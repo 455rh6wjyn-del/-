@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>햄쮸하우스 커피노트</title>
+<meta name="description" content="에스프레소 추출 레시피와 결과를 기록하는 개인 커피노트">
+<meta name="theme-color" content="#a5683c">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="커피노트">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f4eee4;
+    --surface: #fdfaf4;
+    --surface-2: #efe7d9;
+    --line: #ddd1bf;
+    --brass: #a5683c;
+    --brass-dim: #c49a72;
+    --cream: #2b1f16;
+    --muted: #8a7a68;
+    --danger: #b5493a;
+    --radius: 14px;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{ margin:0; padding:0; background: var(--bg) !important; }
+  body{
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+  /* 뷰어가 body 배경을 무시해도 항상 어두운 배경이 깔리도록 하는 고정 레이어 */
+  .bg-fix{
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .wrap{ max-width: 480px; margin: 0 auto; padding: 0 16px; }
+
+  header.top{ padding: 28px 16px 14px; text-align:center; }
+  header.top h1{
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 26px;
+    letter-spacing: 0.5px;
+    margin: 0;
+    color: var(--cream);
+  }
+  header.top p{
+    margin: 4px 0 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  nav.tabs{
+    display:flex;
+    max-width: 480px;
+    margin: 0 auto 18px;
+    padding: 0 16px;
+    gap: 6px;
+  }
+  nav.tabs button{
+    flex:1;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 11px 0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  nav.tabs button.active{
+    background: var(--brass);
+    border-color: var(--brass);
+    color: #fff;
+  }
+
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(43,31,22,0.06);
+  }
+  .card-title{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin: 0 0 12px;
+  }
+  .field{ margin-bottom: 14px; }
+  .field:last-child{ margin-bottom: 0; }
+  .field label, .pk-label{
+    display:block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  select.dropdown{
+    width:100%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--cream);
+    font-family:'Inter', sans-serif;
+    font-size: 15px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a7a68' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+
+  .picker-grid{
+    display:grid;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .picker-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .picker-grid.cols-2{ grid-template-columns: repeat(2, 1fr); }
+  .pk-cell{ text-align:center; }
+  .pk-cell .pk-label{ text-align:center; font-size: 12px; }
+
+  .picker{
+    position: relative;
+    height: 132px;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+    background: var(--surface-2);
+    border-radius: 10px;
+    scrollbar-width: none;
+  }
+  .picker::-webkit-scrollbar{ display:none; }
+  .picker-pad{ height: 44px; }
+  .picker-item{
+    height: 44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    scroll-snap-align: center;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--muted);
+    transition: color .1s;
+  }
+  .picker-item.center{
+    color: var(--cream);
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .picker-window{
+    position:absolute;
+    top: 44px;
+    left:0; right:0;
+    height: 44px;
+    border-top: 1px solid var(--brass-dim);
+    border-bottom: 1px solid var(--brass-dim);
+    pointer-events:none;
+  }
+
+  .ratio-display{
+    text-align:center;
+    padding: 10px;
+    background: var(--surface-2);
+    border-radius: 10px;
+    font-family:'JetBrains Mono', monospace;
+    color: var(--brass);
+    font-size: 15px;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+
+  .btn-row{ display:flex; gap:8px; margin-bottom: 14px; }
+  .btn-secondary{
+    flex:1;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-family:'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px;
+    border-radius: 10px;
+    cursor:pointer;
+  }
+  .btn-primary{
+    width:100%;
+    background: var(--brass);
+    border: none;
+    color: #fff;
+    font-family:'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 10px;
+    cursor:pointer;
+    letter-spacing: 0.3px;
+  }
+  .btn-primary:active{ opacity: 0.85; }
+
+  .toast{
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--brass);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 18px;
+    border-radius: 20px;
+    opacity: 0;
+    transition: all .25s ease;
+    pointer-events:none;
+    z-index: 50;
+    max-width: 90vw;
+    text-align:center;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+  .filter-row{ display:flex; gap:8px; margin-bottom: 12px; }
+  .filter-row select{ flex:1; font-size:13px; padding:8px 10px; }
+  .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  table{ border-collapse: collapse; width:100%; min-width: 780px; background: var(--surface); }
+  tbody tr{ background: var(--surface); }
+  th, td{
+    padding: 9px 10px;
+    text-align:center;
+    font-size: 12px;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(43,31,22,0.08);
+  }
+  th{
+    font-family:'JetBrains Mono', monospace;
+    color: #8a5530;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor:pointer;
+    background: var(--surface-2);
+    position: sticky; top:0;
+    user-select: none;
+  }
+  .sort-arrows{
+    display:inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    margin-left: 4px;
+    line-height: 0.85;
+  }
+  .sort-arrows span{
+    font-size: 7px;
+    color: var(--line);
+  }
+  .sort-arrows span.on{
+    color: var(--brass);
+  }
+  td{ color: #241a12; font-family:'JetBrains Mono', monospace; font-weight: 600; font-size: 12.5px; }
+  td.taste-cell{ font-family:'Inter', sans-serif; }
+  tr:last-child td{ border-bottom:none; }
+  .del-btn{
+    background:none; border:none; color: var(--danger);
+    font-size: 15px; cursor:pointer; padding:2px 6px;
+  }
+  .empty-state{
+    text-align:center; color: var(--muted); padding: 40px 20px; font-size: 13px; line-height:1.6;
+  }
+
+  .chip-list{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 12px; }
+  .chip{
+    display:flex; align-items:center; gap:6px;
+    background: var(--surface-2);
+    border:1px solid var(--line);
+    padding: 7px 10px 7px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+  }
+  .chip button{
+    background:none; border:none; color: var(--danger);
+    font-size: 14px; cursor:pointer; line-height:1; padding:0;
+  }
+  .add-row{ display:flex; gap:8px; }
+  .add-row input{
+    flex:1;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--cream);
+    font-family:'Inter', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+  .add-row button{
+    background: var(--brass);
+    border:none;
+    color: #fff;
+    font-weight:700;
+    padding: 0 16px;
+    border-radius: 10px;
+    cursor:pointer;
+  }
+  .share-note{
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-fix"></div>
+
+<header class="top">
+  <h1>햄쮸하우스 커피노트 🐹🤎</h1>
+  <p>BES876 · Impress</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="input">입력</button>
+  <button class="tab-btn" data-tab="table">기록</button>
+  <button class="tab-btn" data-tab="settings">설정</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- INPUT PANEL -->
+  <section id="panel-input" class="panel active">
+
+    <div id="editBanner" style="display:none; align-items:center; justify-content:space-between; background:var(--surface-2); border:1px solid var(--brass-dim); border-radius:10px; padding:10px 14px; margin-bottom:12px;">
+      <span id="editBannerText" style="font-size:13px; color:var(--brass); font-weight:600;"></span>
+      <button id="cancelEditBtn" style="background:none; border:none; color:var(--muted); font-size:13px; cursor:pointer; font-weight:600;">취소</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-secondary" id="loadRecipeBtn">↺ 이전 레시피 불러오기</button>
+      <button class="btn-secondary" id="resetBtn">전체 초기화</button>
+    </div>
+
+    <div class="card">
+      <p class="card-title">레시피</p>
+      <div class="field">
+        <label>날짜/시간 <span style="color:var(--muted); font-weight:400;">(비워두면 저장 시각 자동 기록)</span></label>
+        <input type="datetime-local" id="inp-datetime" style="display:block; width:100%; max-width:100%; min-width:0; box-sizing:border-box; -webkit-appearance:none; appearance:none; background:var(--surface-2); border:1px solid var(--line); color:var(--cream); font-family:'JetBrains Mono',monospace; font-size:14px; padding:11px 12px; border-radius:10px; color-scheme:light; min-height:44px;">
+      </div>
+      <div class="field">
+        <label>커피 종류</label>
+        <select class="dropdown" id="sel-coffeeType"></select>
+      </div>
+      <div class="field">
+        <label>원두</label>
+        <select class="dropdown" id="sel-bean"></select>
+      </div>
+      <div class="picker-grid cols-3">
+        <div class="pk-cell">
+          <span class="pk-label">분쇄도</span>
+          <div class="picker" id="pk-grind"><div class="picker-window"></div></div>
+        </div>
+        <div class="pk-cell">
+          <span class="pk-label">도징량 (g)</span>
+          <div class="picker" id="pk-dose"><div class="picker-window"></div></div>
+        </div>
+        <div class="pk-cell">
+          <span class="pk-label">탬핑 (회)</span>
+          <div class="picker" id="pk-tamp"><div class="picker-window"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">추출 결과</p>
+      <div class="picker-grid cols-2">
+        <div class="pk-cell">
+          <span class="pk-label">추출시간 (초)</span>
+          <div class="picker" id="pk-time"><div class="picker-window"></div></div>
+        </div>
+        <div class="pk-cell">
+          <span class="pk-label">추출량 (ml)</span>
+          <div class="picker" id="pk-yield"><div class="picker-window"></div></div>
+        </div>
+      </div>
+      <div class="picker-grid cols-2">
+        <div class="pk-cell">
+          <span class="pk-label">물 (ml)</span>
+          <div class="picker" id="pk-water"><div class="picker-window"></div></div>
+        </div>
+        <div class="pk-cell">
+          <span class="pk-label">우유 (ml)</span>
+          <div class="picker" id="pk-milk"><div class="picker-window"></div></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>맛 평가</label>
+        <select class="dropdown" id="sel-taste"></select>
+      </div>
+      <div class="field">
+        <label>메모 <span style="color:var(--muted); font-weight:400;">(선택)</span></label>
+        <textarea id="inp-memo" rows="2" placeholder="예: 크레마 얇음, 다음엔 분쇄도 1 내려보기" style="display:block; width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--line); color:var(--cream); font-family:'Inter',sans-serif; font-size:14px; padding:11px 12px; border-radius:10px; resize:vertical; min-height:52px;"></textarea>
+      </div>
+    </div>
+
+    <div class="ratio-display" id="ratioDisplay">비율 1 : —</div>
+
+    <button class="btn-primary" id="saveBtn">저장하기</button>
+  </section>
+
+  <!-- TABLE PANEL -->
+  <section id="panel-table" class="panel">
+    <div class="filter-row">
+      <select class="dropdown" id="filter-coffeeType"><option value="">전체 종류</option></select>
+      <select class="dropdown" id="filter-bean"><option value="">전체 원두</option></select>
+      <select class="dropdown" id="filter-taste"><option value="">전체 평가</option></select>
+    </div>
+    <div id="tableContainer"></div>
+  </section>
+
+  <!-- SETTINGS PANEL -->
+  <section id="panel-settings" class="panel">
+    <div class="share-note">기록은 이 기기의 브라우저(홈 화면 앱 포함)에만 저장돼요. 다른 기기와 공유하려면 아래 내보내기/가져오기 기능을 사용하세요.</div>
+
+    <div class="card">
+      <p class="card-title">데이터 백업</p>
+      <div class="btn-row" style="margin-bottom:0;">
+        <button class="btn-secondary" id="exportBtn">⇩ 내보내기</button>
+        <button class="btn-secondary" id="importBtn">⇧ 가져오기</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json" style="display:none;">
+    </div>
+
+    <div class="card">
+      <p class="card-title">커피 종류</p>
+      <div class="chip-list" id="chips-coffeeType"></div>
+      <div class="add-row">
+        <input type="text" id="add-coffeeType" placeholder="예: 플랫화이트">
+        <button data-target="coffeeType">추가</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">원두</p>
+      <div class="chip-list" id="chips-bean"></div>
+      <div class="add-row">
+        <input type="text" id="add-bean" placeholder="예: 테라로사 예가체프">
+        <button data-target="bean">추가</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">맛 평가</p>
+      <div class="chip-list" id="chips-taste"></div>
+      <div class="add-row">
+        <input type="text" id="add-taste" placeholder="예: 산미 강함">
+        <button data-target="taste">추가</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="detailOverlay" style="display:none; position:fixed; inset:0; background:rgba(43,31,22,0.35); z-index:40; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:var(--surface); border:1px solid var(--brass-dim); border-radius:var(--radius); max-width:400px; width:100%; max-height:80vh; overflow-y:auto; padding:20px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--brass);">기록 상세</span>
+      <button id="detailCloseBtn" style="background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; line-height:1;">×</button>
+    </div>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_OPTIONS = {
+  coffeeType: ['에스프레소','아메리카노','라떼'],
+  bean: ['테라로사 예가체프 아리차','폴바셋'],
+  taste: ['밸런스 좋음','산미 강함','쓴맛 강함','싱거움','탄맛']
+};
+
+let options = JSON.parse(JSON.stringify(DEFAULT_OPTIONS));
+let entries = [];
+let sortState = { col: 'ts', dir: 'desc' };
+let editingId = null;
+
+// ---------- storage helpers (localStorage, per-device) ----------
+function storageGet(key){
+  try{ return localStorage.getItem(key); }
+  catch(e){ return null; }
+}
+function storageSet(key, value){
+  try{ localStorage.setItem(key, value); return true; }
+  catch(e){ return false; }
+}
+
+function loadAll(){
+  const o = storageGet('coffee-options');
+  if(o){ try{ options = JSON.parse(o); }catch(e){} }
+  const e = storageGet('coffee-entries');
+  if(e){ try{ entries = JSON.parse(e); }catch(err){ entries = []; } }
+}
+function saveOptions(){
+  if(!storageSet('coffee-options', JSON.stringify(options))){
+    showToast('설정 저장 실패');
+    throw new Error('storage unavailable');
+  }
+}
+function saveEntries(){
+  if(!storageSet('coffee-entries', JSON.stringify(entries))){
+    throw new Error('storage unavailable');
+  }
+}
+
+// ---------- toast ----------
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2000);
+}
+
+// ---------- tabs ----------
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab === 'table') renderTable();
+  });
+});
+
+// ---------- picker component ----------
+const pickers = {};
+
+function buildPicker(elId, values, formatFn, initialValue, onChange){
+  const el = document.getElementById(elId);
+  el.innerHTML = '<div class="picker-window"></div>';
+  const topPad = document.createElement('div'); topPad.className='picker-pad';
+  el.appendChild(topPad);
+  const frag = document.createDocumentFragment();
+  values.forEach((v)=>{
+    const item = document.createElement('div');
+    item.className = 'picker-item';
+    item.textContent = formatFn(v);
+    frag.appendChild(item);
+  });
+  el.appendChild(frag);
+  const botPad = document.createElement('div'); botPad.className='picker-pad';
+  el.appendChild(botPad);
+
+  const itemH = 44;
+  let initialIndex = values.indexOf(initialValue);
+  if(initialIndex < 0){
+    // closest match for float steps
+    let best = 0, bestDiff = Infinity;
+    values.forEach((v,i)=>{ const d = Math.abs(v - initialValue); if(d < bestDiff){ bestDiff = d; best = i; } });
+    initialIndex = best;
+  }
+  let currentIndex = initialIndex;
+  const items = el.querySelectorAll('.picker-item');
+
+  function highlight(idx){
+    items.forEach((it,i)=> it.classList.toggle('center', i===idx));
+  }
+  function scrollToIndex(idx, smooth){
+    el.scrollTo({ top: idx*itemH, behavior: smooth ? 'smooth' : 'auto' });
+  }
+
+  requestAnimationFrame(()=>{ scrollToIndex(initialIndex, false); highlight(initialIndex); });
+
+  let debTimer;
+  el.addEventListener('scroll', ()=>{
+    const idx = Math.round(el.scrollTop / itemH);
+    const clamped = Math.max(0, Math.min(values.length-1, idx));
+    highlight(clamped);
+    clearTimeout(debTimer);
+    debTimer = setTimeout(()=>{
+      const finalIdx = Math.max(0, Math.min(values.length-1, Math.round(el.scrollTop / itemH)));
+      currentIndex = finalIdx;
+      onChange(values[finalIdx]);
+      scrollToIndex(finalIdx, true);
+      highlight(finalIdx);
+    }, 120);
+  });
+
+  pickers[elId] = {
+    getValue: ()=> values[currentIndex],
+    setValue: (v)=>{
+      let idx = values.indexOf(v);
+      if(idx < 0){
+        let best = 0, bestDiff = Infinity;
+        values.forEach((val,i)=>{ const d = Math.abs(val - v); if(d < bestDiff){ bestDiff = d; best = i; } });
+        idx = best;
+      }
+      currentIndex = idx;
+      scrollToIndex(idx, false);
+      highlight(idx);
+    }
+  };
+}
+
+function range(min, max, step){
+  const arr = [];
+  const decimals = (step.toString().split('.')[1] || '').length;
+  for(let v = min; v <= max + 1e-9; v = +(v+step).toFixed(decimals)) arr.push(+v.toFixed(decimals));
+  return arr;
+}
+
+function initPickers(){
+  buildPicker('pk-grind', range(1,40,1), v=>String(v), 10, ()=>updateRatio());
+  buildPicker('pk-dose', range(10,30,0.1), v=>v.toFixed(1), 17.0, ()=>updateRatio());
+  buildPicker('pk-tamp', range(0,10,1), v=>String(v), 1, ()=>{});
+  buildPicker('pk-time', range(0,90,1), v=>String(v), 25, ()=>{});
+  buildPicker('pk-yield', range(0,120,0.1), v=>v.toFixed(1), 36.0, ()=>updateRatio());
+  buildPicker('pk-water', range(0,400,5), v=>String(v), 0, ()=>{});
+  buildPicker('pk-milk', range(0,400,5), v=>String(v), 0, ()=>{});
+  updateRatio();
+}
+
+function updateRatio(){
+  const doseP = pickers['pk-dose'], yieldP = pickers['pk-yield'];
+  if(!doseP || !yieldP) return;
+  const dose = doseP.getValue();
+  const yld = yieldP.getValue();
+  const disp = document.getElementById('ratioDisplay');
+  if(dose > 0 && yld > 0){
+    disp.textContent = '비율 1 : ' + (yld/dose).toFixed(1);
+  } else {
+    disp.textContent = '비율 1 : —';
+  }
+}
+
+// ---------- dropdown rendering ----------
+function renderDropdowns(){
+  fillSelect('sel-coffeeType', options.coffeeType);
+  fillSelect('sel-bean', options.bean);
+  fillSelect('sel-taste', options.taste);
+  fillSelect('filter-coffeeType', options.coffeeType, true, '전체 종류');
+  fillSelect('filter-bean', options.bean, true, '전체 원두');
+  fillSelect('filter-taste', options.taste, true, '전체 평가');
+}
+function fillSelect(id, list, withAll, allLabel){
+  const sel = document.getElementById(id);
+  const prevValue = sel.value;
+  sel.innerHTML = '';
+  if(withAll){
+    const opt = document.createElement('option');
+    opt.value=''; opt.textContent = allLabel;
+    sel.appendChild(opt);
+  }
+  list.forEach(v=>{
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+  if(list.includes(prevValue) || (withAll && prevValue==='')) sel.value = prevValue;
+}
+
+// ---------- save entry ----------
+document.getElementById('saveBtn').addEventListener('click', ()=>{
+  if(options.coffeeType.length === 0 || options.bean.length === 0 || options.taste.length === 0){
+    showToast('설정 탭에서 항목을 먼저 등록해주세요');
+    return;
+  }
+  const values = {
+    coffeeType: document.getElementById('sel-coffeeType').value,
+    bean: document.getElementById('sel-bean').value,
+    grind: pickers['pk-grind'].getValue(),
+    dose: pickers['pk-dose'].getValue(),
+    tamp: pickers['pk-tamp'].getValue(),
+    time: pickers['pk-time'].getValue(),
+    yieldMl: pickers['pk-yield'].getValue(),
+    water: pickers['pk-water'].getValue(),
+    milk: pickers['pk-milk'].getValue(),
+    taste: document.getElementById('sel-taste').value,
+    memo: document.getElementById('inp-memo').value.trim()
+  };
+  if(editingId){
+    const target = entries.find(e=> e.id === editingId);
+    if(target){
+      Object.assign(target, values);
+      const customTs = getDatetimeValue();
+      if(customTs) target.ts = customTs;
+    }
+    try{
+      saveEntries();
+      showToast('기록을 수정했어요 ✏️');
+    }catch(e){
+      showToast('저장 실패 — 잠시 후 다시 저장을 눌러주세요');
+      return;
+    }
+    exitEditMode();
+    return;
+  }
+  const customTs = getDatetimeValue();
+  const entry = Object.assign({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    ts: customTs || new Date().toISOString()
+  }, values);
+  entries.push(entry);
+  try{
+    saveEntries();
+    document.getElementById('inp-datetime').value = '';
+    document.getElementById('inp-memo').value = '';
+    showToast('저장했어요 ☕');
+  }catch(e){
+    entries.pop();
+    showToast('저장 실패 — 잠시 후 다시 시도해주세요');
+  }
+});
+
+// ---------- datetime helpers ----------
+function isoToLocal(iso){
+  const d = new Date(iso);
+  const p = n => String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
+}
+function getDatetimeValue(){
+  const v = document.getElementById('inp-datetime').value;
+  if(!v) return null;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+// ---------- detail view ----------
+function openDetail(e){
+  const d = new Date(e.ts);
+  const p = n => String(n).padStart(2,'0');
+  const dateStr = d.getFullYear()+'.'+p(d.getMonth()+1)+'.'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+  const ratio = e.dose>0 && e.yieldMl>0 ? '1 : '+(e.yieldMl/e.dose).toFixed(1) : '—';
+  const water = e.water != null ? e.water : (e.liquid || 0);
+  const milk = e.milk != null ? e.milk : 0;
+  const rows = [
+    ['날짜', dateStr],
+    ['커피 종류', e.coffeeType],
+    ['원두', e.bean],
+    ['분쇄도', e.grind],
+    ['도징량', Number(e.dose).toFixed(1)+' g'],
+    ['탬핑', e.tamp+' 회'],
+    ['추출시간', e.time+' 초'],
+    ['추출량', Number(e.yieldMl).toFixed(1)+' ml'],
+    ['비율', ratio],
+    ['물', water+' ml'],
+    ['우유', milk+' ml'],
+    ['맛 평가', e.taste]
+  ];
+  let html = '';
+  rows.forEach(r=>{
+    html += '<div style="display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid rgba(43,31,22,0.08);">'
+      + '<span style="font-size:13px; color:var(--muted);">'+r[0]+'</span>'
+      + '<span style="font-size:14px; color:#241a12; font-weight:600; font-family:\'JetBrains Mono\',monospace;">'+escHtml(String(r[1]))+'</span>'
+      + '</div>';
+  });
+  if(e.memo){
+    html += '<div style="padding:12px 0 2px;">'
+      + '<div style="font-size:13px; color:var(--muted); margin-bottom:6px;">메모</div>'
+      + '<div style="font-size:14px; color:#241a12; line-height:1.6; background:var(--surface-2); border-radius:10px; padding:12px; white-space:pre-wrap;">'+escHtml(e.memo)+'</div>'
+      + '</div>';
+  }
+  document.getElementById('detailBody').innerHTML = html;
+  document.getElementById('detailOverlay').style.display = 'flex';
+}
+document.getElementById('detailCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('detailOverlay').style.display = 'none';
+});
+document.getElementById('detailOverlay').addEventListener('click', (ev)=>{
+  if(ev.target.id === 'detailOverlay') document.getElementById('detailOverlay').style.display = 'none';
+});
+
+// ---------- edit mode ----------
+function enterEditMode(entry){
+  editingId = entry.id;
+  document.getElementById('sel-coffeeType').value = entry.coffeeType;
+  document.getElementById('sel-bean').value = entry.bean;
+  document.getElementById('sel-taste').value = entry.taste;
+  pickers['pk-grind'].setValue(entry.grind);
+  pickers['pk-dose'].setValue(entry.dose);
+  pickers['pk-tamp'].setValue(entry.tamp);
+  pickers['pk-time'].setValue(entry.time);
+  pickers['pk-yield'].setValue(entry.yieldMl);
+  pickers['pk-water'].setValue(entry.water != null ? entry.water : (entry.liquid || 0));
+  pickers['pk-milk'].setValue(entry.milk != null ? entry.milk : 0);
+  document.getElementById('inp-datetime').value = isoToLocal(entry.ts);
+  document.getElementById('inp-memo').value = entry.memo || '';
+  updateRatio();
+  document.getElementById('saveBtn').textContent = '수정 저장';
+  document.getElementById('editBanner').style.display = 'flex';
+  const d = new Date(entry.ts);
+  document.getElementById('editBannerText').textContent =
+    (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+' 기록 수정 중';
+  // 입력 탭으로 전환
+  document.querySelector('.tab-btn[data-tab="input"]').click();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function exitEditMode(){
+  editingId = null;
+  document.getElementById('saveBtn').textContent = '저장하기';
+  document.getElementById('editBanner').style.display = 'none';
+  document.getElementById('inp-datetime').value = '';
+  document.getElementById('inp-memo').value = '';
+}
+document.getElementById('cancelEditBtn').addEventListener('click', exitEditMode);
+
+// ---------- load recipe / reset ----------
+document.getElementById('loadRecipeBtn').addEventListener('click', ()=>{
+  if(entries.length === 0){ showToast('불러올 이전 기록이 없어요'); return; }
+  const last = entries[entries.length-1];
+  document.getElementById('sel-coffeeType').value = last.coffeeType;
+  document.getElementById('sel-bean').value = last.bean;
+  pickers['pk-grind'].setValue(last.grind);
+  pickers['pk-dose'].setValue(last.dose);
+  pickers['pk-tamp'].setValue(last.tamp);
+  updateRatio();
+  showToast('이전 레시피를 불러왔어요');
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  exitEditMode();
+  initPickers();
+  document.getElementById('sel-coffeeType').selectedIndex = 0;
+  document.getElementById('sel-bean').selectedIndex = 0;
+  document.getElementById('sel-taste').selectedIndex = 0;
+});
+
+// ---------- table ----------
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function truncate(s, n){
+  return s.length > n ? s.slice(0, n) + '…' : s;
+}
+function renderTable(){
+  const container = document.getElementById('tableContainer');
+  const typeFilter = document.getElementById('filter-coffeeType').value;
+  const beanFilter = document.getElementById('filter-bean').value;
+  const tasteFilter = document.getElementById('filter-taste').value;
+
+  let rows = entries.filter(e=>
+    (!typeFilter || e.coffeeType === typeFilter) &&
+    (!beanFilter || e.bean === beanFilter) &&
+    (!tasteFilter || e.taste === tasteFilter)
+  );
+
+  const ratioOf = e => (e.dose > 0 && e.yieldMl > 0) ? e.yieldMl / e.dose : 0;
+  rows.sort((a,b)=>{
+    let av, bv;
+    if(sortState.col === 'ratio'){ av = ratioOf(a); bv = ratioOf(b); }
+    else { av = a[sortState.col]; bv = b[sortState.col]; }
+    if(sortState.col === 'ts'){ av = new Date(av).getTime(); bv = new Date(bv).getTime(); }
+    if(typeof av === 'string') return sortState.dir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    return sortState.dir==='asc' ? av-bv : bv-av;
+  });
+
+  if(rows.length === 0){
+    container.innerHTML = '<div class="empty-state">아직 기록이 없어요.<br>입력 탭에서 첫 추출을 기록해보세요.</div>';
+    return;
+  }
+
+  const cols = [
+    {k:'ts', label:'날짜'}, {k:'coffeeType', label:'종류'}, {k:'bean', label:'원두'},
+    {k:'grind', label:'분쇄도'}, {k:'dose', label:'도징(g)'}, {k:'tamp', label:'탬핑'},
+    {k:'time', label:'추출(초)'}, {k:'yieldMl', label:'추출량(ml)'}, {k:'ratio', label:'비율'},
+    {k:'water', label:'물(ml)'}, {k:'milk', label:'우유(ml)'}, {k:'taste', label:'맛평가'},
+    {k:'memo', label:'메모'}
+  ];
+
+  let html = '<div class="table-scroll"><table><thead><tr>';
+  cols.forEach(c=>{
+    const upOn = sortState.col===c.k && sortState.dir==='asc';
+    const downOn = sortState.col===c.k && sortState.dir==='desc';
+    html += '<th data-col="'+c.k+'">'+c.label
+      + '<span class="sort-arrows">'
+      + '<span class="'+(upOn?'on':'')+'">▲</span>'
+      + '<span class="'+(downOn?'on':'')+'">▼</span>'
+      + '</span></th>';
+  });
+  html += '<th></th></tr></thead><tbody>';
+
+  rows.forEach(e=>{
+    const d = new Date(e.ts);
+    const dateStr = (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    const ratio = e.dose>0 && e.yieldMl>0 ? '1:'+(e.yieldMl/e.dose).toFixed(1) : '—';
+    const water = e.water != null ? e.water : (e.liquid || 0);
+    const milk = e.milk != null ? e.milk : 0;
+    html += '<tr>'
+      + '<td>'+dateStr+'</td>'
+      + '<td>'+e.coffeeType+'</td>'
+      + '<td>'+e.bean+'</td>'
+      + '<td>'+e.grind+'</td>'
+      + '<td>'+Number(e.dose).toFixed(1)+'</td>'
+      + '<td>'+e.tamp+'</td>'
+      + '<td>'+e.time+'</td>'
+      + '<td>'+Number(e.yieldMl).toFixed(1)+'</td>'
+      + '<td>'+ratio+'</td>'
+      + '<td>'+water+'</td>'
+      + '<td>'+milk+'</td>'
+      + '<td class="taste-cell">'+e.taste+'</td>'
+      + '<td class="taste-cell memo-cell" title="'+escHtml(e.memo||'')+'">'+escHtml(truncate(e.memo||'', 8))+'</td>'
+      + '<td style="white-space:nowrap;"><button class="view-btn" data-id="'+e.id+'" style="background:none;border:none;color:var(--cream);font-size:13px;cursor:pointer;padding:2px 6px;">🔍</button><button class="edit-btn" data-id="'+e.id+'" style="background:none;border:none;color:var(--brass);font-size:14px;cursor:pointer;padding:2px 6px;">✎</button><button class="del-btn" data-id="'+e.id+'">×</button></td>'
+      + '</tr>';
+  });
+  html += '</tbody></table></div>';
+  container.innerHTML = html;
+
+  container.querySelectorAll('.view-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const entry = entries.find(e=> e.id === btn.dataset.id);
+      if(entry) openDetail(entry);
+    });
+  });
+  container.querySelectorAll('.edit-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const entry = entries.find(e=> e.id === btn.dataset.id);
+      if(entry) enterEditMode(entry);
+    });
+  });
+  container.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const removed = entries.find(e=> e.id === btn.dataset.id);
+      entries = entries.filter(e=> e.id !== btn.dataset.id);
+      try{ saveEntries(); }
+      catch(e){ if(removed) entries.push(removed); showToast('삭제 실패'); }
+      renderTable();
+    });
+  });
+  container.querySelectorAll('th[data-col]').forEach(th=>{
+    th.addEventListener('click', ()=>{
+      const col = th.dataset.col;
+      if(sortState.col === col) sortState.dir = sortState.dir==='asc' ? 'desc' : 'asc';
+      else { sortState.col = col; sortState.dir = 'desc'; }
+      renderTable();
+    });
+  });
+}
+document.getElementById('filter-coffeeType').addEventListener('change', renderTable);
+document.getElementById('filter-bean').addEventListener('change', renderTable);
+document.getElementById('filter-taste').addEventListener('change', renderTable);
+
+// ---------- settings ----------
+function renderChips(){
+  renderChipGroup('coffeeType');
+  renderChipGroup('bean');
+  renderChipGroup('taste');
+}
+function renderChipGroup(key){
+  const box = document.getElementById('chips-'+key);
+  box.innerHTML = '';
+  options[key].forEach(v=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    const span = document.createElement('span');
+    span.textContent = v;
+    const btn = document.createElement('button');
+    btn.textContent = '×';
+    btn.dataset.key = key;
+    btn.dataset.val = v;
+    chip.appendChild(span);
+    chip.appendChild(btn);
+    box.appendChild(chip);
+  });
+  box.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      options[btn.dataset.key] = options[btn.dataset.key].filter(x=> x!==btn.dataset.val);
+      saveOptions();
+      renderChips(); renderDropdowns();
+    });
+  });
+}
+document.querySelectorAll('.add-row button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const key = btn.dataset.target;
+    const input = document.getElementById('add-'+key);
+    const val = input.value.trim();
+    if(!val) return;
+    if(!options[key].includes(val)) options[key].push(val);
+    input.value = '';
+    saveOptions();
+    renderChips(); renderDropdowns();
+  });
+});
+
+// ---------- export / import ----------
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const data = { options, entries, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const p = n => String(n).padStart(2,'0');
+  const d = new Date();
+  a.href = url;
+  a.download = `coffee-note-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showToast('내보냈어요');
+});
+document.getElementById('importBtn').addEventListener('click', ()=>{
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', (ev)=>{
+  const file = ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(data.options) options = data.options;
+      if(data.entries) entries = data.entries;
+      saveOptions();
+      saveEntries();
+      renderDropdowns();
+      renderChips();
+      renderTable();
+      showToast('가져왔어요');
+    }catch(e){
+      showToast('가져오기 실패 — 파일을 확인해주세요');
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+});
+
+// ---------- init ----------
+(function init(){
+  loadAll();
+  renderDropdowns();
+  renderChips();
+  initPickers();
+})();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
