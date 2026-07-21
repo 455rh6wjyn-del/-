@@ -444,7 +444,7 @@
 
   <!-- SETTINGS PANEL -->
   <section id="panel-settings" class="panel">
-    <div class="share-note">기록은 이 기기의 브라우저(홈 화면 앱 포함)에만 저장돼요. 다른 기기와 공유하려면 아래 내보내기/가져오기 기능을 사용하세요.</div>
+    <div class="share-note">기록은 클라우드에 저장되어 이 앱을 설치한 모든 기기에 실시간으로 공유돼요. 인터넷이 안 될 때는 이 기기에만 임시로 저장돼요.</div>
 
     <div class="card">
       <p class="card-title">데이터 백업</p>
@@ -509,7 +509,7 @@ let entries = [];
 let sortState = { col: 'ts', dir: 'desc' };
 let editingId = null;
 
-// ---------- storage helpers (localStorage, per-device) ----------
+// ---------- storage helpers (localStorage cache + Firestore realtime sync) ----------
 function storageGet(key){
   try{ return localStorage.getItem(key); }
   catch(e){ return null; }
@@ -526,16 +526,52 @@ function loadAll(){
   if(e){ try{ entries = JSON.parse(e); }catch(err){ entries = []; } }
 }
 function saveOptions(){
-  if(!storageSet('coffee-options', JSON.stringify(options))){
-    showToast('설정 저장 실패');
-    throw new Error('storage unavailable');
+  storageSet('coffee-options', JSON.stringify(options));
+  if(useCloud && fbRefs){
+    fbRefs.fb.setDoc(fbRefs.optionsRef, { value: JSON.stringify(options) })
+      .catch(()=> showToast('클라우드 동기화 실패 — 이 기기에는 저장됐어요'));
   }
 }
 function saveEntries(){
-  if(!storageSet('coffee-entries', JSON.stringify(entries))){
-    throw new Error('storage unavailable');
+  storageSet('coffee-entries', JSON.stringify(entries));
+  if(useCloud && fbRefs){
+    fbRefs.fb.setDoc(fbRefs.entriesRef, { value: JSON.stringify(entries) })
+      .catch(()=> showToast('클라우드 동기화 실패 — 이 기기에는 저장됐어요'));
   }
 }
+
+// ---------- Firestore realtime sync ----------
+let useCloud = false;
+let fbRefs = null;
+
+window.startCloudSync = function(fb){
+  const optionsRef = fb.doc(fb.db, 'coffeeNotes', 'options');
+  const entriesRef = fb.doc(fb.db, 'coffeeNotes', 'entries');
+  fbRefs = { fb, optionsRef, entriesRef };
+
+  fb.onSnapshot(optionsRef, (snap)=>{
+    useCloud = true;
+    if(snap.exists() && snap.data().value){
+      options = JSON.parse(snap.data().value);
+      storageSet('coffee-options', snap.data().value);
+      renderDropdowns();
+      renderChips();
+    } else {
+      fb.setDoc(optionsRef, { value: JSON.stringify(options) }).catch(()=>{});
+    }
+  }, ()=>{ useCloud = false; showToast('클라우드 연결 실패 — 이 기기에만 저장돼요'); });
+
+  fb.onSnapshot(entriesRef, (snap)=>{
+    useCloud = true;
+    if(snap.exists() && snap.data().value){
+      entries = JSON.parse(snap.data().value);
+      storageSet('coffee-entries', snap.data().value);
+      if(document.getElementById('panel-table').classList.contains('active')) renderTable();
+    } else {
+      fb.setDoc(entriesRef, { value: JSON.stringify(entries) }).catch(()=>{});
+    }
+  }, ()=>{ useCloud = false; showToast('클라우드 연결 실패 — 이 기기에만 저장돼요'); });
+};
 
 // ---------- toast ----------
 let toastTimer;
@@ -711,13 +747,8 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
       const customTs = getDatetimeValue();
       if(customTs) target.ts = customTs;
     }
-    try{
-      saveEntries();
-      showToast('기록을 수정했어요 ✏️');
-    }catch(e){
-      showToast('저장 실패 — 잠시 후 다시 저장을 눌러주세요');
-      return;
-    }
+    saveEntries();
+    showToast('기록을 수정했어요 ✏️');
     exitEditMode();
     return;
   }
@@ -727,15 +758,10 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
     ts: customTs || new Date().toISOString()
   }, values);
   entries.push(entry);
-  try{
-    saveEntries();
-    document.getElementById('inp-datetime').value = '';
-    document.getElementById('inp-memo').value = '';
-    showToast('저장했어요 ☕');
-  }catch(e){
-    entries.pop();
-    showToast('저장 실패 — 잠시 후 다시 시도해주세요');
-  }
+  saveEntries();
+  document.getElementById('inp-datetime').value = '';
+  document.getElementById('inp-memo').value = '';
+  showToast('저장했어요 ☕');
 });
 
 // ---------- datetime helpers ----------
@@ -944,10 +970,8 @@ function renderTable(){
   });
   container.querySelectorAll('.del-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const removed = entries.find(e=> e.id === btn.dataset.id);
       entries = entries.filter(e=> e.id !== btn.dataset.id);
-      try{ saveEntries(); }
-      catch(e){ if(removed) entries.push(removed); showToast('삭제 실패'); }
+      saveEntries();
       renderTable();
     });
   });
@@ -1062,6 +1086,30 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js').catch(()=>{});
   });
 }
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCpqPBtxjBDT_Zp9CQu9cIu2oY0sOShX6I",
+    authDomain: "lovehouse-b7440.firebaseapp.com",
+    projectId: "lovehouse-b7440",
+    storageBucket: "lovehouse-b7440.firebasestorage.app",
+    messagingSenderId: "910165492271",
+    appId: "1:910165492271:web:258d97081d966a5f27fcda"
+  };
+
+  try{
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    if(typeof window.startCloudSync === 'function'){
+      window.startCloudSync({ db, doc, setDoc, onSnapshot });
+    }
+  }catch(e){
+    console.error('Firebase init failed', e);
+  }
 </script>
 </body>
 </html>
