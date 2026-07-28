@@ -15,13 +15,22 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // 업체명단
+    // 프로젝트 명단.
+    // 구버전이 쓰던 companies 도 남겨둬, 규칙을 먼저 올려도 앱이 멎지 않게 한다.
+    match /fundSurvey/projects {
+      allow read, write: if true;
+    }
     match /fundSurvey/companies {
       allow read, write: if true;
     }
 
-    // 업체별 인출계획 응답 (문서 ID = 사업자번호)
-    match /fundSurveyResponses/{bizNo} {
+    // 프로젝트별 인출계획 응답 (문서 ID = 이메일::선정연도::프로젝트명)
+    match /fundSurveyResponses/{projectId} {
+      allow read, write: if true;
+    }
+
+    // 업체별 내년 신규 신청 계획 (문서 ID = 이메일)
+    match /fundSurveyPlans/{email} {
       allow read, write: if true;
     }
   }
