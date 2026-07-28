@@ -55,6 +55,23 @@ git 에 올리지 않는다.
 
 ## 3. Firebase 배포
 
+### 다른 Firebase 프로젝트로 바꾸기
+
+콘솔에서 프로젝트를 새로 만들고 **웹 앱(</>)** 을 하나 추가하면 `firebaseConfig` 가 나온다.
+그 값으로 아래 세 곳을 고치면 끝이다.
+
+| 파일 | 고칠 것 |
+| --- | --- |
+| `fund-survey/src/firebase-config.js` | `firebaseConfig` 전체 |
+| `.firebaserc` | `projects.default` = 새 프로젝트 ID |
+| `.github/workflows/firebase-hosting.yml` | `projectId` = 새 프로젝트 ID |
+
+새 프로젝트에서도 **Firestore 데이터베이스**와 **Hosting** 을 켜고 `npm run deploy:rules`
+로 규칙을 올려야 한다. `FIREBASE_SERVICE_ACCOUNT` 시크릿도 새 프로젝트 것으로 다시 발급받는다.
+
+커피노트(루트 페이지)는 `index.html` 안에 자기 `firebaseConfig` 를 따로 들고 있다.
+같이 옮길 게 아니면 건드리지 않아도 된다.
+
 ### 최초 1회 준비
 
 ```bash
