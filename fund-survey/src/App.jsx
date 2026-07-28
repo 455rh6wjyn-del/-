@@ -857,7 +857,9 @@ function Gate({ data, onEnter, onAdmin }) {
   };
   const tryAdmin = async () => {
     if (!data.config.adminPwHash) return setErr("관리자 비밀번호가 아직 설정되지 않았습니다.");
-    if ((await hashPw(pw)) !== data.config.adminPwHash) return setErr("비밀번호가 맞지 않습니다.");
+    // 설정할 때 trim 한 값으로 저장하므로 확인할 때도 똑같이 잘라낸다.
+    if ((await hashPw(pw.trim())) !== data.config.adminPwHash)
+      return setErr("비밀번호가 맞지 않습니다. 한/영 상태를 확인해 주세요.");
     setErr("");
     onAdmin();
   };
