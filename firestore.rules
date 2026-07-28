@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 커피노트(루트 페이지) — 기존 동작 유지
+    match /coffeeNotes/{docId} {
+      allow read, write: if true;
+    }
+
+    // 자금수요조사 설정: 마감일·조사명은 누구나 고칠 수 있지만
+    // 관리자 비밀번호 해시는 한 번 만들어지면 바꿀 수 없다.
+    match /fundSurvey/config {
+      allow read, create: if true;
+      allow update: if !request.resource.data.diff(resource.data)
+                        .affectedKeys().hasAny(['adminPwHash']);
+      allow delete: if false;
+    }
+
+    // 업체명단
+    match /fundSurvey/companies {
+      allow read, write: if true;
+    }
+
+    // 업체별 인출계획 응답 (문서 ID = 사업자번호)
+    match /fundSurveyResponses/{bizNo} {
+      allow read, write: if true;
+    }
+  }
+}
