@@ -12,10 +12,10 @@
  *   3) /.github/workflows/firebase-hosting.yml → projectId
  */
 export const firebaseConfig = {
-  apiKey: "AIzaSyCpqPBtxjBDT_Zp9CQu9cIu2oY0sOShX6I",
-  authDomain: "lovehouse-b7440.firebaseapp.com",
-  projectId: "lovehouse-b7440",
-  storageBucket: "lovehouse-b7440.firebasestorage.app",
-  messagingSenderId: "910165492271",
-  appId: "1:910165492271:web:258d97081d966a5f27fcda",
+  apiKey: "AIzaSyBdhE2d0rnyAaBE2eKGCZLWIZiHImPJF3U",
+  authDomain: "fund-survey-bfd82.firebaseapp.com",
+  projectId: "fund-survey-bfd82",
+  storageBucket: "fund-survey-bfd82.firebasestorage.app",
+  messagingSenderId: "895689323285",
+  appId: "1:895689323285:web:9645134264ab9157d82f1c",
 };

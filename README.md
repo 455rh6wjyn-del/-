@@ -1,13 +1,18 @@
-# lovehouse 사이트
+# 자금수요조사 사이트
 
-Firebase Hosting 한 곳에 정적 페이지 두 개를 올린다.
+Firebase Hosting(`fund-survey-bfd82`) 한 곳에 정적 페이지 두 개를 올린다.
 
 | 경로 | 내용 | 소스 |
 | --- | --- | --- |
 | `/` | 햄쮸하우스 커피노트 (PWA) | `index.html`, `sw.js`, `manifest.json`, `icons/` |
 | `/fund-survey/` | 자금수요조사 (React + Firestore) | `fund-survey/` |
 
-두 앱 모두 Firebase 프로젝트 `lovehouse-b7440` 의 Firestore 를 쓴다.
+Firestore 는 앱마다 다른 프로젝트를 쓴다.
+
+- 자금수요조사 → `fund-survey-bfd82` (이 저장소의 `firestore.rules` 가 적용되는 곳)
+- 커피노트 → `lovehouse-b7440` (`index.html` 안에 자기 설정을 따로 들고 있다)
+
+호스팅만 `fund-survey-bfd82` 로 합쳐져 있고, 커피노트가 읽고 쓰는 데이터는 예전 그대로다.
 
 ---
 
@@ -79,15 +84,16 @@ npm install -g firebase-tools
 firebase login
 ```
 
-Firebase 콘솔에서 프로젝트 `lovehouse-b7440` 에 **Firestore 데이터베이스**와
-**Hosting** 이 켜져 있어야 한다. 그다음 보안 규칙을 올린다.
+Firebase 콘솔에서 프로젝트 `fund-survey-bfd82` 에 **Firestore 데이터베이스**가
+켜져 있어야 한다(완료). Hosting 은 첫 배포 때 자동으로 켜진다.
+그다음 보안 규칙을 올린다.
 
 ```bash
 npm run deploy:rules    # firestore.rules 반영
 ```
 
-> 이 명령은 콘솔에 저장된 기존 규칙을 `firestore.rules` 내용으로 **덮어쓴다.**
-> 커피노트가 쓰는 `coffeeNotes` 컬렉션 규칙도 이 파일에 함께 들어 있으니 그대로 두면 된다.
+> 이 명령은 `fund-survey-bfd82` 의 규칙을 `firestore.rules` 내용으로 **덮어쓴다.**
+> 커피노트가 쓰는 `lovehouse-b7440` 쪽 규칙은 건드리지 않는다.
 
 ### 손으로 배포
 
@@ -106,7 +112,7 @@ npm run deploy          # 빌드 + firebase deploy --only hosting
 firebase init hosting:github
 ```
 
-깃허브 저장소를 물으면 `455rh6wjyn-del/-` 를 넣는다. 서비스 계정을 만들어 시크릿까지
+깃허브 저장소를 물으면 `455rh6wjyn-del/-` 를, 프로젝트는 `fund-survey-bfd82` 를 고른다. 서비스 계정을 만들어 시크릿까지
 자동으로 등록해 준다. 워크플로 파일을 새로 만들지 묻거든 **거절**하고(이미 있음),
 혹시 덮어썼다면 `git checkout .github/workflows/firebase-hosting.yml` 로 되돌린다.
 
@@ -114,7 +120,7 @@ firebase init hosting:github
 만들고, JSON 키 전체를 저장소 `Settings → Secrets and variables → Actions` 의
 `FIREBASE_SERVICE_ACCOUNT` 에 붙여 넣는다.
 
-배포 후 주소는 `https://lovehouse-b7440.web.app/fund-survey/` 이다.
+배포 후 주소는 `https://fund-survey-bfd82.web.app/fund-survey/` 이다.
 
 ---
 
