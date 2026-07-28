@@ -18,7 +18,7 @@ Firestore 는 앱마다 다른 프로젝트를 쓴다.
 
 ## 1. 자금수요조사 앱
 
-업체가 사업자번호로 들어와 8~12월 월별 인출계획을 넣고, `기인출액 + 8~12월 합계 = 올해 추천액`
+업체가 사업자번호로 들어와 9~12월 월별 인출계획을 넣고, `기인출액 + 9~12월 합계 = 올해 추천액`
 이 딱 맞을 때만 제출된다. 관리자는 비밀번호로 들어와 진행현황을 실시간으로 보고 결과를
 엑셀로 내려받는다.
 
@@ -27,7 +27,7 @@ Firestore 는 앱마다 다른 프로젝트를 쓴다.
 ```
 fundSurvey/config               { title, deadline, adminPwHash }
 fundSurvey/companies            { list: [{ bizNo, name, recommend, prevDrawn }], updatedAt }
-fundSurveyResponses/{사업자번호}  { m8..m12, manager, phone, status, updatedAt }
+fundSurveyResponses/{사업자번호}  { m9..m12, manager, phone, status, updatedAt }
 ```
 
 업체 응답은 문서 하나에 몰아넣지 않고 사업자번호별로 쪼갰다. 여러 업체가 같은 시각에
@@ -138,6 +138,11 @@ firebase init hosting:github
 
 담당자 연락처가 들어가는 조사이므로, 외부에 널리 알려질 주소라면
 Firebase Authentication + App Check 를 얹는 것을 권한다.
+
+---
+
+조사 대상 월은 `fund-survey/src/App.jsx` 의 `MONTHS` 한 줄에서 정한다.
+화면 문구·엑셀 열·관리자 표가 모두 여기서 따라간다.
 
 ---
 

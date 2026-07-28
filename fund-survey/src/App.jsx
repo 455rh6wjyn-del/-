@@ -28,8 +28,9 @@ const SANS =
   "'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,BlinkMacSystemFont,system-ui,sans-serif";
 const MONO = "ui-monospace,'SF Mono',Menlo,Consolas,monospace";
 
-const MONTHS = [8, 9, 10, 11, 12];
+const MONTHS = [9, 10, 11, 12];
 const MKEY = (m) => `m${m}`;
+const SPAN = `${MONTHS[0]}~${MONTHS[MONTHS.length - 1]}월`;
 
 /* ── 유틸 ───────────────────────────────────────────────────── */
 const digits = (s) => String(s ?? "").replace(/[^0-9]/g, "");
@@ -354,7 +355,7 @@ function CompanySheet({ company, response, deadline, onSave, onExit }) {
           <div style={{ marginTop: 24 }}>
             {line("기인출액", `${won(company.prevDrawn)}원`)}
             {MONTHS.map((m) => line(`${m}월 인출계획`, `${won(months[MKEY(m)] || 0)}원`))}
-            {line("8~12월 합계", `${won(sum)}원`, { strong: true, double: true })}
+            {line(`${SPAN} 합계`, `${won(sum)}원`, { strong: true, double: true })}
             {line("올해 추천액", `${won(company.recommend)}원`)}
           </div>
 
@@ -371,7 +372,7 @@ function CompanySheet({ company, response, deadline, onSave, onExit }) {
               fontWeight: 600,
             }}
           >
-            기인출액 + 8~12월 합계 = 올해 추천액 · 대차 일치
+            기인출액 + {SPAN} 합계 = 올해 추천액 · 대차 일치
           </div>
 
           <div style={{ marginTop: 18, fontSize: 13, color: C.ink2 }}>
@@ -544,6 +545,18 @@ function CompanySheet({ company, response, deadline, onSave, onExit }) {
   );
 }
 
+const HEADERS = [
+  "업체명",
+  "사업자번호",
+  "추천액",
+  "기인출액",
+  ...MONTHS.map((m) => `${m}월`),
+  "합계",
+  "상태",
+  "담당자",
+  "최종수정",
+];
+
 /* ── 관리자 ─────────────────────────────────────────────────── */
 function Admin({ data, onExit }) {
   const [tab, setTab] = useState("현황");
@@ -589,12 +602,8 @@ function Admin({ data, onExit }) {
       업체명: x.name,
       "올해 추천액": x.recommend,
       기인출액: x.prevDrawn,
-      "8월": x.r.m8 || 0,
-      "9월": x.r.m9 || 0,
-      "10월": x.r.m10 || 0,
-      "11월": x.r.m11 || 0,
-      "12월": x.r.m12 || 0,
-      "8~12월 합계": x.sum,
+      ...Object.fromEntries(MONTHS.map((m) => [`${m}월`, x.r[MKEY(m)] || 0])),
+      [`${SPAN} 합계`]: x.sum,
       "검증(기인출+합계-추천)": x.prevDrawn + x.sum - x.recommend,
       담당자: x.r.manager || "",
       연락처: x.r.phone || "",
@@ -731,7 +740,7 @@ function Admin({ data, onExit }) {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 900 }}>
               <thead>
                 <tr style={{ background: C.ink, color: C.paper }}>
-                  {["업체명", "사업자번호", "추천액", "기인출액", "8월", "9월", "10월", "11월", "12월", "합계", "상태", "담당자", "최종수정"].map((h) => (
+                  {HEADERS.map((h) => (
                     <th key={h} style={{ padding: "9px 10px", textAlign: h === "업체명" || h === "상태" || h === "담당자" ? "left" : "right", fontWeight: 600, whiteSpace: "nowrap" }}>
                       {h}
                     </th>
@@ -743,8 +752,8 @@ function Admin({ data, onExit }) {
                   <tr key={x.bizNo} style={{ background: i % 2 ? C.bar : C.card }}>
                     <td style={{ padding: "8px 10px", fontWeight: 600 }}>{x.name}</td>
                     <td style={{ padding: "8px 10px", fontFamily: MONO, textAlign: "right", color: C.ink2 }}>{bizFmt(x.bizNo)}</td>
-                    {[x.recommend, x.prevDrawn, x.r.m8 || 0, x.r.m9 || 0, x.r.m10 || 0, x.r.m11 || 0, x.r.m12 || 0, x.sum].map((v, j) => (
-                      <td key={j} style={{ padding: "8px 10px", fontFamily: MONO, textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: j === 7 ? 700 : 400 }}>
+                    {[x.recommend, x.prevDrawn, ...MONTHS.map((m) => x.r[MKEY(m)] || 0), x.sum].map((v, j, arr) => (
+                      <td key={j} style={{ padding: "8px 10px", fontFamily: MONO, textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: j === arr.length - 1 ? 700 : 400 }}>
                         {won(v)}
                       </td>
                     ))}
@@ -771,7 +780,7 @@ function Admin({ data, onExit }) {
                 ))}
                 {!rows.length && (
                   <tr>
-                    <td colSpan={13} style={{ padding: "34px 12px", textAlign: "center", color: C.ink2, background: C.card }}>
+                    <td colSpan={HEADERS.length} style={{ padding: "34px 12px", textAlign: "center", color: C.ink2, background: C.card }}>
                       업체명단 탭에서 명단을 올리면 여기에 현황이 나옵니다.
                     </td>
                   </tr>
@@ -857,7 +866,9 @@ function Gate({ data, onEnter, onAdmin }) {
   };
   const tryAdmin = async () => {
     if (!data.config.adminPwHash) return setErr("관리자 비밀번호가 아직 설정되지 않았습니다.");
-    if ((await hashPw(pw)) !== data.config.adminPwHash) return setErr("비밀번호가 맞지 않습니다.");
+    // 설정할 때 trim 한 값으로 저장하므로 확인할 때도 똑같이 잘라낸다.
+    if ((await hashPw(pw.trim())) !== data.config.adminPwHash)
+      return setErr("비밀번호가 맞지 않습니다. 한/영 상태를 확인해 주세요.");
     setErr("");
     onAdmin();
   };
@@ -873,7 +884,7 @@ function Gate({ data, onEnter, onAdmin }) {
             자금수요조사
           </h1>
           <p style={{ fontSize: 13, color: C.ink2, margin: "8px 0 0", lineHeight: 1.6 }}>
-            8월부터 12월까지 월별 인출 계획을 제출합니다.
+            {MONTHS[0]}월부터 {MONTHS[MONTHS.length - 1]}월까지 월별 인출 계획을 제출합니다.
             {data.config.deadline && (
               <>
                 {" "}
