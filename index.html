@@ -27,6 +27,7 @@
     --cream: #2b1f16;
     --muted: #8a7a68;
     --danger: #b5493a;
+    --gold: #d99a2b;
     --radius: 14px;
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
@@ -137,7 +138,8 @@
 
   .bean-info-row{
     display:flex;
-    gap: 16px;
+    flex-wrap: wrap;
+    gap: 6px 16px;
     font-size: 12px;
     color: var(--muted);
     padding: 8px 2px 0;
@@ -283,6 +285,24 @@
     color: #fff;
   }
 
+  .rating-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .rating-row:last-of-type{ margin-bottom:10px; }
+  .rating-row .rating-label{ font-size:13px; color:var(--muted); font-weight:500; min-width:40px; }
+  .star-rating{ position:relative; display:inline-block; font-size:26px; line-height:1; cursor:pointer; letter-spacing:4px; }
+  .star-row{ white-space:nowrap; }
+  .star-bg{ color: var(--line); }
+  .star-fill{ position:absolute; top:0; left:0; overflow:hidden; color: var(--gold); pointer-events:none; white-space:nowrap; width:0%; }
+  .overall-rating-display{
+    text-align:center;
+    padding: 9px;
+    background: var(--surface-2);
+    border-radius: 10px;
+    font-family:'JetBrains Mono', monospace;
+    color: var(--brass);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
   .toast{
     position: fixed;
     bottom: 20px;
@@ -303,8 +323,27 @@
   }
   .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
 
-  .filter-row{ display:flex; gap:8px; margin-bottom: 12px; }
-  .filter-row select{ flex:1; font-size:13px; padding:8px 10px; }
+  .filter-row{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 10px; }
+  .filter-row select{ flex:1 1 45%; min-width:110px; font-size:13px; padding:8px 10px; }
+
+  .viewmode-row{ display:flex; gap:8px; margin-bottom: 14px; }
+  .viewmode-btn{
+    flex:1;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-family:'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 9px 0;
+    border-radius: 10px;
+    cursor:pointer;
+  }
+  .viewmode-btn.active{
+    background: var(--brass);
+    border-color: var(--brass);
+    color: #fff;
+  }
 
   .empty-state{
     text-align:center; color: var(--muted); padding: 40px 20px; font-size: 13px; line-height:1.6;
@@ -329,7 +368,33 @@
   .ec-line2{ font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--muted); margin-bottom:3px; line-height:1.5; }
   .ec-cup{ color: var(--brass); font-family:'Inter', sans-serif; }
   .ec-line3{ font-size:12.5px; color:#241a12; }
+  .ec-line3 .ec-rating{ color: var(--gold); font-weight:700; }
   .ec-line3 .ec-memo{ color: var(--muted); }
+
+  .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  table{ border-collapse: collapse; width:100%; min-width: 780px; background: var(--surface); }
+  th, td{
+    padding: 9px 10px;
+    text-align:center;
+    font-size: 12px;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(43,31,22,0.08);
+  }
+  th{
+    font-family:'JetBrains Mono', monospace;
+    color: #8a5530;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    background: var(--surface-2);
+    position: sticky; top:0;
+  }
+  td{ color: #241a12; font-family:'JetBrains Mono', monospace; font-weight: 600; font-size: 12.5px; }
+  td.taste-cell{ font-family:'Inter', sans-serif; }
+  tr:last-child td{ border-bottom:none; }
+  tbody tr{ cursor:pointer; }
+  tbody tr:active{ background: var(--surface-2); }
 
   .chip-list{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 12px; }
   .chip{
@@ -378,16 +443,17 @@
     margin-bottom: 8px;
   }
   .bean-field-row{ display:flex; gap:8px; margin-bottom: 10px; }
-  .bean-field-row > div{ flex:1; }
+  .bean-field-row > div{ flex:1; min-width:0; }
   .bean-field-row label{ display:block; font-size:11px; color: var(--muted); margin-bottom:4px; }
   .bean-field-row input[type="date"]{
     width:100%;
+    min-width:0;
     background: var(--surface-2);
     border: 1px solid var(--line);
     color: var(--cream);
     font-family:'JetBrains Mono', monospace;
-    font-size: 13px;
-    padding: 9px 8px;
+    font-size: 12px;
+    padding: 9px 6px;
     border-radius: 10px;
     color-scheme: light;
   }
@@ -446,7 +512,8 @@
         <select class="dropdown" id="sel-bean"></select>
         <div class="bean-info-row" id="beanInfoRow" style="display:none;">
           <span>로스팅 <b id="beanInfoRoast">-</b></span>
-          <span>구매 <b id="beanInfoPurchase">-</b></span>
+          <span>개봉 <b id="beanInfoOpen">-</b></span>
+          <span id="beanInfoDaysWrap" style="display:none;">로스팅 후 <b id="beanInfoDays">-</b></span>
         </div>
       </div>
       <div class="picker-grid cols-3">
@@ -502,6 +569,31 @@
         <select class="dropdown" id="sel-taste"></select>
       </div>
       <div class="field">
+        <label>별점 평가</label>
+        <div class="rating-row">
+          <span class="rating-label">산미</span>
+          <div class="star-rating" id="star-acidity">
+            <div class="star-row star-bg">★★★★★</div>
+            <div class="star-row star-fill">★★★★★</div>
+          </div>
+        </div>
+        <div class="rating-row">
+          <span class="rating-label">쓴맛</span>
+          <div class="star-rating" id="star-bitterness">
+            <div class="star-row star-bg">★★★★★</div>
+            <div class="star-row star-fill">★★★★★</div>
+          </div>
+        </div>
+        <div class="rating-row">
+          <span class="rating-label">향</span>
+          <div class="star-rating" id="star-aroma">
+            <div class="star-row star-bg">★★★★★</div>
+            <div class="star-row star-fill">★★★★★</div>
+          </div>
+        </div>
+        <div class="overall-rating-display" id="overallRatingDisplay">종합 별점 0.00 / 5.00</div>
+      </div>
+      <div class="field">
         <label>메모 <span style="color:var(--muted); font-weight:400;">(선택)</span></label>
         <textarea id="inp-memo" rows="2" placeholder="예: 크레마 얇음, 다음엔 분쇄도 1 내려보기" style="display:block; width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--line); color:var(--cream); font-family:'Inter',sans-serif; font-size:14px; padding:11px 12px; border-radius:10px; resize:vertical; min-height:52px;"></textarea>
       </div>
@@ -518,6 +610,13 @@
       <select class="dropdown" id="filter-coffeeType"><option value="">전체 종류</option></select>
       <select class="dropdown" id="filter-bean"><option value="">전체 원두</option></select>
       <select class="dropdown" id="filter-taste"><option value="">전체 평가</option></select>
+      <select class="dropdown" id="filter-rating">
+        <option value="0">전체 별점</option>
+        <option value="1">★1 이상</option>
+        <option value="2">★2 이상</option>
+        <option value="3">★3 이상</option>
+        <option value="4">★4 이상</option>
+      </select>
     </div>
     <div class="field">
       <select class="dropdown" id="sortSelect">
@@ -525,7 +624,13 @@
         <option value="ts-asc">오래된순</option>
         <option value="ratio-desc">비율 높은순</option>
         <option value="ratio-asc">비율 낮은순</option>
+        <option value="overallRating-desc">별점 높은순</option>
+        <option value="overallRating-asc">별점 낮은순</option>
       </select>
+    </div>
+    <div class="viewmode-row">
+      <button class="viewmode-btn active" data-view="card">카드형</button>
+      <button class="viewmode-btn" data-view="list">목록형</button>
     </div>
     <div id="tableContainer"></div>
   </section>
@@ -562,8 +667,8 @@
           <input type="date" id="add-bean-roast">
         </div>
         <div>
-          <label>구매일자</label>
-          <input type="date" id="add-bean-purchase">
+          <label>개봉일자</label>
+          <input type="date" id="add-bean-open">
         </div>
       </div>
       <button class="btn-primary" id="addBeanBtn" style="padding:11px;">추가</button>
@@ -597,8 +702,8 @@
 const DEFAULT_OPTIONS = {
   coffeeType: ['에스프레소','아메리카노','라떼'],
   bean: [
-    { name: '테라로사 예가체프 아리차', roastDate: '', purchaseDate: '' },
-    { name: '폴바셋', roastDate: '', purchaseDate: '' }
+    { name: '테라로사 예가체프 아리차', roastDate: '', openDate: '' },
+    { name: '폴바셋', roastDate: '', openDate: '' }
   ],
   taste: ['밸런스 좋음','산미 강함','쓴맛 강함','싱거움','탄맛']
 };
@@ -609,6 +714,8 @@ let sortState = { col: 'ts', dir: 'desc' };
 let editingId = null;
 let editingBeanName = null;
 let dosingCupUsed = false;
+let starRatings = { acidity: 0, bitterness: 0, aroma: 0 };
+let viewMode = 'card';
 
 // ---------- options helpers ----------
 function normalizeOptions(opts){
@@ -617,8 +724,8 @@ function normalizeOptions(opts){
     coffeeType: Array.isArray(opts.coffeeType) ? opts.coffeeType : DEFAULT_OPTIONS.coffeeType.slice(),
     bean: Array.isArray(opts.bean) ? opts.bean.map(b=>
       typeof b === 'string'
-        ? { name: b, roastDate: '', purchaseDate: '' }
-        : { name: b.name, roastDate: b.roastDate || '', purchaseDate: b.purchaseDate || '' }
+        ? { name: b, roastDate: '', openDate: '' }
+        : { name: b.name, roastDate: b.roastDate || '', openDate: b.openDate || b.purchaseDate || '' }
     ) : [],
     taste: Array.isArray(opts.taste) ? opts.taste : DEFAULT_OPTIONS.taste.slice()
   };
@@ -629,6 +736,17 @@ function formatDateShort(iso){
   const parts = String(iso).split('-');
   if(parts.length !== 3) return iso;
   return parts[1]+'/'+parts[2];
+}
+function daysBetween(fromISODate, toDate){
+  if(!fromISODate) return null;
+  const from = new Date(fromISODate+'T00:00:00');
+  const to = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+  return Math.round((to - from) / 86400000);
+}
+function getPreviewBrewDate(){
+  const v = document.getElementById('inp-datetime').value;
+  if(v){ const d = new Date(v); if(!isNaN(d.getTime())) return d; }
+  return new Date();
 }
 
 // ---------- storage helpers (localStorage cache + Firestore realtime sync) ----------
@@ -858,6 +976,40 @@ function enableManualEntry(pickerId, min, max, step){
   });
 }
 
+// ---------- 별점 ----------
+function renderStarRating(containerId, val){
+  const el = document.getElementById(containerId);
+  el.querySelector('.star-fill').style.width = (val/5*100)+'%';
+}
+function updateOverallRatingDisplay(){
+  const avg = (starRatings.acidity + starRatings.bitterness + starRatings.aroma) / 3;
+  document.getElementById('overallRatingDisplay').textContent = '종합 별점 ' + avg.toFixed(2) + ' / 5.00';
+}
+function setStarRating(field, containerId, rawVal){
+  const val = Math.max(0, Math.min(5, Math.round(rawVal*2)/2));
+  starRatings[field] = val;
+  renderStarRating(containerId, val);
+  updateOverallRatingDisplay();
+}
+function wireStarRating(containerId, field){
+  const el = document.getElementById(containerId);
+  el.addEventListener('click', (ev)=>{
+    const rect = el.getBoundingClientRect();
+    const fraction = (ev.clientX - rect.left) / rect.width;
+    setStarRating(field, containerId, fraction*5);
+  });
+}
+function resetStarRatings(){
+  starRatings = { acidity: 0, bitterness: 0, aroma: 0 };
+  renderStarRating('star-acidity', 0);
+  renderStarRating('star-bitterness', 0);
+  renderStarRating('star-aroma', 0);
+  updateOverallRatingDisplay();
+}
+function starsText(val){
+  return (val || 0).toFixed(1) + ' ★';
+}
+
 // ---------- dropdown rendering ----------
 function renderDropdowns(){
   fillSelect('sel-coffeeType', options.coffeeType);
@@ -887,15 +1039,24 @@ function fillSelect(id, list, withAll, allLabel){
 function updateBeanInfo(){
   const b = findBean(document.getElementById('sel-bean').value);
   const row = document.getElementById('beanInfoRow');
-  if(b && (b.roastDate || b.purchaseDate)){
+  if(b && (b.roastDate || b.openDate)){
     document.getElementById('beanInfoRoast').textContent = b.roastDate ? formatDateShort(b.roastDate) : '-';
-    document.getElementById('beanInfoPurchase').textContent = b.purchaseDate ? formatDateShort(b.purchaseDate) : '-';
+    document.getElementById('beanInfoOpen').textContent = b.openDate ? formatDateShort(b.openDate) : '-';
+    const daysWrap = document.getElementById('beanInfoDaysWrap');
+    if(b.roastDate){
+      const days = daysBetween(b.roastDate, getPreviewBrewDate());
+      document.getElementById('beanInfoDays').textContent = (days>=0?'+':'') + days + '일';
+      daysWrap.style.display = '';
+    } else {
+      daysWrap.style.display = 'none';
+    }
     row.style.display = 'flex';
   } else {
     row.style.display = 'none';
   }
 }
 document.getElementById('sel-bean').addEventListener('change', updateBeanInfo);
+document.getElementById('inp-datetime').addEventListener('change', updateBeanInfo);
 
 // ---------- 도징컵 토글 ----------
 function updateDosingCupBtn(){
@@ -916,11 +1077,15 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
   }
   const beanName = document.getElementById('sel-bean').value;
   const beanObj = findBean(beanName);
+  const customTs = getDatetimeValue();
+  const brewDate = customTs ? new Date(customTs) : new Date();
+  const overallRating = +(((starRatings.acidity + starRatings.bitterness + starRatings.aroma) / 3).toFixed(2));
   const values = {
     coffeeType: document.getElementById('sel-coffeeType').value,
     bean: beanName,
     beanRoastDate: beanObj ? beanObj.roastDate : '',
-    beanPurchaseDate: beanObj ? beanObj.purchaseDate : '',
+    beanOpenDate: beanObj ? beanObj.openDate : '',
+    daysSinceRoast: (beanObj && beanObj.roastDate) ? daysBetween(beanObj.roastDate, brewDate) : null,
     dosingCup: dosingCupUsed,
     grind: pickers['pk-grind'].getValue(),
     dose: pickers['pk-dose'].getValue(),
@@ -930,13 +1095,14 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
     water: pickers['pk-water'].getValue(),
     milk: pickers['pk-milk'].getValue(),
     taste: document.getElementById('sel-taste').value,
+    ratings: { acidity: starRatings.acidity, bitterness: starRatings.bitterness, aroma: starRatings.aroma },
+    overallRating: overallRating,
     memo: document.getElementById('inp-memo').value.trim()
   };
   if(editingId){
     const target = entries.find(e=> e.id === editingId);
     if(target){
       Object.assign(target, values);
-      const customTs = getDatetimeValue();
       if(customTs) target.ts = customTs;
     }
     saveEntries();
@@ -944,7 +1110,6 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
     exitEditMode();
     return;
   }
-  const customTs = getDatetimeValue();
   const entry = Object.assign({
     id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
     ts: customTs || new Date().toISOString()
@@ -977,13 +1142,15 @@ function openDetail(e){
   const ratio = e.dose>0 && e.yieldMl>0 ? '1 : '+(e.yieldMl/e.dose).toFixed(1) : '—';
   const water = e.water != null ? e.water : (e.liquid || 0);
   const milk = e.milk != null ? e.milk : 0;
+  const openDate = e.beanOpenDate || e.beanPurchaseDate || '';
   const rows = [
     ['날짜', dateStr],
     ['커피 종류', e.coffeeType],
     ['원두', e.bean]
   ];
   if(e.beanRoastDate) rows.push(['로스팅일자', formatDateShort(e.beanRoastDate)]);
-  if(e.beanPurchaseDate) rows.push(['구매일자', formatDateShort(e.beanPurchaseDate)]);
+  if(openDate) rows.push(['개봉일자', formatDateShort(openDate)]);
+  if(e.daysSinceRoast != null) rows.push(['로스팅 후', (e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일']);
   rows.push(['분쇄도', e.grind]);
   rows.push(['도징량', Number(e.dose).toFixed(1)+' g']);
   rows.push(['도징컵', e.dosingCup ? '사용함' : '사용 안 함']);
@@ -994,6 +1161,12 @@ function openDetail(e){
   rows.push(['물', water+' ml']);
   rows.push(['우유', milk+' ml']);
   rows.push(['맛 평가', e.taste]);
+  if(e.ratings){
+    rows.push(['산미', starsText(e.ratings.acidity)]);
+    rows.push(['쓴맛', starsText(e.ratings.bitterness)]);
+    rows.push(['향', starsText(e.ratings.aroma)]);
+  }
+  if(e.overallRating != null) rows.push(['종합 별점', e.overallRating.toFixed(2)+' / 5.00']);
   let html = '';
   rows.forEach(r=>{
     html += '<div style="display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid rgba(43,31,22,0.08);">'
@@ -1022,7 +1195,6 @@ function enterEditMode(entry){
   editingId = entry.id;
   document.getElementById('sel-coffeeType').value = entry.coffeeType;
   document.getElementById('sel-bean').value = entry.bean;
-  updateBeanInfo();
   document.getElementById('sel-taste').value = entry.taste;
   dosingCupUsed = !!entry.dosingCup;
   updateDosingCupBtn();
@@ -1035,6 +1207,12 @@ function enterEditMode(entry){
   pickers['pk-milk'].setValue(entry.milk != null ? entry.milk : 0);
   document.getElementById('inp-datetime').value = isoToLocal(entry.ts);
   document.getElementById('inp-memo').value = entry.memo || '';
+  starRatings = entry.ratings ? { acidity: entry.ratings.acidity||0, bitterness: entry.ratings.bitterness||0, aroma: entry.ratings.aroma||0 } : { acidity:0, bitterness:0, aroma:0 };
+  renderStarRating('star-acidity', starRatings.acidity);
+  renderStarRating('star-bitterness', starRatings.bitterness);
+  renderStarRating('star-aroma', starRatings.aroma);
+  updateOverallRatingDisplay();
+  updateBeanInfo();
   updateRatio();
   document.getElementById('saveBtn').textContent = '수정 저장';
   document.getElementById('editBanner').style.display = 'flex';
@@ -1053,6 +1231,8 @@ function exitEditMode(){
   document.getElementById('inp-memo').value = '';
   dosingCupUsed = false;
   updateDosingCupBtn();
+  resetStarRatings();
+  updateBeanInfo();
 }
 document.getElementById('cancelEditBtn').addEventListener('click', exitEditMode);
 
@@ -1080,40 +1260,63 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
   updateBeanInfo();
 });
 
-// ---------- entry list (card style) ----------
+// ---------- entry list (card / list view) ----------
 function escHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function truncate(s, n){
   return s.length > n ? s.slice(0, n) + '…' : s;
 }
-function renderTable(){
-  const container = document.getElementById('tableContainer');
+function getFilteredSortedEntries(){
   const typeFilter = document.getElementById('filter-coffeeType').value;
   const beanFilter = document.getElementById('filter-bean').value;
   const tasteFilter = document.getElementById('filter-taste').value;
+  const ratingFilter = parseFloat(document.getElementById('filter-rating').value) || 0;
 
   let rows = entries.filter(e=>
     (!typeFilter || e.coffeeType === typeFilter) &&
     (!beanFilter || e.bean === beanFilter) &&
-    (!tasteFilter || e.taste === tasteFilter)
+    (!tasteFilter || e.taste === tasteFilter) &&
+    ((e.overallRating || 0) >= ratingFilter)
   );
 
   const ratioOf = e => (e.dose > 0 && e.yieldMl > 0) ? e.yieldMl / e.dose : 0;
   rows.sort((a,b)=>{
     let av, bv;
     if(sortState.col === 'ratio'){ av = ratioOf(a); bv = ratioOf(b); }
+    else if(sortState.col === 'overallRating'){ av = a.overallRating || 0; bv = b.overallRating || 0; }
     else { av = a[sortState.col]; bv = b[sortState.col]; }
     if(sortState.col === 'ts'){ av = new Date(av).getTime(); bv = new Date(bv).getTime(); }
     if(typeof av === 'string') return sortState.dir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
     return sortState.dir==='asc' ? av-bv : bv-av;
   });
-
-  if(rows.length === 0){
-    container.innerHTML = '<div class="empty-state">아직 기록이 없어요.<br>입력 탭에서 첫 추출을 기록해보세요.</div>';
-    return;
-  }
-
+  return rows;
+}
+function wireEntryButtons(container){
+  container.querySelectorAll('.edit-btn').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      const entry = entries.find(e=> e.id === btn.dataset.id);
+      if(entry) enterEditMode(entry);
+    });
+  });
+  container.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      entries = entries.filter(e=> e.id !== btn.dataset.id);
+      saveEntries();
+      renderTable();
+    });
+  });
+  container.querySelectorAll('[data-open-id]').forEach(el=>{
+    el.addEventListener('click', (ev)=>{
+      if(ev.target.closest('button')) return;
+      const entry = entries.find(e=> e.id === el.dataset.openId);
+      if(entry) openDetail(entry);
+    });
+  });
+}
+function renderCardView(container, rows){
   let html = '<div class="entry-list">';
   rows.forEach(e=>{
     const d = new Date(e.ts);
@@ -1125,48 +1328,82 @@ function renderTable(){
     const extras = [];
     if(water > 0) extras.push('물 '+water+'ml');
     if(milk > 0) extras.push('우유 '+milk+'ml');
+    const ratingStr = e.overallRating ? '<span class="ec-rating">⭐ '+e.overallRating.toFixed(2)+'</span> · ' : '';
     const memoStr = e.memo ? ' · '+escHtml(truncate(e.memo, 20)) : '';
-    html += '<div class="entry-card" data-id="'+e.id+'">'
+    html += '<div class="entry-card" data-open-id="'+e.id+'">'
       + '<div class="ec-top">'
       +   '<span class="ec-date">'+dateStr+'</span>'
       +   '<div class="ec-actions"><button class="edit-btn" data-id="'+e.id+'">✎</button><button class="del-btn" data-id="'+e.id+'">×</button></div>'
       + '</div>'
       + '<div class="ec-line1">'+escHtml(e.coffeeType)+' · '+escHtml(e.bean)+'</div>'
       + '<div class="ec-line2">분쇄도 '+e.grind+' · 도징 '+Number(e.dose).toFixed(1)+'g'+cupBadge+' · 탬핑 '+e.tamp+'회 · 추출 '+e.time+'초 · 추출량 '+Number(e.yieldMl).toFixed(1)+'ml · 비율 '+ratio+(extras.length ? ' · '+extras.join(' · ') : '')+'</div>'
-      + '<div class="ec-line3">'+escHtml(e.taste)+memoStr+'</div>'
+      + '<div class="ec-line3">'+ratingStr+escHtml(e.taste)+memoStr+'</div>'
       + '</div>';
   });
   html += '</div>';
   container.innerHTML = html;
-
-  container.querySelectorAll('.entry-card').forEach(card=>{
-    card.addEventListener('click', (ev)=>{
-      if(ev.target.closest('button')) return;
-      const entry = entries.find(e=> e.id === card.dataset.id);
-      if(entry) openDetail(entry);
-    });
+  wireEntryButtons(container);
+}
+function renderListView(container, rows){
+  const cols = [
+    {label:'날짜'}, {label:'종류'}, {label:'원두'}, {label:'분쇄도'}, {label:'도징(g)'},
+    {label:'탬핑'}, {label:'추출(초)'}, {label:'추출량(ml)'}, {label:'비율'}, {label:'별점'},
+    {label:'맛평가'}, {label:'메모'}
+  ];
+  let html = '<div class="table-scroll"><table><thead><tr>';
+  cols.forEach(c=> html += '<th>'+c.label+'</th>');
+  html += '<th></th></tr></thead><tbody>';
+  rows.forEach(e=>{
+    const d = new Date(e.ts);
+    const dateStr = (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    const ratio = e.dose>0 && e.yieldMl>0 ? '1:'+(e.yieldMl/e.dose).toFixed(1) : '—';
+    const rating = e.overallRating ? e.overallRating.toFixed(2) : '—';
+    html += '<tr data-open-id="'+e.id+'">'
+      + '<td>'+dateStr+'</td>'
+      + '<td>'+escHtml(e.coffeeType)+'</td>'
+      + '<td>'+escHtml(e.bean)+'</td>'
+      + '<td>'+e.grind+'</td>'
+      + '<td>'+Number(e.dose).toFixed(1)+'</td>'
+      + '<td>'+e.tamp+'</td>'
+      + '<td>'+e.time+'</td>'
+      + '<td>'+Number(e.yieldMl).toFixed(1)+'</td>'
+      + '<td>'+ratio+'</td>'
+      + '<td>'+rating+'</td>'
+      + '<td class="taste-cell">'+escHtml(e.taste)+'</td>'
+      + '<td class="taste-cell" title="'+escHtml(e.memo||'')+'">'+escHtml(truncate(e.memo||'', 8))+'</td>'
+      + '<td style="white-space:nowrap;"><button class="edit-btn" data-id="'+e.id+'">✎</button><button class="del-btn" data-id="'+e.id+'">×</button></td>'
+      + '</tr>';
   });
-  container.querySelectorAll('.edit-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const entry = entries.find(e=> e.id === btn.dataset.id);
-      if(entry) enterEditMode(entry);
-    });
-  });
-  container.querySelectorAll('.del-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      entries = entries.filter(e=> e.id !== btn.dataset.id);
-      saveEntries();
-      renderTable();
-    });
-  });
+  html += '</tbody></table></div>';
+  container.innerHTML = html;
+  wireEntryButtons(container);
+}
+function renderTable(){
+  const container = document.getElementById('tableContainer');
+  const rows = getFilteredSortedEntries();
+  if(rows.length === 0){
+    container.innerHTML = '<div class="empty-state">아직 기록이 없어요.<br>입력 탭에서 첫 추출을 기록해보세요.</div>';
+    return;
+  }
+  if(viewMode === 'list') renderListView(container, rows);
+  else renderCardView(container, rows);
 }
 document.getElementById('filter-coffeeType').addEventListener('change', renderTable);
 document.getElementById('filter-bean').addEventListener('change', renderTable);
 document.getElementById('filter-taste').addEventListener('change', renderTable);
+document.getElementById('filter-rating').addEventListener('change', renderTable);
 document.getElementById('sortSelect').addEventListener('change', (ev)=>{
   const [col, dir] = ev.target.value.split('-');
   sortState = { col, dir };
   renderTable();
+});
+document.querySelectorAll('.viewmode-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.viewmode-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    viewMode = btn.dataset.view;
+    renderTable();
+  });
 });
 
 // ---------- settings ----------
@@ -1232,7 +1469,7 @@ function startEditBean(b){
   editingBeanName = b.name;
   document.getElementById('add-bean-name').value = b.name;
   document.getElementById('add-bean-roast').value = b.roastDate || '';
-  document.getElementById('add-bean-purchase').value = b.purchaseDate || '';
+  document.getElementById('add-bean-open').value = b.openDate || '';
   document.getElementById('addBeanBtn').textContent = '수정 완료';
   renderBeanChips();
 }
@@ -1240,25 +1477,25 @@ function cancelEditBean(){
   editingBeanName = null;
   document.getElementById('add-bean-name').value = '';
   document.getElementById('add-bean-roast').value = '';
-  document.getElementById('add-bean-purchase').value = '';
+  document.getElementById('add-bean-open').value = '';
   document.getElementById('addBeanBtn').textContent = '추가';
 }
 document.getElementById('addBeanBtn').addEventListener('click', ()=>{
   const name = document.getElementById('add-bean-name').value.trim();
   const roastDate = document.getElementById('add-bean-roast').value;
-  const purchaseDate = document.getElementById('add-bean-purchase').value;
+  const openDate = document.getElementById('add-bean-open').value;
   if(!name) return;
   if(editingBeanName){
     const b = options.bean.find(x=> x.name === editingBeanName);
-    if(b){ b.name = name; b.roastDate = roastDate; b.purchaseDate = purchaseDate; }
+    if(b){ b.name = name; b.roastDate = roastDate; b.openDate = openDate; }
     cancelEditBean();
   } else {
     if(!options.bean.some(b=> b.name === name)){
-      options.bean.push({ name, roastDate, purchaseDate });
+      options.bean.push({ name, roastDate, openDate });
     }
     document.getElementById('add-bean-name').value = '';
     document.getElementById('add-bean-roast').value = '';
-    document.getElementById('add-bean-purchase').value = '';
+    document.getElementById('add-bean-open').value = '';
   }
   saveOptions();
   renderChips(); renderDropdowns();
@@ -1325,8 +1562,12 @@ document.getElementById('importFile').addEventListener('change', (ev)=>{
   renderChips();
   initPickers();
   updateDosingCupBtn();
+  resetStarRatings();
   enableManualEntry('pk-dose', 10, 30, 0.1);
   enableManualEntry('pk-yield', 0, 120, 0.1);
+  wireStarRating('star-acidity', 'acidity');
+  wireStarRating('star-bitterness', 'bitterness');
+  wireStarRating('star-aroma', 'aroma');
 })();
 
 if('serviceWorker' in navigator){
