@@ -135,6 +135,15 @@
     background-position: right 12px center;
   }
 
+  .bean-info-row{
+    display:flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 8px 2px 0;
+  }
+  .bean-info-row b{ color: var(--cream); font-weight:600; }
+
   .picker-grid{
     display:grid;
     gap: 8px;
@@ -144,6 +153,38 @@
   .picker-grid.cols-2{ grid-template-columns: repeat(2, 1fr); }
   .pk-cell{ text-align:center; }
   .pk-cell .pk-label{ text-align:center; font-size: 12px; }
+  .pk-label-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .pk-label-row .pk-label{ margin-bottom:0; }
+  .manual-btn{
+    background:none;
+    border:none;
+    color: var(--brass);
+    font-size: 10px;
+    font-weight: 700;
+    cursor:pointer;
+    padding:0;
+    text-decoration: underline;
+    white-space: nowrap;
+  }
+  .manual-input{
+    width:100%;
+    height:132px;
+    box-sizing:border-box;
+    background: var(--surface-2);
+    border: 1px solid var(--brass-dim);
+    border-radius: 10px;
+    text-align:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size: 20px;
+    font-weight:700;
+    color: var(--cream);
+  }
 
   .picker{
     position: relative;
@@ -223,6 +264,25 @@
   }
   .btn-primary:active{ opacity: 0.85; }
 
+  .toggle-btn{
+    width:100%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-family:'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 11px;
+    border-radius: 10px;
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .toggle-btn.on{
+    background: var(--brass);
+    border-color: var(--brass);
+    color: #fff;
+  }
+
   .toast{
     position: fixed;
     bottom: 20px;
@@ -245,52 +305,31 @@
 
   .filter-row{ display:flex; gap:8px; margin-bottom: 12px; }
   .filter-row select{ flex:1; font-size:13px; padding:8px 10px; }
-  .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-  table{ border-collapse: collapse; width:100%; min-width: 780px; background: var(--surface); }
-  tbody tr{ background: var(--surface); }
-  th, td{
-    padding: 9px 10px;
-    text-align:center;
-    font-size: 12px;
-    white-space: nowrap;
-    border-bottom: 1px solid rgba(43,31,22,0.08);
-  }
-  th{
-    font-family:'JetBrains Mono', monospace;
-    color: #8a5530;
-    font-weight: 700;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    cursor:pointer;
-    background: var(--surface-2);
-    position: sticky; top:0;
-    user-select: none;
-  }
-  .sort-arrows{
-    display:inline-flex;
-    flex-direction: column;
-    vertical-align: middle;
-    margin-left: 4px;
-    line-height: 0.85;
-  }
-  .sort-arrows span{
-    font-size: 7px;
-    color: var(--line);
-  }
-  .sort-arrows span.on{
-    color: var(--brass);
-  }
-  td{ color: #241a12; font-family:'JetBrains Mono', monospace; font-weight: 600; font-size: 12.5px; }
-  td.taste-cell{ font-family:'Inter', sans-serif; }
-  tr:last-child td{ border-bottom:none; }
-  .del-btn{
-    background:none; border:none; color: var(--danger);
-    font-size: 15px; cursor:pointer; padding:2px 6px;
-  }
+
   .empty-state{
     text-align:center; color: var(--muted); padding: 40px 20px; font-size: 13px; line-height:1.6;
   }
+
+  .entry-list{ display:flex; flex-direction:column; gap:10px; }
+  .entry-card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    cursor:pointer;
+  }
+  .entry-card:active{ background: var(--surface-2); }
+  .ec-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:4px; }
+  .ec-date{ font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--brass); font-weight:700; white-space:nowrap; padding-top:3px; }
+  .ec-actions{ display:flex; gap:2px; }
+  .ec-actions button{ background:none; border:none; cursor:pointer; padding:4px 6px; }
+  .ec-actions .edit-btn{ color: var(--brass); font-size:14px; }
+  .ec-actions .del-btn{ color: var(--danger); font-size:17px; }
+  .ec-line1{ font-size:14px; font-weight:600; color:#241a12; margin-bottom:3px; }
+  .ec-line2{ font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--muted); margin-bottom:3px; line-height:1.5; }
+  .ec-cup{ color: var(--brass); font-family:'Inter', sans-serif; }
+  .ec-line3{ font-size:12.5px; color:#241a12; }
+  .ec-line3 .ec-memo{ color: var(--muted); }
 
   .chip-list{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 12px; }
   .chip{
@@ -301,6 +340,8 @@
     border-radius: 20px;
     font-size: 13px;
   }
+  .chip.editing{ border-color: var(--brass); background:#fff; }
+  .chip .chip-meta{ font-size:11px; color: var(--muted); }
   .chip button{
     background:none; border:none; color: var(--danger);
     font-size: 14px; cursor:pointer; line-height:1; padding:0;
@@ -324,6 +365,31 @@
     padding: 0 16px;
     border-radius: 10px;
     cursor:pointer;
+  }
+  .bean-name-input{
+    width:100%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--cream);
+    font-family:'Inter', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .bean-field-row{ display:flex; gap:8px; margin-bottom: 10px; }
+  .bean-field-row > div{ flex:1; }
+  .bean-field-row label{ display:block; font-size:11px; color: var(--muted); margin-bottom:4px; }
+  .bean-field-row input[type="date"]{
+    width:100%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--cream);
+    font-family:'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 9px 8px;
+    border-radius: 10px;
+    color-scheme: light;
   }
   .share-note{
     font-size: 12px;
@@ -378,6 +444,10 @@
       <div class="field">
         <label>원두</label>
         <select class="dropdown" id="sel-bean"></select>
+        <div class="bean-info-row" id="beanInfoRow" style="display:none;">
+          <span>로스팅 <b id="beanInfoRoast">-</b></span>
+          <span>구매 <b id="beanInfoPurchase">-</b></span>
+        </div>
       </div>
       <div class="picker-grid cols-3">
         <div class="pk-cell">
@@ -385,13 +455,20 @@
           <div class="picker" id="pk-grind"><div class="picker-window"></div></div>
         </div>
         <div class="pk-cell">
-          <span class="pk-label">도징량 (g)</span>
+          <div class="pk-label-row">
+            <span class="pk-label">도징량 (g)</span>
+            <button type="button" class="manual-btn" data-picker="pk-dose">직접입력</button>
+          </div>
           <div class="picker" id="pk-dose"><div class="picker-window"></div></div>
         </div>
         <div class="pk-cell">
           <span class="pk-label">탬핑 (회)</span>
           <div class="picker" id="pk-tamp"><div class="picker-window"></div></div>
         </div>
+      </div>
+      <div class="field" style="margin-top:14px; margin-bottom:0;">
+        <label>도징컵 사용</label>
+        <button type="button" class="toggle-btn" id="toggle-dosingCup">사용 안 함</button>
       </div>
     </div>
 
@@ -403,7 +480,10 @@
           <div class="picker" id="pk-time"><div class="picker-window"></div></div>
         </div>
         <div class="pk-cell">
-          <span class="pk-label">추출량 (ml)</span>
+          <div class="pk-label-row">
+            <span class="pk-label">추출량 (ml)</span>
+            <button type="button" class="manual-btn" data-picker="pk-yield">직접입력</button>
+          </div>
           <div class="picker" id="pk-yield"><div class="picker-window"></div></div>
         </div>
       </div>
@@ -439,6 +519,14 @@
       <select class="dropdown" id="filter-bean"><option value="">전체 원두</option></select>
       <select class="dropdown" id="filter-taste"><option value="">전체 평가</option></select>
     </div>
+    <div class="field">
+      <select class="dropdown" id="sortSelect">
+        <option value="ts-desc">최신순</option>
+        <option value="ts-asc">오래된순</option>
+        <option value="ratio-desc">비율 높은순</option>
+        <option value="ratio-asc">비율 낮은순</option>
+      </select>
+    </div>
     <div id="tableContainer"></div>
   </section>
 
@@ -465,12 +553,20 @@
     </div>
 
     <div class="card">
-      <p class="card-title">원두</p>
+      <p class="card-title">원두 <span style="color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0;">(이름 누르면 날짜 수정)</span></p>
       <div class="chip-list" id="chips-bean"></div>
-      <div class="add-row">
-        <input type="text" id="add-bean" placeholder="예: 테라로사 예가체프">
-        <button data-target="bean">추가</button>
+      <input type="text" id="add-bean-name" class="bean-name-input" placeholder="원두 이름 예: 테라로사 예가체프">
+      <div class="bean-field-row">
+        <div>
+          <label>로스팅일자</label>
+          <input type="date" id="add-bean-roast">
+        </div>
+        <div>
+          <label>구매일자</label>
+          <input type="date" id="add-bean-purchase">
+        </div>
       </div>
+      <button class="btn-primary" id="addBeanBtn" style="padding:11px;">추가</button>
     </div>
 
     <div class="card">
@@ -500,7 +596,10 @@
 <script>
 const DEFAULT_OPTIONS = {
   coffeeType: ['에스프레소','아메리카노','라떼'],
-  bean: ['테라로사 예가체프 아리차','폴바셋'],
+  bean: [
+    { name: '테라로사 예가체프 아리차', roastDate: '', purchaseDate: '' },
+    { name: '폴바셋', roastDate: '', purchaseDate: '' }
+  ],
   taste: ['밸런스 좋음','산미 강함','쓴맛 강함','싱거움','탄맛']
 };
 
@@ -508,6 +607,29 @@ let options = JSON.parse(JSON.stringify(DEFAULT_OPTIONS));
 let entries = [];
 let sortState = { col: 'ts', dir: 'desc' };
 let editingId = null;
+let editingBeanName = null;
+let dosingCupUsed = false;
+
+// ---------- options helpers ----------
+function normalizeOptions(opts){
+  if(!opts || typeof opts !== 'object') return JSON.parse(JSON.stringify(DEFAULT_OPTIONS));
+  return {
+    coffeeType: Array.isArray(opts.coffeeType) ? opts.coffeeType : DEFAULT_OPTIONS.coffeeType.slice(),
+    bean: Array.isArray(opts.bean) ? opts.bean.map(b=>
+      typeof b === 'string'
+        ? { name: b, roastDate: '', purchaseDate: '' }
+        : { name: b.name, roastDate: b.roastDate || '', purchaseDate: b.purchaseDate || '' }
+    ) : [],
+    taste: Array.isArray(opts.taste) ? opts.taste : DEFAULT_OPTIONS.taste.slice()
+  };
+}
+function beanNames(){ return options.bean.map(b=> b.name); }
+function findBean(name){ return options.bean.find(b=> b.name === name); }
+function formatDateShort(iso){
+  const parts = String(iso).split('-');
+  if(parts.length !== 3) return iso;
+  return parts[1]+'/'+parts[2];
+}
 
 // ---------- storage helpers (localStorage cache + Firestore realtime sync) ----------
 function storageGet(key){
@@ -521,7 +643,7 @@ function storageSet(key, value){
 
 function loadAll(){
   const o = storageGet('coffee-options');
-  if(o){ try{ options = JSON.parse(o); }catch(e){} }
+  if(o){ try{ options = normalizeOptions(JSON.parse(o)); }catch(e){} }
   const e = storageGet('coffee-entries');
   if(e){ try{ entries = JSON.parse(e); }catch(err){ entries = []; } }
 }
@@ -552,8 +674,8 @@ window.startCloudSync = function(fb){
   fb.onSnapshot(optionsRef, (snap)=>{
     useCloud = true;
     if(snap.exists() && snap.data().value){
-      options = JSON.parse(snap.data().value);
-      storageSet('coffee-options', snap.data().value);
+      options = normalizeOptions(JSON.parse(snap.data().value));
+      storageSet('coffee-options', JSON.stringify(options));
       renderDropdowns();
       renderChips();
     } else {
@@ -695,14 +817,56 @@ function updateRatio(){
   }
 }
 
+// ---------- 도징량/추출량 직접입력 ----------
+function enableManualEntry(pickerId, min, max, step){
+  const btn = document.querySelector('.manual-btn[data-picker="'+pickerId+'"]');
+  if(!btn) return;
+  const decimals = (step.toString().split('.')[1] || '').length;
+  btn.addEventListener('click', ()=>{
+    const pickerEl = document.getElementById(pickerId);
+    if(!pickerEl) return;
+    const current = pickers[pickerId].getValue();
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.step = step;
+    input.min = min;
+    input.max = max;
+    input.value = current;
+    input.className = 'manual-input';
+    input.id = pickerId;
+    pickerEl.replaceWith(input);
+    input.focus();
+    input.select();
+    let done = false;
+    function commit(){
+      if(done) return;
+      done = true;
+      let v = parseFloat(input.value);
+      if(isNaN(v) || !isFinite(v)) v = current;
+      v = Math.max(min, Math.min(max, v));
+      v = +v.toFixed(decimals);
+      const restored = document.createElement('div');
+      restored.className = 'picker';
+      restored.id = pickerId;
+      input.replaceWith(restored);
+      const onChange = (pickerId === 'pk-dose' || pickerId === 'pk-yield') ? updateRatio : ()=>{};
+      buildPicker(pickerId, range(min, max, step), x=>x.toFixed(decimals), v, onChange);
+      onChange();
+    }
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); input.blur(); } });
+  });
+}
+
 // ---------- dropdown rendering ----------
 function renderDropdowns(){
   fillSelect('sel-coffeeType', options.coffeeType);
-  fillSelect('sel-bean', options.bean);
+  fillSelect('sel-bean', beanNames());
   fillSelect('sel-taste', options.taste);
   fillSelect('filter-coffeeType', options.coffeeType, true, '전체 종류');
-  fillSelect('filter-bean', options.bean, true, '전체 원두');
+  fillSelect('filter-bean', beanNames(), true, '전체 원두');
   fillSelect('filter-taste', options.taste, true, '전체 평가');
+  updateBeanInfo();
 }
 function fillSelect(id, list, withAll, allLabel){
   const sel = document.getElementById(id);
@@ -720,6 +884,29 @@ function fillSelect(id, list, withAll, allLabel){
   });
   if(list.includes(prevValue) || (withAll && prevValue==='')) sel.value = prevValue;
 }
+function updateBeanInfo(){
+  const b = findBean(document.getElementById('sel-bean').value);
+  const row = document.getElementById('beanInfoRow');
+  if(b && (b.roastDate || b.purchaseDate)){
+    document.getElementById('beanInfoRoast').textContent = b.roastDate ? formatDateShort(b.roastDate) : '-';
+    document.getElementById('beanInfoPurchase').textContent = b.purchaseDate ? formatDateShort(b.purchaseDate) : '-';
+    row.style.display = 'flex';
+  } else {
+    row.style.display = 'none';
+  }
+}
+document.getElementById('sel-bean').addEventListener('change', updateBeanInfo);
+
+// ---------- 도징컵 토글 ----------
+function updateDosingCupBtn(){
+  const btn = document.getElementById('toggle-dosingCup');
+  btn.classList.toggle('on', dosingCupUsed);
+  btn.textContent = dosingCupUsed ? '사용함 ✓' : '사용 안 함';
+}
+document.getElementById('toggle-dosingCup').addEventListener('click', ()=>{
+  dosingCupUsed = !dosingCupUsed;
+  updateDosingCupBtn();
+});
 
 // ---------- save entry ----------
 document.getElementById('saveBtn').addEventListener('click', ()=>{
@@ -727,9 +914,14 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
     showToast('설정 탭에서 항목을 먼저 등록해주세요');
     return;
   }
+  const beanName = document.getElementById('sel-bean').value;
+  const beanObj = findBean(beanName);
   const values = {
     coffeeType: document.getElementById('sel-coffeeType').value,
-    bean: document.getElementById('sel-bean').value,
+    bean: beanName,
+    beanRoastDate: beanObj ? beanObj.roastDate : '',
+    beanPurchaseDate: beanObj ? beanObj.purchaseDate : '',
+    dosingCup: dosingCupUsed,
     grind: pickers['pk-grind'].getValue(),
     dose: pickers['pk-dose'].getValue(),
     tamp: pickers['pk-tamp'].getValue(),
@@ -788,17 +980,20 @@ function openDetail(e){
   const rows = [
     ['날짜', dateStr],
     ['커피 종류', e.coffeeType],
-    ['원두', e.bean],
-    ['분쇄도', e.grind],
-    ['도징량', Number(e.dose).toFixed(1)+' g'],
-    ['탬핑', e.tamp+' 회'],
-    ['추출시간', e.time+' 초'],
-    ['추출량', Number(e.yieldMl).toFixed(1)+' ml'],
-    ['비율', ratio],
-    ['물', water+' ml'],
-    ['우유', milk+' ml'],
-    ['맛 평가', e.taste]
+    ['원두', e.bean]
   ];
+  if(e.beanRoastDate) rows.push(['로스팅일자', formatDateShort(e.beanRoastDate)]);
+  if(e.beanPurchaseDate) rows.push(['구매일자', formatDateShort(e.beanPurchaseDate)]);
+  rows.push(['분쇄도', e.grind]);
+  rows.push(['도징량', Number(e.dose).toFixed(1)+' g']);
+  rows.push(['도징컵', e.dosingCup ? '사용함' : '사용 안 함']);
+  rows.push(['탬핑', e.tamp+' 회']);
+  rows.push(['추출시간', e.time+' 초']);
+  rows.push(['추출량', Number(e.yieldMl).toFixed(1)+' ml']);
+  rows.push(['비율', ratio]);
+  rows.push(['물', water+' ml']);
+  rows.push(['우유', milk+' ml']);
+  rows.push(['맛 평가', e.taste]);
   let html = '';
   rows.forEach(r=>{
     html += '<div style="display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid rgba(43,31,22,0.08);">'
@@ -827,7 +1022,10 @@ function enterEditMode(entry){
   editingId = entry.id;
   document.getElementById('sel-coffeeType').value = entry.coffeeType;
   document.getElementById('sel-bean').value = entry.bean;
+  updateBeanInfo();
   document.getElementById('sel-taste').value = entry.taste;
+  dosingCupUsed = !!entry.dosingCup;
+  updateDosingCupBtn();
   pickers['pk-grind'].setValue(entry.grind);
   pickers['pk-dose'].setValue(entry.dose);
   pickers['pk-tamp'].setValue(entry.tamp);
@@ -853,6 +1051,8 @@ function exitEditMode(){
   document.getElementById('editBanner').style.display = 'none';
   document.getElementById('inp-datetime').value = '';
   document.getElementById('inp-memo').value = '';
+  dosingCupUsed = false;
+  updateDosingCupBtn();
 }
 document.getElementById('cancelEditBtn').addEventListener('click', exitEditMode);
 
@@ -862,6 +1062,9 @@ document.getElementById('loadRecipeBtn').addEventListener('click', ()=>{
   const last = entries[entries.length-1];
   document.getElementById('sel-coffeeType').value = last.coffeeType;
   document.getElementById('sel-bean').value = last.bean;
+  updateBeanInfo();
+  dosingCupUsed = !!last.dosingCup;
+  updateDosingCupBtn();
   pickers['pk-grind'].setValue(last.grind);
   pickers['pk-dose'].setValue(last.dose);
   pickers['pk-tamp'].setValue(last.tamp);
@@ -874,9 +1077,10 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
   document.getElementById('sel-coffeeType').selectedIndex = 0;
   document.getElementById('sel-bean').selectedIndex = 0;
   document.getElementById('sel-taste').selectedIndex = 0;
+  updateBeanInfo();
 });
 
-// ---------- table ----------
+// ---------- entry list (card style) ----------
 function escHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -910,55 +1114,35 @@ function renderTable(){
     return;
   }
 
-  const cols = [
-    {k:'ts', label:'날짜'}, {k:'coffeeType', label:'종류'}, {k:'bean', label:'원두'},
-    {k:'grind', label:'분쇄도'}, {k:'dose', label:'도징(g)'}, {k:'tamp', label:'탬핑'},
-    {k:'time', label:'추출(초)'}, {k:'yieldMl', label:'추출량(ml)'}, {k:'ratio', label:'비율'},
-    {k:'water', label:'물(ml)'}, {k:'milk', label:'우유(ml)'}, {k:'taste', label:'맛평가'},
-    {k:'memo', label:'메모'}
-  ];
-
-  let html = '<div class="table-scroll"><table><thead><tr>';
-  cols.forEach(c=>{
-    const upOn = sortState.col===c.k && sortState.dir==='asc';
-    const downOn = sortState.col===c.k && sortState.dir==='desc';
-    html += '<th data-col="'+c.k+'">'+c.label
-      + '<span class="sort-arrows">'
-      + '<span class="'+(upOn?'on':'')+'">▲</span>'
-      + '<span class="'+(downOn?'on':'')+'">▼</span>'
-      + '</span></th>';
-  });
-  html += '<th></th></tr></thead><tbody>';
-
+  let html = '<div class="entry-list">';
   rows.forEach(e=>{
     const d = new Date(e.ts);
     const dateStr = (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
     const ratio = e.dose>0 && e.yieldMl>0 ? '1:'+(e.yieldMl/e.dose).toFixed(1) : '—';
     const water = e.water != null ? e.water : (e.liquid || 0);
     const milk = e.milk != null ? e.milk : 0;
-    html += '<tr>'
-      + '<td>'+dateStr+'</td>'
-      + '<td>'+e.coffeeType+'</td>'
-      + '<td>'+e.bean+'</td>'
-      + '<td>'+e.grind+'</td>'
-      + '<td>'+Number(e.dose).toFixed(1)+'</td>'
-      + '<td>'+e.tamp+'</td>'
-      + '<td>'+e.time+'</td>'
-      + '<td>'+Number(e.yieldMl).toFixed(1)+'</td>'
-      + '<td>'+ratio+'</td>'
-      + '<td>'+water+'</td>'
-      + '<td>'+milk+'</td>'
-      + '<td class="taste-cell">'+e.taste+'</td>'
-      + '<td class="taste-cell memo-cell" title="'+escHtml(e.memo||'')+'">'+escHtml(truncate(e.memo||'', 8))+'</td>'
-      + '<td style="white-space:nowrap;"><button class="view-btn" data-id="'+e.id+'" style="background:none;border:none;color:var(--cream);font-size:13px;cursor:pointer;padding:2px 6px;">🔍</button><button class="edit-btn" data-id="'+e.id+'" style="background:none;border:none;color:var(--brass);font-size:14px;cursor:pointer;padding:2px 6px;">✎</button><button class="del-btn" data-id="'+e.id+'">×</button></td>'
-      + '</tr>';
+    const cupBadge = e.dosingCup ? ' · <span class="ec-cup">🥄 도징컵</span>' : '';
+    const extras = [];
+    if(water > 0) extras.push('물 '+water+'ml');
+    if(milk > 0) extras.push('우유 '+milk+'ml');
+    const memoStr = e.memo ? ' · '+escHtml(truncate(e.memo, 20)) : '';
+    html += '<div class="entry-card" data-id="'+e.id+'">'
+      + '<div class="ec-top">'
+      +   '<span class="ec-date">'+dateStr+'</span>'
+      +   '<div class="ec-actions"><button class="edit-btn" data-id="'+e.id+'">✎</button><button class="del-btn" data-id="'+e.id+'">×</button></div>'
+      + '</div>'
+      + '<div class="ec-line1">'+escHtml(e.coffeeType)+' · '+escHtml(e.bean)+'</div>'
+      + '<div class="ec-line2">분쇄도 '+e.grind+' · 도징 '+Number(e.dose).toFixed(1)+'g'+cupBadge+' · 탬핑 '+e.tamp+'회 · 추출 '+e.time+'초 · 추출량 '+Number(e.yieldMl).toFixed(1)+'ml · 비율 '+ratio+(extras.length ? ' · '+extras.join(' · ') : '')+'</div>'
+      + '<div class="ec-line3">'+escHtml(e.taste)+memoStr+'</div>'
+      + '</div>';
   });
-  html += '</tbody></table></div>';
+  html += '</div>';
   container.innerHTML = html;
 
-  container.querySelectorAll('.view-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const entry = entries.find(e=> e.id === btn.dataset.id);
+  container.querySelectorAll('.entry-card').forEach(card=>{
+    card.addEventListener('click', (ev)=>{
+      if(ev.target.closest('button')) return;
+      const entry = entries.find(e=> e.id === card.dataset.id);
       if(entry) openDetail(entry);
     });
   });
@@ -975,23 +1159,20 @@ function renderTable(){
       renderTable();
     });
   });
-  container.querySelectorAll('th[data-col]').forEach(th=>{
-    th.addEventListener('click', ()=>{
-      const col = th.dataset.col;
-      if(sortState.col === col) sortState.dir = sortState.dir==='asc' ? 'desc' : 'asc';
-      else { sortState.col = col; sortState.dir = 'desc'; }
-      renderTable();
-    });
-  });
 }
 document.getElementById('filter-coffeeType').addEventListener('change', renderTable);
 document.getElementById('filter-bean').addEventListener('change', renderTable);
 document.getElementById('filter-taste').addEventListener('change', renderTable);
+document.getElementById('sortSelect').addEventListener('change', (ev)=>{
+  const [col, dir] = ev.target.value.split('-');
+  sortState = { col, dir };
+  renderTable();
+});
 
 // ---------- settings ----------
 function renderChips(){
   renderChipGroup('coffeeType');
-  renderChipGroup('bean');
+  renderBeanChips();
   renderChipGroup('taste');
 }
 function renderChipGroup(key){
@@ -1018,6 +1199,70 @@ function renderChipGroup(key){
     });
   });
 }
+function renderBeanChips(){
+  const box = document.getElementById('chips-bean');
+  box.innerHTML = '';
+  options.bean.forEach(b=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (editingBeanName === b.name ? ' editing' : '');
+    const span = document.createElement('span');
+    span.textContent = b.name;
+    span.style.cursor = 'pointer';
+    span.addEventListener('click', ()=> startEditBean(b));
+    chip.appendChild(span);
+    if(b.roastDate){
+      const meta = document.createElement('span');
+      meta.className = 'chip-meta';
+      meta.textContent = formatDateShort(b.roastDate);
+      chip.appendChild(meta);
+    }
+    const btn = document.createElement('button');
+    btn.textContent = '×';
+    btn.addEventListener('click', ()=>{
+      options.bean = options.bean.filter(x=> x.name !== b.name);
+      if(editingBeanName === b.name) cancelEditBean();
+      saveOptions();
+      renderChips(); renderDropdowns();
+    });
+    chip.appendChild(btn);
+    box.appendChild(chip);
+  });
+}
+function startEditBean(b){
+  editingBeanName = b.name;
+  document.getElementById('add-bean-name').value = b.name;
+  document.getElementById('add-bean-roast').value = b.roastDate || '';
+  document.getElementById('add-bean-purchase').value = b.purchaseDate || '';
+  document.getElementById('addBeanBtn').textContent = '수정 완료';
+  renderBeanChips();
+}
+function cancelEditBean(){
+  editingBeanName = null;
+  document.getElementById('add-bean-name').value = '';
+  document.getElementById('add-bean-roast').value = '';
+  document.getElementById('add-bean-purchase').value = '';
+  document.getElementById('addBeanBtn').textContent = '추가';
+}
+document.getElementById('addBeanBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('add-bean-name').value.trim();
+  const roastDate = document.getElementById('add-bean-roast').value;
+  const purchaseDate = document.getElementById('add-bean-purchase').value;
+  if(!name) return;
+  if(editingBeanName){
+    const b = options.bean.find(x=> x.name === editingBeanName);
+    if(b){ b.name = name; b.roastDate = roastDate; b.purchaseDate = purchaseDate; }
+    cancelEditBean();
+  } else {
+    if(!options.bean.some(b=> b.name === name)){
+      options.bean.push({ name, roastDate, purchaseDate });
+    }
+    document.getElementById('add-bean-name').value = '';
+    document.getElementById('add-bean-roast').value = '';
+    document.getElementById('add-bean-purchase').value = '';
+  }
+  saveOptions();
+  renderChips(); renderDropdowns();
+});
 document.querySelectorAll('.add-row button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const key = btn.dataset.target;
@@ -1057,7 +1302,7 @@ document.getElementById('importFile').addEventListener('change', (ev)=>{
   reader.onload = () => {
     try{
       const data = JSON.parse(reader.result);
-      if(data.options) options = data.options;
+      if(data.options) options = normalizeOptions(data.options);
       if(data.entries) entries = data.entries;
       saveOptions();
       saveEntries();
@@ -1079,6 +1324,9 @@ document.getElementById('importFile').addEventListener('change', (ev)=>{
   renderDropdowns();
   renderChips();
   initPickers();
+  updateDosingCupBtn();
+  enableManualEntry('pk-dose', 10, 30, 0.1);
+  enableManualEntry('pk-yield', 0, 120, 0.1);
 })();
 
 if('serviceWorker' in navigator){
