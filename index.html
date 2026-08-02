@@ -174,6 +174,16 @@
     border-color: var(--brass);
     color: #fff;
   }
+  .tool-group{ margin-bottom: 9px; }
+  .tool-group:last-child{ margin-bottom: 0; }
+  .tool-group-label{
+    display:block;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--brass-dim);
+    margin-bottom: 5px;
+  }
 
   .picker-grid{
     display:grid;
@@ -188,11 +198,12 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    gap: 6px;
+    flex-wrap: wrap;
+    gap: 5px;
     margin-bottom: 6px;
   }
   .pk-label-row .pk-label{ margin-bottom:0; }
-  .manual-btn{
+  .manual-btn, .zero-btn, .glass-btn{
     background:none;
     border:none;
     color: var(--brass);
@@ -200,8 +211,25 @@
     font-weight: 700;
     cursor:pointer;
     padding:0;
-    text-decoration: underline;
     white-space: nowrap;
+  }
+  .manual-btn{ text-decoration: underline; }
+  .zero-btn{
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1px 5px;
+    color: var(--muted);
+  }
+  .glass-btn{
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1px 6px;
+    color: var(--muted);
+  }
+  .glass-btn.on{
+    background: var(--brass);
+    border-color: var(--brass);
+    color: #fff;
   }
   .manual-input{
     width:100%;
@@ -222,24 +250,6 @@
     color: var(--brass);
     margin-top: 4px;
     min-height: 14px;
-  }
-  .weight-toggle{
-    width:100%;
-    background: var(--surface-2);
-    border: 1px solid var(--line);
-    color: var(--muted);
-    font-family:'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 12.5px;
-    padding: 9px;
-    border-radius: 10px;
-    cursor:pointer;
-    margin-bottom: 14px;
-  }
-  .weight-toggle.on{
-    background: var(--brass);
-    border-color: var(--brass);
-    color: #fff;
   }
 
   .picker{
@@ -475,6 +485,7 @@
   td .row-actions .del-btn{ color: var(--danger); }
 
   .chip-list{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 12px; }
+  .chip-list:empty{ margin-bottom: 0; }
   .chip{
     display:flex; align-items:center; gap:6px;
     background: var(--surface-2);
@@ -512,6 +523,24 @@
     border-radius: 10px;
     cursor:pointer;
     white-space:nowrap;
+  }
+  .tool-cat{
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: rgba(239,231,217,0.4);
+  }
+  .tool-cat-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 9px; }
+  .tool-cat-name{
+    font-family:'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--cream);
+  }
+  .tool-cat-head .cat-del{
+    background:none; border:none; color: var(--danger);
+    font-size: 16px; cursor:pointer; line-height:1; padding:0 4px;
   }
   .stack-input{
     display:block;
@@ -600,7 +629,11 @@
       </div>
       <div class="field">
         <label>도구 <span style="color:var(--muted); font-weight:400;">(복수 선택 가능)</span></label>
-        <div class="pick-chips" id="toolChips"></div>
+        <div id="toolChips"></div>
+      </div>
+      <div class="field">
+        <label>측정 상태 <span style="color:var(--muted); font-weight:400;">(도징량을 어떤 상태로 쟀는지)</span></label>
+        <div class="pick-chips" id="measureChips"></div>
       </div>
       <div class="picker-grid cols-3">
         <div class="pk-cell">
@@ -620,7 +653,6 @@
           <div class="picker" id="pk-tamp"><div class="picker-window"></div></div>
         </div>
       </div>
-      <button type="button" class="weight-toggle" id="doseWeightToggle" style="display:none;">도징컵 무게 포함 안 함</button>
     </div>
 
     <div class="card">
@@ -634,17 +666,18 @@
           <div class="pk-label-row">
             <span class="pk-label">추출량 (ml)</span>
             <button type="button" class="manual-btn" data-picker="pk-yield">직접입력</button>
+            <button type="button" class="glass-btn" id="yieldGlassBtn" style="display:none;">잔포함</button>
           </div>
           <div class="picker" id="pk-yield"><div class="picker-window"></div></div>
           <div class="net-hint" id="yieldNetHint"></div>
         </div>
       </div>
-      <button type="button" class="weight-toggle" id="yieldWeightToggle" style="display:none;">샷잔 무게 포함 안 함</button>
       <div class="picker-grid cols-2">
         <div class="pk-cell">
           <div class="pk-label-row">
             <span class="pk-label">물 (ml)</span>
             <button type="button" class="manual-btn" data-picker="pk-water">직접입력</button>
+            <button type="button" class="zero-btn" data-picker="pk-water" title="안 넣음">✕</button>
           </div>
           <div class="picker" id="pk-water"><div class="picker-window"></div></div>
         </div>
@@ -652,6 +685,7 @@
           <div class="pk-label-row">
             <span class="pk-label">우유 (ml)</span>
             <button type="button" class="manual-btn" data-picker="pk-milk">직접입력</button>
+            <button type="button" class="zero-btn" data-picker="pk-milk" title="안 넣음">✕</button>
           </div>
           <div class="picker" id="pk-milk"><div class="picker-window"></div></div>
         </div>
@@ -770,11 +804,11 @@
 
     <div class="card">
       <p class="card-title">도구 <span style="color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0;">(이름 탭하면 수정)</span></p>
-      <div class="chip-list" id="chips-tools"></div>
-      <input type="text" id="add-tool-name" class="stack-input" placeholder="도구 이름 예: 도징컵">
-      <label class="stack-label">무게 (g) — 없으면 비워두세요</label>
-      <input type="number" step="0.1" id="add-tool-weight" class="stack-input" placeholder="예: 142">
-      <button class="btn-primary" id="addToolBtn" style="padding:11px;">추가</button>
+      <div id="toolCategoryList"></div>
+      <div class="add-row">
+        <input type="text" id="add-toolCategory" placeholder="새 도구 분류 예: 디스트리뷰터">
+        <button id="addToolCategoryBtn">분류 추가</button>
+      </div>
     </div>
 
     <div class="card">
@@ -817,38 +851,60 @@ const DEFAULT_OPTIONS = {
     { name: '테라로사 예가체프 아리차', roastDate: '', openDate: '' },
     { name: '폴바셋', roastDate: '', openDate: '' }
   ],
-  tools: [
-    { name: '포터필터', weight: 0 },
-    { name: '침칠봉', weight: 0 },
-    { name: '도징컵', weight: 0 },
-    { name: '레벨링툴', weight: 0 },
-    { name: '샷잔', weight: 0 }
+  toolCategories: [
+    { name: '포터필터', items: [] },
+    { name: '침칠봉', items: [] },
+    { name: '도징컵', items: [] },
+    { name: '레벨링툴', items: [] },
+    { name: '샷잔', items: [] }
   ],
   taste: ['평가 전','밸런스 좋음','산미 강함','쓴맛 강함','싱거움','탄맛'],
   memoKeywords: ['크레마 좋음','채널링','과소추출','과다추출']
 };
 
-// 도징컵/샷잔 무게를 포함해 입력할 때 기준이 되는 순수 값
 const DOSE_BASE = 18;
 const YIELD_BASE = 36;
-const DOSE_TOOL = '도징컵';
-const YIELD_TOOL = '샷잔';
+const YIELD_CAT = '샷잔';
+const TARE = '영점';
 
 let options = JSON.parse(JSON.stringify(DEFAULT_OPTIONS));
 let entries = [];
 let sortState = { col: 'ts', dir: 'desc' };
 let editingId = null;
 let editingBeanName = null;
-let editingToolName = null;
+let editingToolRef = null;       // { catIdx, name }
 let selectedTools = [];
 let selectedKeywords = [];
-let doseIncludesCup = false;
+let measureState = TARE;         // '영점' 또는 선택한 도구 이름
 let yieldIncludesGlass = false;
 let intensity = { acidity: 0, bitterness: 0, aroma: 0 };
 let starRating = 0;
 let viewMode = 'card';
 
 // ---------- options helpers ----------
+function normalizeToolCategories(opts){
+  if(Array.isArray(opts.toolCategories) && opts.toolCategories.length){
+    return opts.toolCategories.map(c=> ({
+      name: c.name,
+      items: Array.isArray(c.items)
+        ? c.items.map(i=> ({ name: i.name, weight: Number(i.weight) || 0 }))
+        : []
+    }));
+  }
+  // 예전 평면 구조(tools: [{name, weight}])를 분류 구조로 옮긴다
+  const cats = JSON.parse(JSON.stringify(DEFAULT_OPTIONS.toolCategories));
+  if(Array.isArray(opts.tools)){
+    opts.tools.forEach(t=>{
+      const name = typeof t === 'string' ? t : t.name;
+      const weight = typeof t === 'string' ? 0 : (Number(t.weight) || 0);
+      if(!name) return;
+      let cat = cats.find(c=> c.name === name);
+      if(!cat){ cat = { name, items: [] }; cats.push(cat); }
+      if(weight > 0) cat.items.push({ name, weight });
+    });
+  }
+  return cats;
+}
 function normalizeOptions(opts){
   if(!opts || typeof opts !== 'object') return JSON.parse(JSON.stringify(DEFAULT_OPTIONS));
   const taste = Array.isArray(opts.taste) ? opts.taste.slice() : DEFAULT_OPTIONS.taste.slice();
@@ -860,19 +916,41 @@ function normalizeOptions(opts){
         ? { name: b, roastDate: '', openDate: '' }
         : { name: b.name, roastDate: b.roastDate || '', openDate: b.openDate || b.purchaseDate || '' }
     ) : [],
-    tools: (Array.isArray(opts.tools) && opts.tools.length)
-      ? opts.tools.map(t=> typeof t === 'string' ? { name: t, weight: 0 } : { name: t.name, weight: Number(t.weight) || 0 })
-      : JSON.parse(JSON.stringify(DEFAULT_OPTIONS.tools)),
+    toolCategories: normalizeToolCategories(opts),
     taste: taste,
     memoKeywords: Array.isArray(opts.memoKeywords) ? opts.memoKeywords : DEFAULT_OPTIONS.memoKeywords.slice()
   };
 }
 function beanNames(){ return options.bean.map(b=> b.name); }
 function findBean(name){ return options.bean.find(b=> b.name === name); }
-function findTool(name){ return options.tools.find(t=> t.name === name); }
+// 분류에 등록된 도구가 없으면 분류 이름 자체를 하나의 도구로 취급한다
+function categoryTools(cat){
+  return cat.items.length ? cat.items : [{ name: cat.name, weight: 0 }];
+}
+function findToolItem(name){
+  for(const cat of options.toolCategories){
+    const item = categoryTools(cat).find(t=> t.name === name);
+    if(item) return { item, category: cat.name };
+  }
+  return null;
+}
 function toolWeight(name){
-  const t = findTool(name);
-  return t ? (Number(t.weight) || 0) : 0;
+  const found = findToolItem(name);
+  return found ? (Number(found.item.weight) || 0) : 0;
+}
+function toolCategoryOf(name){
+  const found = findToolItem(name);
+  return found ? found.category : null;
+}
+// 선택한 도구 중 샷잔 분류에 속한 것의 무게
+function selectedGlassWeight(){
+  for(const n of selectedTools){
+    if(toolCategoryOf(n) === YIELD_CAT){
+      const w = toolWeight(n);
+      if(w > 0) return w;
+    }
+  }
+  return 0;
 }
 function formatDateShort(iso){
   const parts = String(iso).split('-');
@@ -938,7 +1016,7 @@ window.startCloudSync = function(fb){
       storageSet('coffee-options', JSON.stringify(options));
       renderDropdowns();
       renderChips();
-      renderToolChips();
+      refreshToolUI();
       renderKeywordChips();
     } else {
       fb.setDoc(optionsRef, { value: JSON.stringify(options) }).catch(()=>{});
@@ -1073,7 +1151,7 @@ function setupPicker(id, cfg){
 }
 
 function initPickers(){
-  setupPicker('pk-grind', { min:1, max:40, step:1, value:11, onChange: updateRatio });
+  setupPicker('pk-grind', { min:1, max:40, step:1, value:11 });
   setupPicker('pk-tamp', { min:0, max:10, step:1, value:2 });
   setupPicker('pk-time', { min:0, max:90, step:1, value:30 });
   setupPicker('pk-water', { min:0, max:400, step:5, value:160 });
@@ -1082,88 +1160,107 @@ function initPickers(){
   buildYieldPicker(YIELD_BASE);
 }
 
-// ---------- 도징컵/샷잔 무게 포함 처리 ----------
+// ---------- 측정 상태 / 도구 무게 보정 ----------
+function measureWeight(){
+  return measureState === TARE ? 0 : toolWeight(measureState);
+}
 function buildDosePicker(net){
-  const cupW = doseIncludesCup ? toolWeight(DOSE_TOOL) : 0;
-  const min = doseIncludesCup ? cupW : 10;
-  const max = doseIncludesCup ? cupW + 60 : 30;
+  const w = measureWeight();
+  const min = w > 0 ? w : 10;
+  const max = w > 0 ? w + 60 : 30;
   setupPicker('pk-dose', {
     min, max, step: 0.1,
-    value: +(net + cupW).toFixed(1),
+    value: +(net + w).toFixed(1),
     onChange: ()=>{ updateRatio(); updateNetHints(); }
   });
   updateNetHints();
 }
+function glassWeight(){
+  return yieldIncludesGlass ? selectedGlassWeight() : 0;
+}
 function buildYieldPicker(net){
-  const glassW = yieldIncludesGlass ? toolWeight(YIELD_TOOL) : 0;
-  const min = yieldIncludesGlass ? glassW : 0;
-  const max = yieldIncludesGlass ? glassW + 150 : 120;
+  const w = glassWeight();
+  const min = w > 0 ? w : 0;
+  const max = w > 0 ? w + 150 : 120;
   setupPicker('pk-yield', {
     min, max, step: 0.1,
-    value: +(net + glassW).toFixed(1),
+    value: +(net + w).toFixed(1),
     onChange: ()=>{ updateRatio(); updateNetHints(); }
   });
   updateNetHints();
 }
 function getNetDose(){
   if(!pickers['pk-dose']) return DOSE_BASE;
-  const raw = pickers['pk-dose'].getValue();
-  return +(raw - (doseIncludesCup ? toolWeight(DOSE_TOOL) : 0)).toFixed(1);
+  return +(pickers['pk-dose'].getValue() - measureWeight()).toFixed(1);
 }
 function getNetYield(){
   if(!pickers['pk-yield']) return YIELD_BASE;
-  const raw = pickers['pk-yield'].getValue();
-  return +(raw - (yieldIncludesGlass ? toolWeight(YIELD_TOOL) : 0)).toFixed(1);
+  return +(pickers['pk-yield'].getValue() - glassWeight()).toFixed(1);
 }
 function updateNetHints(){
   document.getElementById('doseNetHint').textContent =
-    doseIncludesCup ? '실제 '+getNetDose().toFixed(1)+' g' : '';
+    measureWeight() > 0 ? '실제 '+getNetDose().toFixed(1)+' g' : '';
   document.getElementById('yieldNetHint').textContent =
-    yieldIncludesGlass ? '실제 '+getNetYield().toFixed(1)+' ml' : '';
+    glassWeight() > 0 ? '실제 '+getNetYield().toFixed(1)+' ml' : '';
 }
-function updateWeightToggleBtns(){
-  const dBtn = document.getElementById('doseWeightToggle');
-  dBtn.classList.toggle('on', doseIncludesCup);
-  dBtn.textContent = doseIncludesCup
-    ? '도징컵 무게 포함 ✓ ('+toolWeight(DOSE_TOOL).toFixed(1)+'g 제외)'
-    : '도징컵 무게 포함 안 함';
-  const yBtn = document.getElementById('yieldWeightToggle');
-  yBtn.classList.toggle('on', yieldIncludesGlass);
-  yBtn.textContent = yieldIncludesGlass
-    ? '샷잔 무게 포함 ✓ ('+toolWeight(YIELD_TOOL).toFixed(1)+'g 제외)'
-    : '샷잔 무게 포함 안 함';
+function renderMeasureChips(){
+  const box = document.getElementById('measureChips');
+  box.innerHTML = '';
+  const choices = [TARE].concat(selectedTools);
+  if(!choices.includes(measureState)) measureState = TARE;
+  choices.forEach(name=>{
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'pick-chip' + (measureState === name ? ' on' : '');
+    if(name === TARE){
+      chip.textContent = '영점';
+    } else {
+      const w = toolWeight(name);
+      chip.textContent = w > 0 ? name+' 포함 ('+w+'g)' : name+' 포함';
+    }
+    chip.addEventListener('click', ()=>{
+      if(measureState === name) return;
+      const net = getNetDose();
+      measureState = name;
+      renderMeasureChips();
+      buildDosePicker(net);
+      updateRatio();
+    });
+    box.appendChild(chip);
+  });
 }
-// 도구 선택이 바뀌면 무게 포함 버튼을 보이거나 감춘다.
-function syncWeightToggles(){
-  const cupSel = selectedTools.includes(DOSE_TOOL);
-  document.getElementById('doseWeightToggle').style.display = cupSel ? '' : 'none';
-  if(!cupSel && doseIncludesCup){
-    const net = getNetDose();
-    doseIncludesCup = false;
-    buildDosePicker(net);
+function updateYieldGlassBtn(){
+  const btn = document.getElementById('yieldGlassBtn');
+  btn.classList.toggle('on', yieldIncludesGlass);
+  btn.textContent = yieldIncludesGlass ? '잔포함 ✓' : '잔포함';
+}
+// 도구 선택이 바뀌면 측정 상태와 잔포함 버튼을 다시 맞춘다
+function syncToolDependents(){
+  const prevMeasure = measureState;
+  const netDose = getNetDose();
+  renderMeasureChips();                       // 선택이 풀렸으면 영점으로 되돌린다
+  if(measureState !== prevMeasure) buildDosePicker(netDose);
+
+  const btn = document.getElementById('yieldGlassBtn');
+  if(selectedGlassWeight() > 0){
+    btn.style.display = '';
+  } else {
+    btn.style.display = 'none';
+    if(yieldIncludesGlass){
+      const netYield = getNetYield();
+      yieldIncludesGlass = false;
+      buildYieldPicker(netYield);
+    }
   }
-  const glassSel = selectedTools.includes(YIELD_TOOL);
-  document.getElementById('yieldWeightToggle').style.display = glassSel ? '' : 'none';
-  if(!glassSel && yieldIncludesGlass){
-    const net = getNetYield();
-    yieldIncludesGlass = false;
-    buildYieldPicker(net);
-  }
-  updateWeightToggleBtns();
+  updateYieldGlassBtn();
   updateNetHints();
-}
-document.getElementById('doseWeightToggle').addEventListener('click', ()=>{
-  const net = getNetDose();
-  doseIncludesCup = !doseIncludesCup;
-  buildDosePicker(net);
-  updateWeightToggleBtns();
   updateRatio();
-});
-document.getElementById('yieldWeightToggle').addEventListener('click', ()=>{
+}
+document.getElementById('yieldGlassBtn').addEventListener('click', ()=>{
   const net = getNetYield();
   yieldIncludesGlass = !yieldIncludesGlass;
   buildYieldPicker(net);
-  updateWeightToggleBtns();
+  updateYieldGlassBtn();
   updateRatio();
 });
 
@@ -1178,7 +1275,7 @@ function updateRatio(){
   }
 }
 
-// ---------- 직접입력 ----------
+// ---------- 직접입력 / 안넣음 ----------
 function enableManualEntry(pickerId){
   const btn = document.querySelector('.manual-btn[data-picker="'+pickerId+'"]');
   if(!btn) return;
@@ -1210,6 +1307,16 @@ function enableManualEntry(pickerId){
     }
     input.addEventListener('blur', commit);
     input.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); input.blur(); } });
+  });
+}
+function enableZeroBtn(pickerId){
+  const btn = document.querySelector('.zero-btn[data-picker="'+pickerId+'"]');
+  if(!btn) return;
+  btn.addEventListener('click', ()=>{
+    const cfg = pickerCfg[pickerId];
+    if(!cfg) return;
+    setupPicker(pickerId, { min: cfg.min, max: cfg.max, step: cfg.step, value: 0, onChange: cfg.onChange });
+    cfg.onChange(0);
   });
 }
 
@@ -1253,22 +1360,34 @@ document.getElementById('star-rating').addEventListener('click', (ev)=>{
   renderStar();
 });
 
-// ---------- 도구 / 키워드 선택 칩 ----------
+// ---------- 입력탭 도구 / 키워드 칩 ----------
 function renderToolChips(){
   const box = document.getElementById('toolChips');
   box.innerHTML = '';
-  options.tools.forEach(t=>{
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'pick-chip' + (selectedTools.includes(t.name) ? ' on' : '');
-    chip.textContent = t.weight ? t.name+' ('+t.weight+'g)' : t.name;
-    chip.addEventListener('click', ()=>{
-      if(selectedTools.includes(t.name)) selectedTools = selectedTools.filter(n=> n!==t.name);
-      else selectedTools.push(t.name);
-      renderToolChips();
-      syncWeightToggles();
+  options.toolCategories.forEach(cat=>{
+    const group = document.createElement('div');
+    group.className = 'tool-group';
+    const label = document.createElement('span');
+    label.className = 'tool-group-label';
+    label.textContent = cat.name;
+    group.appendChild(label);
+    const chips = document.createElement('div');
+    chips.className = 'pick-chips';
+    categoryTools(cat).forEach(t=>{
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'pick-chip' + (selectedTools.includes(t.name) ? ' on' : '');
+      chip.textContent = t.name;   // 무게는 표시하지 않는다
+      chip.addEventListener('click', ()=>{
+        if(selectedTools.includes(t.name)) selectedTools = selectedTools.filter(n=> n!==t.name);
+        else selectedTools.push(t.name);
+        renderToolChips();
+        syncToolDependents();
+      });
+      chips.appendChild(chip);
     });
-    box.appendChild(chip);
+    group.appendChild(chips);
+    box.appendChild(group);
   });
 }
 function renderKeywordChips(){
@@ -1354,15 +1473,17 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
     beanOpenDate: beanObj ? beanObj.openDate : '',
     daysSinceRoast: (beanObj && beanObj.roastDate) ? daysBetween(beanObj.roastDate, brewDate) : null,
     tools: selectedTools.slice(),
+    measureState: measureState,
+    measureWeight: measureWeight(),
     grind: pickers['pk-grind'].getValue(),
     dose: getNetDose(),
     doseGross: pickers['pk-dose'].getValue(),
-    doseIncludesCup: doseIncludesCup,
     tamp: pickers['pk-tamp'].getValue(),
     time: pickers['pk-time'].getValue(),
     yieldMl: getNetYield(),
     yieldGross: pickers['pk-yield'].getValue(),
     yieldIncludesGlass: yieldIncludesGlass,
+    yieldGlassWeight: glassWeight(),
     water: pickers['pk-water'].getValue(),
     milk: pickers['pk-milk'].getValue(),
     taste: document.getElementById('sel-taste').value,
@@ -1410,7 +1531,7 @@ function getDatetimeValue(){
 // ---------- 옛 기록 호환 ----------
 function entryTools(e){
   if(Array.isArray(e.tools)) return e.tools;
-  return e.dosingCup ? [DOSE_TOOL] : [];
+  return e.dosingCup ? ['도징컵'] : [];
 }
 function entryRating(e){
   if(e.rating != null) return e.rating;
@@ -1440,13 +1561,14 @@ function openDetail(e){
   if(openDate) rows.push(['개봉일자', formatDateShort(openDate)]);
   if(e.daysSinceRoast != null) rows.push(['로스팅 후', (e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일']);
   if(tools.length) rows.push(['도구', tools.join(', ')]);
+  if(e.measureState) rows.push(['측정 상태', e.measureState]);
   rows.push(['분쇄도', e.grind]);
   rows.push(['도징량', Number(e.dose).toFixed(1)+' g']);
-  if(e.doseIncludesCup) rows.push(['도징 입력값', Number(e.doseGross).toFixed(1)+' g (컵 포함)']);
+  if(e.measureWeight > 0) rows.push(['저울 표시값', Number(e.doseGross).toFixed(1)+' g']);
   rows.push(['탬핑', e.tamp+' 회']);
   rows.push(['추출시간', e.time+' 초']);
   rows.push(['추출량', Number(e.yieldMl).toFixed(1)+' ml']);
-  if(e.yieldIncludesGlass) rows.push(['추출 입력값', Number(e.yieldGross).toFixed(1)+' ml (잔 포함)']);
+  if(e.yieldIncludesGlass) rows.push(['잔 포함 표시값', Number(e.yieldGross).toFixed(1)+' ml']);
   rows.push(['비율', ratio]);
   rows.push(['물', water+' ml']);
   rows.push(['우유', milk+' ml']);
@@ -1503,16 +1625,16 @@ function enterEditMode(entry){
 
   selectedTools = entryTools(entry).slice();
   renderToolChips();
-  doseIncludesCup = !!entry.doseIncludesCup;
+  measureState = entry.measureState || TARE;
   yieldIncludesGlass = !!entry.yieldIncludesGlass;
-  document.getElementById('doseWeightToggle').style.display = selectedTools.includes(DOSE_TOOL) ? '' : 'none';
-  document.getElementById('yieldWeightToggle').style.display = selectedTools.includes(YIELD_TOOL) ? '' : 'none';
-  updateWeightToggleBtns();
+  renderMeasureChips();
+  document.getElementById('yieldGlassBtn').style.display = selectedGlassWeight() > 0 ? '' : 'none';
+  updateYieldGlassBtn();
 
   selectedKeywords = Array.isArray(entry.keywords) ? entry.keywords.slice() : [];
   renderKeywordChips();
 
-  setupPicker('pk-grind', { min:1, max:40, step:1, value:entry.grind, onChange: updateRatio });
+  setupPicker('pk-grind', { min:1, max:40, step:1, value:entry.grind });
   setupPicker('pk-tamp', { min:0, max:10, step:1, value:entry.tamp });
   setupPicker('pk-time', { min:0, max:90, step:1, value:entry.time });
   setupPicker('pk-water', { min:0, max:400, step:5, value: entry.water != null ? entry.water : (entry.liquid || 0) });
@@ -1552,7 +1674,7 @@ function exitEditMode(){
   renderKeywordChips();
   renderAllIntensity();
   renderStar();
-  syncWeightToggles();
+  syncToolDependents();
   updateBeanInfo();
 }
 document.getElementById('cancelEditBtn').addEventListener('click', exitEditMode);
@@ -1566,18 +1688,21 @@ document.getElementById('loadRecipeBtn').addEventListener('click', ()=>{
   updateBeanInfo();
   selectedTools = entryTools(last).slice();
   renderToolChips();
-  doseIncludesCup = !!last.doseIncludesCup;
-  document.getElementById('doseWeightToggle').style.display = selectedTools.includes(DOSE_TOOL) ? '' : 'none';
-  document.getElementById('yieldWeightToggle').style.display = selectedTools.includes(YIELD_TOOL) ? '' : 'none';
-  updateWeightToggleBtns();
-  setupPicker('pk-grind', { min:1, max:40, step:1, value:last.grind, onChange: updateRatio });
+  measureState = last.measureState || TARE;
+  renderMeasureChips();
+  setupPicker('pk-grind', { min:1, max:40, step:1, value:last.grind });
   setupPicker('pk-tamp', { min:0, max:10, step:1, value:last.tamp });
   buildDosePicker(last.dose);
+  document.getElementById('yieldGlassBtn').style.display = selectedGlassWeight() > 0 ? '' : 'none';
+  updateYieldGlassBtn();
   updateRatio();
   showToast('이전 레시피를 불러왔어요');
 });
 document.getElementById('resetBtn').addEventListener('click', ()=>{
   exitEditMode();
+  measureState = TARE;
+  yieldIncludesGlass = false;
+  renderMeasureChips();
   initPickers();
   document.getElementById('sel-coffeeType').selectedIndex = 0;
   document.getElementById('sel-bean').selectedIndex = 0;
@@ -1759,7 +1884,7 @@ document.querySelectorAll('.viewmode-btn').forEach(btn=>{
 });
 
 // ---------- 설정: 꾹 눌러 순서 바꾸기 ----------
-function enableReorder(box, key){
+function enableReorder(box, applyOrder){
   let dragEl = null, timer = null, dragging = false, startX = 0, startY = 0;
   function cleanup(){
     clearTimeout(timer);
@@ -1798,14 +1923,8 @@ function enableReorder(box, key){
     chip.addEventListener('pointerup', ()=>{
       if(dragging){
         const order = Array.from(box.children).map(c=> parseInt(c.dataset.idx, 10));
-        const list = options[key];
-        options[key] = order.map(i=> list[i]);
         cleanup();
-        saveOptions();
-        renderChips();
-        renderDropdowns();
-        renderToolChips();
-        renderKeywordChips();
+        applyOrder(order);
         showToast('순서를 바꿨어요');
         return;
       }
@@ -1816,12 +1935,16 @@ function enableReorder(box, key){
 }
 
 // ---------- settings ----------
+function refreshToolUI(){
+  renderToolCategories();
+  renderToolChips();
+  syncToolDependents();
+}
 function renderChips(){
   renderChipGroup('coffeeType');
   renderChipGroup('taste');
   renderChipGroup('memoKeywords');
   renderBeanChips();
-  renderToolSettingChips();
 }
 function renderChipGroup(key){
   const box = document.getElementById('chips-'+key);
@@ -1836,6 +1959,7 @@ function renderChipGroup(key){
     btn.textContent = '×';
     btn.addEventListener('click', ()=>{
       options[key] = options[key].filter(x=> x!==v);
+      if(key === 'memoKeywords') selectedKeywords = selectedKeywords.filter(x=> x!==v);
       saveOptions();
       renderChips(); renderDropdowns(); renderKeywordChips();
     });
@@ -1843,7 +1967,12 @@ function renderChipGroup(key){
     chip.appendChild(btn);
     box.appendChild(chip);
   });
-  enableReorder(box, key);
+  enableReorder(box, (order)=>{
+    const old = options[key].slice();
+    options[key] = order.map(i=> old[i]);
+    saveOptions();
+    renderChips(); renderDropdowns(); renderKeywordChips();
+  });
 }
 function renderBeanChips(){
   const box = document.getElementById('chips-bean');
@@ -1874,39 +2003,12 @@ function renderBeanChips(){
     chip.appendChild(btn);
     box.appendChild(chip);
   });
-  enableReorder(box, 'bean');
-}
-function renderToolSettingChips(){
-  const box = document.getElementById('chips-tools');
-  box.innerHTML = '';
-  options.tools.forEach((t, idx)=>{
-    const chip = document.createElement('div');
-    chip.className = 'chip' + (editingToolName === t.name ? ' editing' : '');
-    chip.dataset.idx = idx;
-    const span = document.createElement('span');
-    span.textContent = t.name;
-    span.style.cursor = 'pointer';
-    span.addEventListener('click', ()=> startEditTool(t));
-    chip.appendChild(span);
-    if(t.weight){
-      const meta = document.createElement('span');
-      meta.className = 'chip-meta';
-      meta.textContent = t.weight+'g';
-      chip.appendChild(meta);
-    }
-    const btn = document.createElement('button');
-    btn.textContent = '×';
-    btn.addEventListener('click', ()=>{
-      options.tools = options.tools.filter(x=> x.name !== t.name);
-      selectedTools = selectedTools.filter(n=> n !== t.name);
-      if(editingToolName === t.name) cancelEditTool();
-      saveOptions();
-      renderChips(); renderToolChips(); syncWeightToggles();
-    });
-    chip.appendChild(btn);
-    box.appendChild(chip);
+  enableReorder(box, (order)=>{
+    const old = options.bean.slice();
+    options.bean = order.map(i=> old[i]);
+    saveOptions();
+    renderChips(); renderDropdowns();
   });
-  enableReorder(box, 'tools');
 }
 function startEditBean(b){
   editingBeanName = b.name;
@@ -1943,47 +2045,142 @@ document.getElementById('addBeanBtn').addEventListener('click', ()=>{
   saveOptions();
   renderChips(); renderDropdowns();
 });
-function startEditTool(t){
-  editingToolName = t.name;
-  document.getElementById('add-tool-name').value = t.name;
-  document.getElementById('add-tool-weight').value = t.weight || '';
-  document.getElementById('addToolBtn').textContent = '수정 완료';
-  renderToolSettingChips();
+
+// ---------- settings: 도구 분류 ----------
+function renderToolCategories(){
+  const wrap = document.getElementById('toolCategoryList');
+  wrap.innerHTML = '';
+  options.toolCategories.forEach((cat, catIdx)=>{
+    const box = document.createElement('div');
+    box.className = 'tool-cat';
+
+    const head = document.createElement('div');
+    head.className = 'tool-cat-head';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'tool-cat-name';
+    nameEl.textContent = cat.name;
+    head.appendChild(nameEl);
+    const delCat = document.createElement('button');
+    delCat.className = 'cat-del';
+    delCat.textContent = '×';
+    delCat.addEventListener('click', ()=>{
+      const removed = categoryTools(cat).map(t=> t.name);
+      options.toolCategories.splice(catIdx, 1);
+      selectedTools = selectedTools.filter(n=> !removed.includes(n));
+      if(editingToolRef && editingToolRef.catIdx === catIdx) editingToolRef = null;
+      saveOptions();
+      refreshToolUI();
+    });
+    head.appendChild(delCat);
+    box.appendChild(head);
+
+    const chips = document.createElement('div');
+    chips.className = 'chip-list';
+    box.appendChild(chips);
+
+    const row = document.createElement('div');
+    row.className = 'add-row';
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.placeholder = cat.name + ' 이름';
+    const weightInput = document.createElement('input');
+    weightInput.type = 'number';
+    weightInput.step = '0.1';
+    weightInput.placeholder = 'g';
+    weightInput.style.maxWidth = '78px';
+    weightInput.style.flex = '0 0 auto';
+    const addBtn = document.createElement('button');
+    addBtn.textContent = '추가';
+    row.appendChild(nameInput);
+    row.appendChild(weightInput);
+    row.appendChild(addBtn);
+    box.appendChild(row);
+
+    cat.items.forEach((it, idx)=>{
+      const chip = document.createElement('div');
+      const isEditing = editingToolRef && editingToolRef.catIdx === catIdx && editingToolRef.name === it.name;
+      chip.className = 'chip' + (isEditing ? ' editing' : '');
+      chip.dataset.idx = idx;
+      const span = document.createElement('span');
+      span.textContent = it.name;
+      span.style.cursor = 'pointer';
+      span.addEventListener('click', ()=>{
+        editingToolRef = { catIdx, name: it.name };
+        nameInput.value = it.name;
+        weightInput.value = it.weight || '';
+        addBtn.textContent = '수정';
+        renderToolCategories();
+      });
+      chip.appendChild(span);
+      if(it.weight){
+        const meta = document.createElement('span');
+        meta.className = 'chip-meta';
+        meta.textContent = it.weight + 'g';
+        chip.appendChild(meta);
+      }
+      const del = document.createElement('button');
+      del.textContent = '×';
+      del.addEventListener('click', ()=>{
+        cat.items.splice(idx, 1);
+        selectedTools = selectedTools.filter(n=> n !== it.name);
+        if(isEditing) editingToolRef = null;
+        saveOptions();
+        refreshToolUI();
+      });
+      chip.appendChild(del);
+      chips.appendChild(chip);
+    });
+    enableReorder(chips, (order)=>{
+      const old = cat.items.slice();
+      cat.items = order.map(i=> old[i]);
+      saveOptions();
+      refreshToolUI();
+    });
+
+    addBtn.addEventListener('click', ()=>{
+      const nm = nameInput.value.trim();
+      const w = parseFloat(weightInput.value) || 0;
+      if(!nm) return;
+      if(editingToolRef && editingToolRef.catIdx === catIdx){
+        const target = cat.items.find(x=> x.name === editingToolRef.name);
+        if(target){
+          const oldName = target.name;
+          target.name = nm;
+          target.weight = w;
+          selectedTools = selectedTools.map(n=> n === oldName ? nm : n);
+          if(measureState === oldName) measureState = nm;
+        }
+        editingToolRef = null;
+      } else if(!cat.items.some(x=> x.name === nm)){
+        // 분류 이름으로 쓰이던 임시 도구가 선택돼 있었다면 첫 등록 시 선택을 옮긴다
+        if(cat.items.length === 0 && selectedTools.includes(cat.name)){
+          selectedTools = selectedTools.map(n=> n === cat.name ? nm : n);
+          if(measureState === cat.name) measureState = nm;
+        }
+        cat.items.push({ name: nm, weight: w });
+      }
+      nameInput.value = '';
+      weightInput.value = '';
+      saveOptions();
+      refreshToolUI();
+    });
+
+    wrap.appendChild(box);
+  });
 }
-function cancelEditTool(){
-  editingToolName = null;
-  document.getElementById('add-tool-name').value = '';
-  document.getElementById('add-tool-weight').value = '';
-  document.getElementById('addToolBtn').textContent = '추가';
-}
-document.getElementById('addToolBtn').addEventListener('click', ()=>{
-  const name = document.getElementById('add-tool-name').value.trim();
-  const weight = parseFloat(document.getElementById('add-tool-weight').value) || 0;
+document.getElementById('addToolCategoryBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('add-toolCategory');
+  const name = input.value.trim();
   if(!name) return;
-  if(editingToolName){
-    const t = options.tools.find(x=> x.name === editingToolName);
-    if(t){
-      const oldName = t.name;
-      t.name = name; t.weight = weight;
-      selectedTools = selectedTools.map(n=> n === oldName ? name : n);
-    }
-    cancelEditTool();
-  } else {
-    if(!options.tools.some(t=> t.name === name)){
-      options.tools.push({ name, weight });
-    }
-    document.getElementById('add-tool-name').value = '';
-    document.getElementById('add-tool-weight').value = '';
+  if(!options.toolCategories.some(c=> c.name === name)){
+    options.toolCategories.push({ name, items: [] });
   }
+  input.value = '';
   saveOptions();
-  renderChips();
-  renderToolChips();
-  // 무게가 바뀌었으면 픽커 범위를 다시 잡는다
-  if(doseIncludesCup) buildDosePicker(getNetDose());
-  if(yieldIncludesGlass) buildYieldPicker(getNetYield());
-  syncWeightToggles();
+  refreshToolUI();
 });
-document.querySelectorAll('.add-row button').forEach(btn=>{
+
+document.querySelectorAll('.add-row button[data-target]').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const key = btn.dataset.target;
     const input = document.getElementById('add-'+key);
@@ -2028,7 +2225,7 @@ document.getElementById('importFile').addEventListener('change', (ev)=>{
       saveEntries();
       renderDropdowns();
       renderChips();
-      renderToolChips();
+      refreshToolUI();
       renderKeywordChips();
       renderTable();
       showToast('가져왔어요');
@@ -2045,15 +2242,18 @@ document.getElementById('importFile').addEventListener('change', (ev)=>{
   loadAll();
   renderDropdowns();
   renderChips();
+  renderToolCategories();
   renderToolChips();
+  renderMeasureChips();
   renderKeywordChips();
   ['acidity','bitterness','aroma'].forEach(buildIntensityWidget);
   renderAllIntensity();
   renderStar();
   initPickers();
-  updateWeightToggleBtns();
+  updateYieldGlassBtn();
   updateRatio();
   ['pk-dose','pk-yield','pk-water','pk-milk'].forEach(enableManualEntry);
+  ['pk-water','pk-milk'].forEach(enableZeroBtn);
 })();
 
 if('serviceWorker' in navigator){
