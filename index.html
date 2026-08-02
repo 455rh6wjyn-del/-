@@ -434,6 +434,7 @@
   .ec-actions .del-btn{ color: var(--danger); }
   .ec-line1{ font-size:14px; font-weight:600; color:#241a12; margin-bottom:3px; }
   .ec-nickname{ color: var(--brass); }
+  .ec-roast{ font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:700; color: var(--brass-dim); }
   .ec-line2{ font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--muted); margin-bottom:3px; line-height:1.5; }
   .ec-line3{ font-size:12.5px; color:#241a12; line-height:1.5; }
   .ec-line3 .ec-rating{ color: var(--gold); font-weight:700; }
@@ -1779,7 +1780,6 @@ function renderCardView(container, rows){
     const ratio = e.dose>0 && e.yieldMl>0 ? '1:'+(e.yieldMl/e.dose).toFixed(1) : '—';
     const water = e.water != null ? e.water : (e.liquid || 0);
     const milk = e.milk != null ? e.milk : 0;
-    const tools = entryTools(e);
     const parts = [
       '분쇄도 '+e.grind,
       '도징 '+Number(e.dose).toFixed(1)+'g',
@@ -1790,11 +1790,12 @@ function renderCardView(container, rows){
     ];
     if(water > 0) parts.push('물 '+water+'ml');
     if(milk > 0) parts.push('우유 '+milk+'ml');
-    if(e.daysSinceRoast != null) parts.push('로스팅 '+(e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일');
-    if(tools.length) parts.push(escHtml(tools.join('·')));
     const rating = entryRating(e);
     const ratingStr = rating ? '<span class="ec-rating">★ '+rating.toFixed(1)+'</span> · ' : '';
     const nick = e.nickname ? '<span class="ec-nickname">'+escHtml(e.nickname)+'</span> · ' : '';
+    const roastAge = e.daysSinceRoast != null
+      ? ' <span class="ec-roast">로스팅 '+(e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일</span>'
+      : '';
     const kw = (e.keywords && e.keywords.length) ? ' · '+escHtml(e.keywords.join(' · ')) : '';
     const memoStr = e.memo ? ' · <span class="ec-memo">'+escHtml(truncate(e.memo, 20))+'</span>' : '';
     html += '<div class="entry-card" data-open-id="'+e.id+'">'
@@ -1802,7 +1803,7 @@ function renderCardView(container, rows){
       +   '<span class="ec-date">'+dateStr+'</span>'
       +   '<div class="ec-actions">'+actionButtonsHtml(e)+'</div>'
       + '</div>'
-      + '<div class="ec-line1">'+nick+escHtml(e.coffeeType)+' · '+escHtml(e.bean)+'</div>'
+      + '<div class="ec-line1">'+nick+escHtml(e.coffeeType)+' · '+escHtml(e.bean)+roastAge+'</div>'
       + '<div class="ec-line2">'+parts.join(' · ')+'</div>'
       + '<div class="ec-line3">'+ratingStr+escHtml(e.taste)+kw+memoStr+'</div>'
       + '</div>';
@@ -1812,7 +1813,7 @@ function renderCardView(container, rows){
   wireEntryButtons(container);
 }
 function renderListView(container, rows){
-  const cols = ['날짜','별칭','종류','원두','로스팅후','도구','분쇄도','도징(g)','탬핑','추출(초)','추출량(ml)','비율','별점','맛평가','메모'];
+  const cols = ['날짜','별칭','종류','원두','로스팅후','분쇄도','도징(g)','탬핑','추출(초)','추출량(ml)','비율','별점','맛평가','메모'];
   let html = '<div class="table-scroll"><table><thead><tr>';
   cols.forEach(c=> html += '<th>'+c+'</th>');
   html += '<th></th></tr></thead><tbody>';
@@ -1821,7 +1822,6 @@ function renderListView(container, rows){
     const dateStr = (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
     const ratio = e.dose>0 && e.yieldMl>0 ? '1:'+(e.yieldMl/e.dose).toFixed(1) : '—';
     const rating = entryRating(e);
-    const tools = entryTools(e);
     const roastAge = e.daysSinceRoast != null ? (e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일' : '—';
     html += '<tr data-open-id="'+e.id+'">'
       + '<td>'+dateStr+'</td>'
@@ -1829,7 +1829,6 @@ function renderListView(container, rows){
       + '<td>'+escHtml(e.coffeeType)+'</td>'
       + '<td>'+escHtml(e.bean)+'</td>'
       + '<td>'+roastAge+'</td>'
-      + '<td class="taste-cell">'+escHtml(tools.length ? tools.join(', ') : '—')+'</td>'
       + '<td>'+e.grind+'</td>'
       + '<td>'+Number(e.dose).toFixed(1)+'</td>'
       + '<td>'+e.tamp+'</td>'
