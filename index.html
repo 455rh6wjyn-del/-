@@ -174,16 +174,9 @@
     border-color: var(--brass);
     color: #fff;
   }
-  .tool-group{ margin-bottom: 9px; }
-  .tool-group:last-child{ margin-bottom: 0; }
-  .tool-group-label{
-    display:block;
-    font-family:'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1px;
-    color: var(--brass-dim);
-    margin-bottom: 5px;
-  }
+  .two-col{ display:flex; gap:8px; }
+  .two-col > div{ flex:1; min-width:0; }
+  .two-col select.dropdown{ font-size:14px; padding:11px 26px 11px 11px; background-position: right 9px center; }
 
   .picker-grid{
     display:grid;
@@ -615,12 +608,16 @@
         <input type="datetime-local" id="inp-datetime" style="display:block; width:100%; max-width:100%; min-width:0; box-sizing:border-box; -webkit-appearance:none; appearance:none; background:var(--surface-2); border:1px solid var(--line); color:var(--cream); font-family:'JetBrains Mono',monospace; font-size:14px; padding:11px 12px; border-radius:10px; color-scheme:light; min-height:44px;">
       </div>
       <div class="field">
-        <label>커피 종류</label>
-        <select class="dropdown" id="sel-coffeeType"></select>
-      </div>
-      <div class="field">
-        <label>원두</label>
-        <select class="dropdown" id="sel-bean"></select>
+        <div class="two-col">
+          <div>
+            <label>커피 종류</label>
+            <select class="dropdown" id="sel-coffeeType"></select>
+          </div>
+          <div>
+            <label>원두</label>
+            <select class="dropdown" id="sel-bean"></select>
+          </div>
+        </div>
         <div class="bean-info-row" id="beanInfoRow" style="display:none;">
           <span>로스팅 <b id="beanInfoRoast">-</b></span>
           <span>개봉 <b id="beanInfoOpen">-</b></span>
@@ -629,7 +626,7 @@
       </div>
       <div class="field">
         <label>도구 <span style="color:var(--muted); font-weight:400;">(복수 선택 가능)</span></label>
-        <div id="toolChips"></div>
+        <div class="pick-chips" id="toolChips"></div>
       </div>
       <div class="field">
         <label>측정 상태 <span style="color:var(--muted); font-weight:400;">(도징량을 어떤 상태로 쟀는지)</span></label>
@@ -866,6 +863,8 @@ const DOSE_BASE = 18;
 const YIELD_BASE = 36;
 const YIELD_CAT = '샷잔';
 const TARE = '영점';
+// 도징량을 저울에 올린 채 잴 수 있는 분류만 측정 상태에 등장한다
+const MEASURE_CATS = ['포터필터','도징컵'];
 
 let options = JSON.parse(JSON.stringify(DEFAULT_OPTIONS));
 let entries = [];
@@ -1206,18 +1205,14 @@ function updateNetHints(){
 function renderMeasureChips(){
   const box = document.getElementById('measureChips');
   box.innerHTML = '';
-  const choices = [TARE].concat(selectedTools);
+  const weighable = selectedTools.filter(n=> MEASURE_CATS.includes(toolCategoryOf(n)));
+  const choices = [TARE].concat(weighable);
   if(!choices.includes(measureState)) measureState = TARE;
   choices.forEach(name=>{
     const chip = document.createElement('button');
     chip.type = 'button';
     chip.className = 'pick-chip' + (measureState === name ? ' on' : '');
-    if(name === TARE){
-      chip.textContent = '영점';
-    } else {
-      const w = toolWeight(name);
-      chip.textContent = w > 0 ? name+' 포함 ('+w+'g)' : name+' 포함';
-    }
+    chip.textContent = name === TARE ? '영점' : name+' 포함';
     chip.addEventListener('click', ()=>{
       if(measureState === name) return;
       const net = getNetDose();
@@ -1361,18 +1356,11 @@ document.getElementById('star-rating').addEventListener('click', (ev)=>{
 });
 
 // ---------- 입력탭 도구 / 키워드 칩 ----------
+// 입력 탭에서는 분류를 나누지 않고 도구를 한 줄로 이어서 보여준다
 function renderToolChips(){
   const box = document.getElementById('toolChips');
   box.innerHTML = '';
   options.toolCategories.forEach(cat=>{
-    const group = document.createElement('div');
-    group.className = 'tool-group';
-    const label = document.createElement('span');
-    label.className = 'tool-group-label';
-    label.textContent = cat.name;
-    group.appendChild(label);
-    const chips = document.createElement('div');
-    chips.className = 'pick-chips';
     categoryTools(cat).forEach(t=>{
       const chip = document.createElement('button');
       chip.type = 'button';
@@ -1384,10 +1372,8 @@ function renderToolChips(){
         renderToolChips();
         syncToolDependents();
       });
-      chips.appendChild(chip);
+      box.appendChild(chip);
     });
-    group.appendChild(chips);
-    box.appendChild(group);
   });
 }
 function renderKeywordChips(){
@@ -1408,6 +1394,12 @@ function renderKeywordChips(){
 }
 
 // ---------- dropdown rendering ----------
+// 맛 평가는 새 기록을 쓸 때 항상 '평가 전'에서 시작한다
+function resetTasteSelect(){
+  const sel = document.getElementById('sel-taste');
+  if(options.taste.includes('평가 전')) sel.value = '평가 전';
+  else sel.selectedIndex = 0;
+}
 function renderDropdowns(){
   fillSelect('sel-coffeeType', options.coffeeType);
   fillSelect('sel-bean', beanNames());
@@ -1561,14 +1553,11 @@ function openDetail(e){
   if(openDate) rows.push(['개봉일자', formatDateShort(openDate)]);
   if(e.daysSinceRoast != null) rows.push(['로스팅 후', (e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일']);
   if(tools.length) rows.push(['도구', tools.join(', ')]);
-  if(e.measureState) rows.push(['측정 상태', e.measureState]);
   rows.push(['분쇄도', e.grind]);
   rows.push(['도징량', Number(e.dose).toFixed(1)+' g']);
-  if(e.measureWeight > 0) rows.push(['저울 표시값', Number(e.doseGross).toFixed(1)+' g']);
   rows.push(['탬핑', e.tamp+' 회']);
   rows.push(['추출시간', e.time+' 초']);
   rows.push(['추출량', Number(e.yieldMl).toFixed(1)+' ml']);
-  if(e.yieldIncludesGlass) rows.push(['잔 포함 표시값', Number(e.yieldGross).toFixed(1)+' ml']);
   rows.push(['비율', ratio]);
   rows.push(['물', water+' ml']);
   rows.push(['우유', milk+' ml']);
@@ -1675,6 +1664,7 @@ function exitEditMode(){
   renderAllIntensity();
   renderStar();
   syncToolDependents();
+  resetTasteSelect();
   updateBeanInfo();
 }
 document.getElementById('cancelEditBtn').addEventListener('click', exitEditMode);
@@ -1706,7 +1696,7 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
   initPickers();
   document.getElementById('sel-coffeeType').selectedIndex = 0;
   document.getElementById('sel-bean').selectedIndex = 0;
-  document.getElementById('sel-taste').selectedIndex = 0;
+  resetTasteSelect();
   updateBeanInfo();
   updateRatio();
 });
@@ -2096,6 +2086,17 @@ function renderToolCategories(){
     row.appendChild(addBtn);
     box.appendChild(row);
 
+    // 수정 중인 도구가 이 분류에 있으면 입력칸을 그 값으로 채워둔다.
+    // (다시 그릴 때마다 입력칸이 새로 만들어지므로 여기서 채워야 값이 남는다)
+    if(editingToolRef && editingToolRef.catIdx === catIdx){
+      const editing = cat.items.find(x=> x.name === editingToolRef.name);
+      if(editing){
+        nameInput.value = editing.name;
+        weightInput.value = editing.weight || '';
+        addBtn.textContent = '수정';
+      }
+    }
+
     cat.items.forEach((it, idx)=>{
       const chip = document.createElement('div');
       const isEditing = editingToolRef && editingToolRef.catIdx === catIdx && editingToolRef.name === it.name;
@@ -2105,10 +2106,7 @@ function renderToolCategories(){
       span.textContent = it.name;
       span.style.cursor = 'pointer';
       span.addEventListener('click', ()=>{
-        editingToolRef = { catIdx, name: it.name };
-        nameInput.value = it.name;
-        weightInput.value = it.weight || '';
-        addBtn.textContent = '수정';
+        editingToolRef = isEditing ? null : { catIdx, name: it.name };
         renderToolCategories();
       });
       chip.appendChild(span);
@@ -2241,6 +2239,7 @@ document.getElementById('importFile').addEventListener('change', (ev)=>{
 (function init(){
   loadAll();
   renderDropdowns();
+  resetTasteSelect();
   renderChips();
   renderToolCategories();
   renderToolChips();
