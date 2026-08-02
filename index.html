@@ -28,6 +28,7 @@
     --muted: #8a7a68;
     --danger: #b5493a;
     --gold: #d99a2b;
+    --heart: #d1495b;
     --radius: 14px;
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
@@ -38,7 +39,7 @@
     min-height: 100vh;
     padding-bottom: 40px;
   }
-  /* 뷰어가 body 배경을 무시해도 항상 어두운 배경이 깔리도록 하는 고정 레이어 */
+  /* 뷰어가 body 배경을 무시해도 항상 배경이 깔리도록 하는 고정 레이어 */
   .bg-fix{
     position: fixed;
     inset: 0;
@@ -135,6 +136,16 @@
     background-repeat: no-repeat;
     background-position: right 12px center;
   }
+  input.text-input{
+    width:100%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--cream);
+    font-family:'Inter', sans-serif;
+    font-size: 15px;
+    padding: 11px 12px;
+    border-radius: 10px;
+  }
 
   .bean-info-row{
     display:flex;
@@ -145,6 +156,24 @@
     padding: 8px 2px 0;
   }
   .bean-info-row b{ color: var(--cream); font-weight:600; }
+
+  .pick-chips{ display:flex; flex-wrap:wrap; gap:7px; }
+  .pick-chip{
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-family:'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 13px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  .pick-chip.on{
+    background: var(--brass);
+    border-color: var(--brass);
+    color: #fff;
+  }
 
   .picker-grid{
     display:grid;
@@ -186,6 +215,31 @@
     font-size: 20px;
     font-weight:700;
     color: var(--cream);
+  }
+  .net-hint{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--brass);
+    margin-top: 4px;
+    min-height: 14px;
+  }
+  .weight-toggle{
+    width:100%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-family:'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    padding: 9px;
+    border-radius: 10px;
+    cursor:pointer;
+    margin-bottom: 14px;
+  }
+  .weight-toggle.on{
+    background: var(--brass);
+    border-color: var(--brass);
+    color: #fff;
   }
 
   .picker{
@@ -266,42 +320,28 @@
   }
   .btn-primary:active{ opacity: 0.85; }
 
-  .toggle-btn{
-    width:100%;
-    background: var(--surface-2);
-    border: 1px solid var(--line);
-    color: var(--muted);
-    font-family:'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 11px;
-    border-radius: 10px;
-    cursor:pointer;
-    transition: all .15s ease;
-  }
-  .toggle-btn.on{
-    background: var(--brass);
-    border-color: var(--brass);
-    color: #fff;
-  }
+  .eval-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+  .eval-row .eval-label{ font-size:13px; color:var(--muted); font-weight:500; min-width:36px; }
+  .eval-value{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--brass); font-weight:700; min-width:28px; text-align:right; }
 
-  .rating-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-  .rating-row:last-of-type{ margin-bottom:10px; }
-  .rating-row .rating-label{ font-size:13px; color:var(--muted); font-weight:500; min-width:40px; }
+  .intensity{ display:flex; align-items:flex-end; gap:5px; height:30px; }
+  .int-bar{
+    width:20px; padding:0; border:none; cursor:pointer;
+    background: var(--line);
+    border-radius: 3px 3px 0 0;
+    transition: background .12s;
+  }
+  .int-bar.on{ background: var(--brass); }
+  .int-bar:nth-child(1){ height:10px; }
+  .int-bar:nth-child(2){ height:15px; }
+  .int-bar:nth-child(3){ height:20px; }
+  .int-bar:nth-child(4){ height:25px; }
+  .int-bar:nth-child(5){ height:30px; }
+
   .star-rating{ position:relative; display:inline-block; font-size:26px; line-height:1; cursor:pointer; letter-spacing:4px; }
   .star-row{ white-space:nowrap; }
   .star-bg{ color: var(--line); }
   .star-fill{ position:absolute; top:0; left:0; overflow:hidden; color: var(--gold); pointer-events:none; white-space:nowrap; width:0%; }
-  .overall-rating-display{
-    text-align:center;
-    padding: 9px;
-    background: var(--surface-2);
-    border-radius: 10px;
-    font-family:'JetBrains Mono', monospace;
-    color: var(--brass);
-    font-size: 13px;
-    letter-spacing: 0.5px;
-  }
 
   .toast{
     position: fixed;
@@ -323,23 +363,38 @@
   }
   .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
 
-  .filter-row{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 10px; }
-  .filter-row select{ flex:1 1 45%; min-width:110px; font-size:13px; padding:8px 10px; }
-
-  .viewmode-row{ display:flex; gap:8px; margin-bottom: 14px; }
-  .viewmode-btn{
-    flex:1;
+  .filter-bar{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding-bottom:8px;
+    margin-bottom:10px;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .filter-bar::-webkit-scrollbar{ display:none; }
+  .filter-bar select{
+    flex:0 0 auto;
+    width:auto;
+    max-width:130px;
+    font-size:12px;
+    padding:8px 26px 8px 10px;
+    background-position: right 8px center;
+  }
+  .filter-bar .viewmode-btn{
+    flex:0 0 auto;
     background: var(--surface);
     border: 1px solid var(--line);
     color: var(--muted);
     font-family:'Inter', sans-serif;
     font-weight: 600;
-    font-size: 13px;
-    padding: 9px 0;
+    font-size: 12px;
+    padding: 8px 12px;
     border-radius: 10px;
     cursor:pointer;
+    white-space:nowrap;
   }
-  .viewmode-btn.active{
+  .filter-bar .viewmode-btn.active{
     background: var(--brass);
     border-color: var(--brass);
     color: #fff;
@@ -359,20 +414,30 @@
   }
   .entry-card:active{ background: var(--surface-2); }
   .ec-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:4px; }
-  .ec-date{ font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--brass); font-weight:700; white-space:nowrap; padding-top:3px; }
-  .ec-actions{ display:flex; gap:2px; }
-  .ec-actions button{ background:none; border:none; cursor:pointer; padding:4px 6px; }
-  .ec-actions .edit-btn{ color: var(--brass); font-size:14px; }
-  .ec-actions .del-btn{ color: var(--danger); font-size:17px; }
+  .ec-date{ font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--brass); font-weight:700; white-space:nowrap; padding-top:8px; }
+  .ec-actions{ display:flex; gap:4px; }
+  .ec-actions button{
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor:pointer;
+    padding: 6px 11px;
+    font-size: 15px;
+    line-height:1.2;
+  }
+  .ec-actions .fav-btn{ color: var(--muted); }
+  .ec-actions .fav-btn.on{ color: var(--heart); border-color: var(--heart); }
+  .ec-actions .edit-btn{ color: var(--brass); }
+  .ec-actions .del-btn{ color: var(--danger); }
   .ec-line1{ font-size:14px; font-weight:600; color:#241a12; margin-bottom:3px; }
+  .ec-nickname{ color: var(--brass); }
   .ec-line2{ font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--muted); margin-bottom:3px; line-height:1.5; }
-  .ec-cup{ color: var(--brass); font-family:'Inter', sans-serif; }
-  .ec-line3{ font-size:12.5px; color:#241a12; }
+  .ec-line3{ font-size:12.5px; color:#241a12; line-height:1.5; }
   .ec-line3 .ec-rating{ color: var(--gold); font-weight:700; }
   .ec-line3 .ec-memo{ color: var(--muted); }
 
   .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-  table{ border-collapse: collapse; width:100%; min-width: 780px; background: var(--surface); }
+  table{ border-collapse: collapse; width:100%; min-width: 900px; background: var(--surface); }
   th, td{
     padding: 9px 10px;
     text-align:center;
@@ -395,6 +460,19 @@
   tr:last-child td{ border-bottom:none; }
   tbody tr{ cursor:pointer; }
   tbody tr:active{ background: var(--surface-2); }
+  td .row-actions{ display:flex; gap:4px; justify-content:center; }
+  td .row-actions button{
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor:pointer;
+    padding: 5px 10px;
+    font-size: 14px;
+  }
+  td .row-actions .fav-btn{ color: var(--muted); }
+  td .row-actions .fav-btn.on{ color: var(--heart); border-color: var(--heart); }
+  td .row-actions .edit-btn{ color: var(--brass); }
+  td .row-actions .del-btn{ color: var(--danger); }
 
   .chip-list{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 12px; }
   .chip{
@@ -404,8 +482,10 @@
     padding: 7px 10px 7px 12px;
     border-radius: 20px;
     font-size: 13px;
+    touch-action: none;
   }
   .chip.editing{ border-color: var(--brass); background:#fff; }
+  .chip.dragging{ opacity:0.6; border-color: var(--brass); box-shadow: 0 2px 8px rgba(43,31,22,0.2); }
   .chip .chip-meta{ font-size:11px; color: var(--muted); }
   .chip button{
     background:none; border:none; color: var(--danger);
@@ -414,6 +494,7 @@
   .add-row{ display:flex; gap:8px; }
   .add-row input{
     flex:1;
+    min-width:0;
     background: var(--surface-2);
     border: 1px solid var(--line);
     color: var(--cream);
@@ -430,9 +511,12 @@
     padding: 0 16px;
     border-radius: 10px;
     cursor:pointer;
+    white-space:nowrap;
   }
-  .bean-name-input{
+  .stack-input{
+    display:block;
     width:100%;
+    min-width:0;
     background: var(--surface-2);
     border: 1px solid var(--line);
     color: var(--cream);
@@ -442,21 +526,15 @@
     border-radius: 10px;
     margin-bottom: 8px;
   }
-  .bean-field-row{ display:flex; gap:8px; margin-bottom: 10px; }
-  .bean-field-row > div{ flex:1; min-width:0; }
-  .bean-field-row label{ display:block; font-size:11px; color: var(--muted); margin-bottom:4px; }
-  .bean-field-row input[type="date"]{
-    width:100%;
-    min-width:0;
-    background: var(--surface-2);
-    border: 1px solid var(--line);
-    color: var(--cream);
+  input.stack-input[type="date"]{
     font-family:'JetBrains Mono', monospace;
-    font-size: 12px;
-    padding: 9px 6px;
-    border-radius: 10px;
+    font-size: 13px;
     color-scheme: light;
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 42px;
   }
+  .stack-label{ display:block; font-size:11px; color: var(--muted); margin-bottom:4px; }
   .share-note{
     font-size: 12px;
     color: var(--muted);
@@ -500,6 +578,10 @@
     <div class="card">
       <p class="card-title">레시피</p>
       <div class="field">
+        <label>레시피 별칭 <span style="color:var(--muted); font-weight:400;">(선택)</span></label>
+        <input type="text" id="inp-nickname" class="text-input" placeholder="예: 아침 라떼">
+      </div>
+      <div class="field">
         <label>날짜/시간 <span style="color:var(--muted); font-weight:400;">(비워두면 저장 시각 자동 기록)</span></label>
         <input type="datetime-local" id="inp-datetime" style="display:block; width:100%; max-width:100%; min-width:0; box-sizing:border-box; -webkit-appearance:none; appearance:none; background:var(--surface-2); border:1px solid var(--line); color:var(--cream); font-family:'JetBrains Mono',monospace; font-size:14px; padding:11px 12px; border-radius:10px; color-scheme:light; min-height:44px;">
       </div>
@@ -516,6 +598,10 @@
           <span id="beanInfoDaysWrap" style="display:none;">로스팅 후 <b id="beanInfoDays">-</b></span>
         </div>
       </div>
+      <div class="field">
+        <label>도구 <span style="color:var(--muted); font-weight:400;">(복수 선택 가능)</span></label>
+        <div class="pick-chips" id="toolChips"></div>
+      </div>
       <div class="picker-grid cols-3">
         <div class="pk-cell">
           <span class="pk-label">분쇄도</span>
@@ -527,16 +613,14 @@
             <button type="button" class="manual-btn" data-picker="pk-dose">직접입력</button>
           </div>
           <div class="picker" id="pk-dose"><div class="picker-window"></div></div>
+          <div class="net-hint" id="doseNetHint"></div>
         </div>
         <div class="pk-cell">
           <span class="pk-label">탬핑 (회)</span>
           <div class="picker" id="pk-tamp"><div class="picker-window"></div></div>
         </div>
       </div>
-      <div class="field" style="margin-top:14px; margin-bottom:0;">
-        <label>도징컵 사용</label>
-        <button type="button" class="toggle-btn" id="toggle-dosingCup">사용 안 함</button>
-      </div>
+      <button type="button" class="weight-toggle" id="doseWeightToggle" style="display:none;">도징컵 무게 포함 안 함</button>
     </div>
 
     <div class="card">
@@ -552,15 +636,23 @@
             <button type="button" class="manual-btn" data-picker="pk-yield">직접입력</button>
           </div>
           <div class="picker" id="pk-yield"><div class="picker-window"></div></div>
+          <div class="net-hint" id="yieldNetHint"></div>
         </div>
       </div>
+      <button type="button" class="weight-toggle" id="yieldWeightToggle" style="display:none;">샷잔 무게 포함 안 함</button>
       <div class="picker-grid cols-2">
         <div class="pk-cell">
-          <span class="pk-label">물 (ml)</span>
+          <div class="pk-label-row">
+            <span class="pk-label">물 (ml)</span>
+            <button type="button" class="manual-btn" data-picker="pk-water">직접입력</button>
+          </div>
           <div class="picker" id="pk-water"><div class="picker-window"></div></div>
         </div>
         <div class="pk-cell">
-          <span class="pk-label">우유 (ml)</span>
+          <div class="pk-label-row">
+            <span class="pk-label">우유 (ml)</span>
+            <button type="button" class="manual-btn" data-picker="pk-milk">직접입력</button>
+          </div>
           <div class="picker" id="pk-milk"><div class="picker-window"></div></div>
         </div>
       </div>
@@ -569,29 +661,37 @@
         <select class="dropdown" id="sel-taste"></select>
       </div>
       <div class="field">
-        <label>별점 평가</label>
-        <div class="rating-row">
-          <span class="rating-label">산미</span>
-          <div class="star-rating" id="star-acidity">
+        <label>강도 평가</label>
+        <div class="eval-row">
+          <span class="eval-label">산미</span>
+          <div class="intensity" id="int-acidity"></div>
+          <span class="eval-value" id="intVal-acidity">0</span>
+        </div>
+        <div class="eval-row">
+          <span class="eval-label">쓴맛</span>
+          <div class="intensity" id="int-bitterness"></div>
+          <span class="eval-value" id="intVal-bitterness">0</span>
+        </div>
+        <div class="eval-row" style="margin-bottom:0;">
+          <span class="eval-label">향</span>
+          <div class="intensity" id="int-aroma"></div>
+          <span class="eval-value" id="intVal-aroma">0</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>별점</label>
+        <div class="eval-row" style="margin-bottom:0;">
+          <span class="eval-label">별점</span>
+          <div class="star-rating" id="star-rating">
             <div class="star-row star-bg">★★★★★</div>
             <div class="star-row star-fill">★★★★★</div>
           </div>
+          <span class="eval-value" id="starValue">0.0</span>
         </div>
-        <div class="rating-row">
-          <span class="rating-label">쓴맛</span>
-          <div class="star-rating" id="star-bitterness">
-            <div class="star-row star-bg">★★★★★</div>
-            <div class="star-row star-fill">★★★★★</div>
-          </div>
-        </div>
-        <div class="rating-row">
-          <span class="rating-label">향</span>
-          <div class="star-rating" id="star-aroma">
-            <div class="star-row star-bg">★★★★★</div>
-            <div class="star-row star-fill">★★★★★</div>
-          </div>
-        </div>
-        <div class="overall-rating-display" id="overallRatingDisplay">종합 별점 0.00 / 5.00</div>
+      </div>
+      <div class="field">
+        <label>메모 키워드 <span style="color:var(--muted); font-weight:400;">(복수 선택 가능)</span></label>
+        <div class="pick-chips" id="keywordChips"></div>
       </div>
       <div class="field">
         <label>메모 <span style="color:var(--muted); font-weight:400;">(선택)</span></label>
@@ -606,29 +706,29 @@
 
   <!-- TABLE PANEL -->
   <section id="panel-table" class="panel">
-    <div class="filter-row">
+    <div class="filter-bar">
       <select class="dropdown" id="filter-coffeeType"><option value="">전체 종류</option></select>
       <select class="dropdown" id="filter-bean"><option value="">전체 원두</option></select>
       <select class="dropdown" id="filter-taste"><option value="">전체 평가</option></select>
       <select class="dropdown" id="filter-rating">
         <option value="0">전체 별점</option>
-        <option value="1">★1 이상</option>
-        <option value="2">★2 이상</option>
-        <option value="3">★3 이상</option>
-        <option value="4">★4 이상</option>
+        <option value="1">★1+</option>
+        <option value="2">★2+</option>
+        <option value="3">★3+</option>
+        <option value="4">★4+</option>
       </select>
-    </div>
-    <div class="field">
+      <select class="dropdown" id="filter-favorite">
+        <option value="">전체</option>
+        <option value="1">♥ 즐겨찾기</option>
+      </select>
       <select class="dropdown" id="sortSelect">
         <option value="ts-desc">최신순</option>
         <option value="ts-asc">오래된순</option>
         <option value="ratio-desc">비율 높은순</option>
         <option value="ratio-asc">비율 낮은순</option>
-        <option value="overallRating-desc">별점 높은순</option>
-        <option value="overallRating-asc">별점 낮은순</option>
+        <option value="rating-desc">별점 높은순</option>
+        <option value="rating-asc">별점 낮은순</option>
       </select>
-    </div>
-    <div class="viewmode-row">
       <button class="viewmode-btn active" data-view="card">카드형</button>
       <button class="viewmode-btn" data-view="list">목록형</button>
     </div>
@@ -637,7 +737,7 @@
 
   <!-- SETTINGS PANEL -->
   <section id="panel-settings" class="panel">
-    <div class="share-note">기록은 클라우드에 저장되어 이 앱을 설치한 모든 기기에 실시간으로 공유돼요. 인터넷이 안 될 때는 이 기기에만 임시로 저장돼요.</div>
+    <div class="share-note">기록은 클라우드에 저장되어 이 앱을 설치한 모든 기기에 실시간으로 공유돼요. 아래 목록의 항목을 <b>꾹 누른 채 끌어서</b> 순서를 바꿀 수 있어요.</div>
 
     <div class="card">
       <p class="card-title">데이터 백업</p>
@@ -658,20 +758,23 @@
     </div>
 
     <div class="card">
-      <p class="card-title">원두 <span style="color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0;">(이름 누르면 날짜 수정)</span></p>
+      <p class="card-title">원두 <span style="color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0;">(이름 탭하면 수정)</span></p>
       <div class="chip-list" id="chips-bean"></div>
-      <input type="text" id="add-bean-name" class="bean-name-input" placeholder="원두 이름 예: 테라로사 예가체프">
-      <div class="bean-field-row">
-        <div>
-          <label>로스팅일자</label>
-          <input type="date" id="add-bean-roast">
-        </div>
-        <div>
-          <label>개봉일자</label>
-          <input type="date" id="add-bean-open">
-        </div>
-      </div>
+      <input type="text" id="add-bean-name" class="stack-input" placeholder="원두 이름 예: 테라로사 예가체프">
+      <label class="stack-label">로스팅일자</label>
+      <input type="date" id="add-bean-roast" class="stack-input">
+      <label class="stack-label">개봉일자</label>
+      <input type="date" id="add-bean-open" class="stack-input">
       <button class="btn-primary" id="addBeanBtn" style="padding:11px;">추가</button>
+    </div>
+
+    <div class="card">
+      <p class="card-title">도구 <span style="color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0;">(이름 탭하면 수정)</span></p>
+      <div class="chip-list" id="chips-tools"></div>
+      <input type="text" id="add-tool-name" class="stack-input" placeholder="도구 이름 예: 도징컵">
+      <label class="stack-label">무게 (g) — 없으면 비워두세요</label>
+      <input type="number" step="0.1" id="add-tool-weight" class="stack-input" placeholder="예: 142">
+      <button class="btn-primary" id="addToolBtn" style="padding:11px;">추가</button>
     </div>
 
     <div class="card">
@@ -680,6 +783,15 @@
       <div class="add-row">
         <input type="text" id="add-taste" placeholder="예: 산미 강함">
         <button data-target="taste">추가</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">메모 키워드</p>
+      <div class="chip-list" id="chips-memoKeywords"></div>
+      <div class="add-row">
+        <input type="text" id="add-memoKeywords" placeholder="예: 채널링">
+        <button data-target="memoKeywords">추가</button>
       </div>
     </div>
   </section>
@@ -705,21 +817,42 @@ const DEFAULT_OPTIONS = {
     { name: '테라로사 예가체프 아리차', roastDate: '', openDate: '' },
     { name: '폴바셋', roastDate: '', openDate: '' }
   ],
-  taste: ['밸런스 좋음','산미 강함','쓴맛 강함','싱거움','탄맛']
+  tools: [
+    { name: '포터필터', weight: 0 },
+    { name: '침칠봉', weight: 0 },
+    { name: '도징컵', weight: 0 },
+    { name: '레벨링툴', weight: 0 },
+    { name: '샷잔', weight: 0 }
+  ],
+  taste: ['평가 전','밸런스 좋음','산미 강함','쓴맛 강함','싱거움','탄맛'],
+  memoKeywords: ['크레마 좋음','채널링','과소추출','과다추출']
 };
+
+// 도징컵/샷잔 무게를 포함해 입력할 때 기준이 되는 순수 값
+const DOSE_BASE = 18;
+const YIELD_BASE = 36;
+const DOSE_TOOL = '도징컵';
+const YIELD_TOOL = '샷잔';
 
 let options = JSON.parse(JSON.stringify(DEFAULT_OPTIONS));
 let entries = [];
 let sortState = { col: 'ts', dir: 'desc' };
 let editingId = null;
 let editingBeanName = null;
-let dosingCupUsed = false;
-let starRatings = { acidity: 0, bitterness: 0, aroma: 0 };
+let editingToolName = null;
+let selectedTools = [];
+let selectedKeywords = [];
+let doseIncludesCup = false;
+let yieldIncludesGlass = false;
+let intensity = { acidity: 0, bitterness: 0, aroma: 0 };
+let starRating = 0;
 let viewMode = 'card';
 
 // ---------- options helpers ----------
 function normalizeOptions(opts){
   if(!opts || typeof opts !== 'object') return JSON.parse(JSON.stringify(DEFAULT_OPTIONS));
+  const taste = Array.isArray(opts.taste) ? opts.taste.slice() : DEFAULT_OPTIONS.taste.slice();
+  if(!taste.includes('평가 전')) taste.unshift('평가 전');
   return {
     coffeeType: Array.isArray(opts.coffeeType) ? opts.coffeeType : DEFAULT_OPTIONS.coffeeType.slice(),
     bean: Array.isArray(opts.bean) ? opts.bean.map(b=>
@@ -727,11 +860,20 @@ function normalizeOptions(opts){
         ? { name: b, roastDate: '', openDate: '' }
         : { name: b.name, roastDate: b.roastDate || '', openDate: b.openDate || b.purchaseDate || '' }
     ) : [],
-    taste: Array.isArray(opts.taste) ? opts.taste : DEFAULT_OPTIONS.taste.slice()
+    tools: (Array.isArray(opts.tools) && opts.tools.length)
+      ? opts.tools.map(t=> typeof t === 'string' ? { name: t, weight: 0 } : { name: t.name, weight: Number(t.weight) || 0 })
+      : JSON.parse(JSON.stringify(DEFAULT_OPTIONS.tools)),
+    taste: taste,
+    memoKeywords: Array.isArray(opts.memoKeywords) ? opts.memoKeywords : DEFAULT_OPTIONS.memoKeywords.slice()
   };
 }
 function beanNames(){ return options.bean.map(b=> b.name); }
 function findBean(name){ return options.bean.find(b=> b.name === name); }
+function findTool(name){ return options.tools.find(t=> t.name === name); }
+function toolWeight(name){
+  const t = findTool(name);
+  return t ? (Number(t.weight) || 0) : 0;
+}
 function formatDateShort(iso){
   const parts = String(iso).split('-');
   if(parts.length !== 3) return iso;
@@ -796,6 +938,8 @@ window.startCloudSync = function(fb){
       storageSet('coffee-options', JSON.stringify(options));
       renderDropdowns();
       renderChips();
+      renderToolChips();
+      renderKeywordChips();
     } else {
       fb.setDoc(optionsRef, { value: JSON.stringify(options) }).catch(()=>{});
     }
@@ -836,6 +980,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 
 // ---------- picker component ----------
 const pickers = {};
+const pickerCfg = {};
 
 function buildPicker(elId, values, formatFn, initialValue, onChange){
   const el = document.getElementById(elId);
@@ -911,23 +1056,121 @@ function range(min, max, step){
   return arr;
 }
 
-function initPickers(){
-  buildPicker('pk-grind', range(1,40,1), v=>String(v), 10, ()=>updateRatio());
-  buildPicker('pk-dose', range(10,30,0.1), v=>v.toFixed(1), 17.0, ()=>updateRatio());
-  buildPicker('pk-tamp', range(0,10,1), v=>String(v), 1, ()=>{});
-  buildPicker('pk-time', range(0,90,1), v=>String(v), 25, ()=>{});
-  buildPicker('pk-yield', range(0,120,0.1), v=>v.toFixed(1), 36.0, ()=>updateRatio());
-  buildPicker('pk-water', range(0,400,5), v=>String(v), 0, ()=>{});
-  buildPicker('pk-milk', range(0,400,5), v=>String(v), 0, ()=>{});
-  updateRatio();
+// 픽커를 새 범위로 다시 만든다. 기존 DOM 노드를 통째로 교체해
+// 이전 scroll 리스너가 쌓이지 않게 한다.
+function setupPicker(id, cfg){
+  const step = cfg.step;
+  const decimals = (step.toString().split('.')[1] || '').length;
+  const onChange = cfg.onChange || (()=>{});
+  pickerCfg[id] = { min: cfg.min, max: cfg.max, step, decimals, onChange };
+  const old = document.getElementById(id);
+  const fresh = document.createElement('div');
+  fresh.className = 'picker';
+  fresh.id = id;
+  old.replaceWith(fresh);
+  const val = Math.min(cfg.max, Math.max(cfg.min, cfg.value));
+  buildPicker(id, range(cfg.min, cfg.max, step), v=> v.toFixed(decimals), val, onChange);
 }
 
+function initPickers(){
+  setupPicker('pk-grind', { min:1, max:40, step:1, value:11, onChange: updateRatio });
+  setupPicker('pk-tamp', { min:0, max:10, step:1, value:2 });
+  setupPicker('pk-time', { min:0, max:90, step:1, value:30 });
+  setupPicker('pk-water', { min:0, max:400, step:5, value:160 });
+  setupPicker('pk-milk', { min:0, max:400, step:5, value:0 });
+  buildDosePicker(DOSE_BASE);
+  buildYieldPicker(YIELD_BASE);
+}
+
+// ---------- 도징컵/샷잔 무게 포함 처리 ----------
+function buildDosePicker(net){
+  const cupW = doseIncludesCup ? toolWeight(DOSE_TOOL) : 0;
+  const min = doseIncludesCup ? cupW : 10;
+  const max = doseIncludesCup ? cupW + 60 : 30;
+  setupPicker('pk-dose', {
+    min, max, step: 0.1,
+    value: +(net + cupW).toFixed(1),
+    onChange: ()=>{ updateRatio(); updateNetHints(); }
+  });
+  updateNetHints();
+}
+function buildYieldPicker(net){
+  const glassW = yieldIncludesGlass ? toolWeight(YIELD_TOOL) : 0;
+  const min = yieldIncludesGlass ? glassW : 0;
+  const max = yieldIncludesGlass ? glassW + 150 : 120;
+  setupPicker('pk-yield', {
+    min, max, step: 0.1,
+    value: +(net + glassW).toFixed(1),
+    onChange: ()=>{ updateRatio(); updateNetHints(); }
+  });
+  updateNetHints();
+}
+function getNetDose(){
+  if(!pickers['pk-dose']) return DOSE_BASE;
+  const raw = pickers['pk-dose'].getValue();
+  return +(raw - (doseIncludesCup ? toolWeight(DOSE_TOOL) : 0)).toFixed(1);
+}
+function getNetYield(){
+  if(!pickers['pk-yield']) return YIELD_BASE;
+  const raw = pickers['pk-yield'].getValue();
+  return +(raw - (yieldIncludesGlass ? toolWeight(YIELD_TOOL) : 0)).toFixed(1);
+}
+function updateNetHints(){
+  document.getElementById('doseNetHint').textContent =
+    doseIncludesCup ? '실제 '+getNetDose().toFixed(1)+' g' : '';
+  document.getElementById('yieldNetHint').textContent =
+    yieldIncludesGlass ? '실제 '+getNetYield().toFixed(1)+' ml' : '';
+}
+function updateWeightToggleBtns(){
+  const dBtn = document.getElementById('doseWeightToggle');
+  dBtn.classList.toggle('on', doseIncludesCup);
+  dBtn.textContent = doseIncludesCup
+    ? '도징컵 무게 포함 ✓ ('+toolWeight(DOSE_TOOL).toFixed(1)+'g 제외)'
+    : '도징컵 무게 포함 안 함';
+  const yBtn = document.getElementById('yieldWeightToggle');
+  yBtn.classList.toggle('on', yieldIncludesGlass);
+  yBtn.textContent = yieldIncludesGlass
+    ? '샷잔 무게 포함 ✓ ('+toolWeight(YIELD_TOOL).toFixed(1)+'g 제외)'
+    : '샷잔 무게 포함 안 함';
+}
+// 도구 선택이 바뀌면 무게 포함 버튼을 보이거나 감춘다.
+function syncWeightToggles(){
+  const cupSel = selectedTools.includes(DOSE_TOOL);
+  document.getElementById('doseWeightToggle').style.display = cupSel ? '' : 'none';
+  if(!cupSel && doseIncludesCup){
+    const net = getNetDose();
+    doseIncludesCup = false;
+    buildDosePicker(net);
+  }
+  const glassSel = selectedTools.includes(YIELD_TOOL);
+  document.getElementById('yieldWeightToggle').style.display = glassSel ? '' : 'none';
+  if(!glassSel && yieldIncludesGlass){
+    const net = getNetYield();
+    yieldIncludesGlass = false;
+    buildYieldPicker(net);
+  }
+  updateWeightToggleBtns();
+  updateNetHints();
+}
+document.getElementById('doseWeightToggle').addEventListener('click', ()=>{
+  const net = getNetDose();
+  doseIncludesCup = !doseIncludesCup;
+  buildDosePicker(net);
+  updateWeightToggleBtns();
+  updateRatio();
+});
+document.getElementById('yieldWeightToggle').addEventListener('click', ()=>{
+  const net = getNetYield();
+  yieldIncludesGlass = !yieldIncludesGlass;
+  buildYieldPicker(net);
+  updateWeightToggleBtns();
+  updateRatio();
+});
+
 function updateRatio(){
-  const doseP = pickers['pk-dose'], yieldP = pickers['pk-yield'];
-  if(!doseP || !yieldP) return;
-  const dose = doseP.getValue();
-  const yld = yieldP.getValue();
   const disp = document.getElementById('ratioDisplay');
+  const dose = getNetDose();
+  const yld = getNetYield();
   if(dose > 0 && yld > 0){
     disp.textContent = '비율 1 : ' + (yld/dose).toFixed(1);
   } else {
@@ -935,20 +1178,20 @@ function updateRatio(){
   }
 }
 
-// ---------- 도징량/추출량 직접입력 ----------
-function enableManualEntry(pickerId, min, max, step){
+// ---------- 직접입력 ----------
+function enableManualEntry(pickerId){
   const btn = document.querySelector('.manual-btn[data-picker="'+pickerId+'"]');
   if(!btn) return;
-  const decimals = (step.toString().split('.')[1] || '').length;
   btn.addEventListener('click', ()=>{
+    const cfg = pickerCfg[pickerId];
     const pickerEl = document.getElementById(pickerId);
-    if(!pickerEl) return;
+    if(!cfg || !pickerEl) return;
     const current = pickers[pickerId].getValue();
     const input = document.createElement('input');
     input.type = 'number';
-    input.step = step;
-    input.min = min;
-    input.max = max;
+    input.step = cfg.step;
+    input.min = cfg.min;
+    input.max = cfg.max;
     input.value = current;
     input.className = 'manual-input';
     input.id = pickerId;
@@ -961,53 +1204,88 @@ function enableManualEntry(pickerId, min, max, step){
       done = true;
       let v = parseFloat(input.value);
       if(isNaN(v) || !isFinite(v)) v = current;
-      v = Math.max(min, Math.min(max, v));
-      v = +v.toFixed(decimals);
-      const restored = document.createElement('div');
-      restored.className = 'picker';
-      restored.id = pickerId;
-      input.replaceWith(restored);
-      const onChange = (pickerId === 'pk-dose' || pickerId === 'pk-yield') ? updateRatio : ()=>{};
-      buildPicker(pickerId, range(min, max, step), x=>x.toFixed(decimals), v, onChange);
-      onChange();
+      v = Math.max(cfg.min, Math.min(cfg.max, v));
+      setupPicker(pickerId, { min: cfg.min, max: cfg.max, step: cfg.step, value: +v.toFixed(cfg.decimals), onChange: cfg.onChange });
+      cfg.onChange(v);
     }
     input.addEventListener('blur', commit);
     input.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); input.blur(); } });
   });
 }
 
-// ---------- 별점 ----------
-function renderStarRating(containerId, val){
-  const el = document.getElementById(containerId);
-  el.querySelector('.star-fill').style.width = (val/5*100)+'%';
+// ---------- 강도 평가 (사다리꼴 바) ----------
+function buildIntensityWidget(field){
+  const el = document.getElementById('int-'+field);
+  el.innerHTML = '';
+  for(let i=1; i<=5; i++){
+    const bar = document.createElement('button');
+    bar.type = 'button';
+    bar.className = 'int-bar';
+    bar.dataset.v = i;
+    bar.addEventListener('click', ()=>{
+      // 같은 칸을 다시 누르면 해제
+      intensity[field] = (intensity[field] === i) ? 0 : i;
+      renderIntensity(field);
+    });
+    el.appendChild(bar);
+  }
 }
-function updateOverallRatingDisplay(){
-  const avg = (starRatings.acidity + starRatings.bitterness + starRatings.aroma) / 3;
-  document.getElementById('overallRatingDisplay').textContent = '종합 별점 ' + avg.toFixed(2) + ' / 5.00';
+function renderIntensity(field){
+  const el = document.getElementById('int-'+field);
+  el.querySelectorAll('.int-bar').forEach(bar=>{
+    bar.classList.toggle('on', Number(bar.dataset.v) <= intensity[field]);
+  });
+  document.getElementById('intVal-'+field).textContent = intensity[field];
 }
-function setStarRating(field, containerId, rawVal){
-  const val = Math.max(0, Math.min(5, Math.round(rawVal*2)/2));
-  starRatings[field] = val;
-  renderStarRating(containerId, val);
-  updateOverallRatingDisplay();
+function renderAllIntensity(){
+  ['acidity','bitterness','aroma'].forEach(renderIntensity);
 }
-function wireStarRating(containerId, field){
-  const el = document.getElementById(containerId);
-  el.addEventListener('click', (ev)=>{
-    const rect = el.getBoundingClientRect();
-    const fraction = (ev.clientX - rect.left) / rect.width;
-    setStarRating(field, containerId, fraction*5);
+
+// ---------- 별점 (0.5 단위) ----------
+function renderStar(){
+  document.querySelector('#star-rating .star-fill').style.width = (starRating/5*100)+'%';
+  document.getElementById('starValue').textContent = starRating.toFixed(1);
+}
+document.getElementById('star-rating').addEventListener('click', (ev)=>{
+  const rect = ev.currentTarget.getBoundingClientRect();
+  const fraction = (ev.clientX - rect.left) / rect.width;
+  starRating = Math.max(0, Math.min(5, Math.round(fraction*5*2)/2));
+  renderStar();
+});
+
+// ---------- 도구 / 키워드 선택 칩 ----------
+function renderToolChips(){
+  const box = document.getElementById('toolChips');
+  box.innerHTML = '';
+  options.tools.forEach(t=>{
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'pick-chip' + (selectedTools.includes(t.name) ? ' on' : '');
+    chip.textContent = t.weight ? t.name+' ('+t.weight+'g)' : t.name;
+    chip.addEventListener('click', ()=>{
+      if(selectedTools.includes(t.name)) selectedTools = selectedTools.filter(n=> n!==t.name);
+      else selectedTools.push(t.name);
+      renderToolChips();
+      syncWeightToggles();
+    });
+    box.appendChild(chip);
   });
 }
-function resetStarRatings(){
-  starRatings = { acidity: 0, bitterness: 0, aroma: 0 };
-  renderStarRating('star-acidity', 0);
-  renderStarRating('star-bitterness', 0);
-  renderStarRating('star-aroma', 0);
-  updateOverallRatingDisplay();
-}
-function starsText(val){
-  return (val || 0).toFixed(1) + ' ★';
+function renderKeywordChips(){
+  const box = document.getElementById('keywordChips');
+  box.innerHTML = '';
+  options.memoKeywords.forEach(k=>{
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'pick-chip' + (selectedKeywords.includes(k) ? ' on' : '');
+    chip.textContent = k;
+    chip.addEventListener('click', ()=>{
+      if(selectedKeywords.includes(k)) selectedKeywords = selectedKeywords.filter(n=> n!==k);
+      else selectedKeywords.push(k);
+      renderKeywordChips();
+    });
+    box.appendChild(chip);
+  });
 }
 
 // ---------- dropdown rendering ----------
@@ -1058,17 +1336,6 @@ function updateBeanInfo(){
 document.getElementById('sel-bean').addEventListener('change', updateBeanInfo);
 document.getElementById('inp-datetime').addEventListener('change', updateBeanInfo);
 
-// ---------- 도징컵 토글 ----------
-function updateDosingCupBtn(){
-  const btn = document.getElementById('toggle-dosingCup');
-  btn.classList.toggle('on', dosingCupUsed);
-  btn.textContent = dosingCupUsed ? '사용함 ✓' : '사용 안 함';
-}
-document.getElementById('toggle-dosingCup').addEventListener('click', ()=>{
-  dosingCupUsed = !dosingCupUsed;
-  updateDosingCupBtn();
-});
-
 // ---------- save entry ----------
 document.getElementById('saveBtn').addEventListener('click', ()=>{
   if(options.coffeeType.length === 0 || options.bean.length === 0 || options.taste.length === 0){
@@ -1079,24 +1346,29 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
   const beanObj = findBean(beanName);
   const customTs = getDatetimeValue();
   const brewDate = customTs ? new Date(customTs) : new Date();
-  const overallRating = +(((starRatings.acidity + starRatings.bitterness + starRatings.aroma) / 3).toFixed(2));
   const values = {
+    nickname: document.getElementById('inp-nickname').value.trim(),
     coffeeType: document.getElementById('sel-coffeeType').value,
     bean: beanName,
     beanRoastDate: beanObj ? beanObj.roastDate : '',
     beanOpenDate: beanObj ? beanObj.openDate : '',
     daysSinceRoast: (beanObj && beanObj.roastDate) ? daysBetween(beanObj.roastDate, brewDate) : null,
-    dosingCup: dosingCupUsed,
+    tools: selectedTools.slice(),
     grind: pickers['pk-grind'].getValue(),
-    dose: pickers['pk-dose'].getValue(),
+    dose: getNetDose(),
+    doseGross: pickers['pk-dose'].getValue(),
+    doseIncludesCup: doseIncludesCup,
     tamp: pickers['pk-tamp'].getValue(),
     time: pickers['pk-time'].getValue(),
-    yieldMl: pickers['pk-yield'].getValue(),
+    yieldMl: getNetYield(),
+    yieldGross: pickers['pk-yield'].getValue(),
+    yieldIncludesGlass: yieldIncludesGlass,
     water: pickers['pk-water'].getValue(),
     milk: pickers['pk-milk'].getValue(),
     taste: document.getElementById('sel-taste').value,
-    ratings: { acidity: starRatings.acidity, bitterness: starRatings.bitterness, aroma: starRatings.aroma },
-    overallRating: overallRating,
+    intensity: { acidity: intensity.acidity, bitterness: intensity.bitterness, aroma: intensity.aroma },
+    rating: starRating,
+    keywords: selectedKeywords.slice(),
     memo: document.getElementById('inp-memo').value.trim()
   };
   if(editingId){
@@ -1112,7 +1384,8 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
   }
   const entry = Object.assign({
     id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-    ts: customTs || new Date().toISOString()
+    ts: customTs || new Date().toISOString(),
+    favorite: false
   }, values);
   entries.push(entry);
   saveEntries();
@@ -1134,6 +1407,20 @@ function getDatetimeValue(){
   return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
+// ---------- 옛 기록 호환 ----------
+function entryTools(e){
+  if(Array.isArray(e.tools)) return e.tools;
+  return e.dosingCup ? [DOSE_TOOL] : [];
+}
+function entryRating(e){
+  if(e.rating != null) return e.rating;
+  if(e.overallRating != null) return e.overallRating;
+  return 0;
+}
+function entryIntensity(e){
+  return e.intensity || e.ratings || null;
+}
+
 // ---------- detail view ----------
 function openDetail(e){
   const d = new Date(e.ts);
@@ -1143,37 +1430,48 @@ function openDetail(e){
   const water = e.water != null ? e.water : (e.liquid || 0);
   const milk = e.milk != null ? e.milk : 0;
   const openDate = e.beanOpenDate || e.beanPurchaseDate || '';
-  const rows = [
-    ['날짜', dateStr],
-    ['커피 종류', e.coffeeType],
-    ['원두', e.bean]
-  ];
+  const tools = entryTools(e);
+  const rows = [];
+  if(e.nickname) rows.push(['별칭', e.nickname]);
+  rows.push(['날짜', dateStr]);
+  rows.push(['커피 종류', e.coffeeType]);
+  rows.push(['원두', e.bean]);
   if(e.beanRoastDate) rows.push(['로스팅일자', formatDateShort(e.beanRoastDate)]);
   if(openDate) rows.push(['개봉일자', formatDateShort(openDate)]);
   if(e.daysSinceRoast != null) rows.push(['로스팅 후', (e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일']);
+  if(tools.length) rows.push(['도구', tools.join(', ')]);
   rows.push(['분쇄도', e.grind]);
   rows.push(['도징량', Number(e.dose).toFixed(1)+' g']);
-  rows.push(['도징컵', e.dosingCup ? '사용함' : '사용 안 함']);
+  if(e.doseIncludesCup) rows.push(['도징 입력값', Number(e.doseGross).toFixed(1)+' g (컵 포함)']);
   rows.push(['탬핑', e.tamp+' 회']);
   rows.push(['추출시간', e.time+' 초']);
   rows.push(['추출량', Number(e.yieldMl).toFixed(1)+' ml']);
+  if(e.yieldIncludesGlass) rows.push(['추출 입력값', Number(e.yieldGross).toFixed(1)+' ml (잔 포함)']);
   rows.push(['비율', ratio]);
   rows.push(['물', water+' ml']);
   rows.push(['우유', milk+' ml']);
   rows.push(['맛 평가', e.taste]);
-  if(e.ratings){
-    rows.push(['산미', starsText(e.ratings.acidity)]);
-    rows.push(['쓴맛', starsText(e.ratings.bitterness)]);
-    rows.push(['향', starsText(e.ratings.aroma)]);
+  const inten = entryIntensity(e);
+  if(inten){
+    rows.push(['산미 강도', (inten.acidity||0)+' / 5']);
+    rows.push(['쓴맛 강도', (inten.bitterness||0)+' / 5']);
+    rows.push(['향 강도', (inten.aroma||0)+' / 5']);
   }
-  if(e.overallRating != null) rows.push(['종합 별점', e.overallRating.toFixed(2)+' / 5.00']);
+  rows.push(['별점', entryRating(e).toFixed(1)+' / 5.0']);
+  if(e.favorite) rows.push(['즐겨찾기', '♥']);
   let html = '';
   rows.forEach(r=>{
-    html += '<div style="display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid rgba(43,31,22,0.08);">'
-      + '<span style="font-size:13px; color:var(--muted);">'+r[0]+'</span>'
-      + '<span style="font-size:14px; color:#241a12; font-weight:600; font-family:\'JetBrains Mono\',monospace;">'+escHtml(String(r[1]))+'</span>'
+    html += '<div style="display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid rgba(43,31,22,0.08);">'
+      + '<span style="font-size:13px; color:var(--muted); white-space:nowrap;">'+r[0]+'</span>'
+      + '<span style="font-size:14px; color:#241a12; font-weight:600; font-family:\'JetBrains Mono\',monospace; text-align:right;">'+escHtml(String(r[1]))+'</span>'
       + '</div>';
   });
+  if(e.keywords && e.keywords.length){
+    html += '<div style="padding:12px 0 2px;">'
+      + '<div style="font-size:13px; color:var(--muted); margin-bottom:6px;">키워드</div>'
+      + '<div style="font-size:14px; color:#241a12;">'+escHtml(e.keywords.join(' · '))+'</div>'
+      + '</div>';
+  }
   if(e.memo){
     html += '<div style="padding:12px 0 2px;">'
       + '<div style="font-size:13px; color:var(--muted); margin-bottom:6px;">메모</div>'
@@ -1192,26 +1490,44 @@ document.getElementById('detailOverlay').addEventListener('click', (ev)=>{
 
 // ---------- edit mode ----------
 function enterEditMode(entry){
+  // 픽커는 화면에 보이는 상태에서만 스크롤 위치를 잡을 수 있으므로
+  // 값을 넣기 전에 입력 탭으로 먼저 전환한다.
+  document.querySelector('.tab-btn[data-tab="input"]').click();
   editingId = entry.id;
+  document.getElementById('inp-nickname').value = entry.nickname || '';
   document.getElementById('sel-coffeeType').value = entry.coffeeType;
   document.getElementById('sel-bean').value = entry.bean;
   document.getElementById('sel-taste').value = entry.taste;
-  dosingCupUsed = !!entry.dosingCup;
-  updateDosingCupBtn();
-  pickers['pk-grind'].setValue(entry.grind);
-  pickers['pk-dose'].setValue(entry.dose);
-  pickers['pk-tamp'].setValue(entry.tamp);
-  pickers['pk-time'].setValue(entry.time);
-  pickers['pk-yield'].setValue(entry.yieldMl);
-  pickers['pk-water'].setValue(entry.water != null ? entry.water : (entry.liquid || 0));
-  pickers['pk-milk'].setValue(entry.milk != null ? entry.milk : 0);
   document.getElementById('inp-datetime').value = isoToLocal(entry.ts);
   document.getElementById('inp-memo').value = entry.memo || '';
-  starRatings = entry.ratings ? { acidity: entry.ratings.acidity||0, bitterness: entry.ratings.bitterness||0, aroma: entry.ratings.aroma||0 } : { acidity:0, bitterness:0, aroma:0 };
-  renderStarRating('star-acidity', starRatings.acidity);
-  renderStarRating('star-bitterness', starRatings.bitterness);
-  renderStarRating('star-aroma', starRatings.aroma);
-  updateOverallRatingDisplay();
+
+  selectedTools = entryTools(entry).slice();
+  renderToolChips();
+  doseIncludesCup = !!entry.doseIncludesCup;
+  yieldIncludesGlass = !!entry.yieldIncludesGlass;
+  document.getElementById('doseWeightToggle').style.display = selectedTools.includes(DOSE_TOOL) ? '' : 'none';
+  document.getElementById('yieldWeightToggle').style.display = selectedTools.includes(YIELD_TOOL) ? '' : 'none';
+  updateWeightToggleBtns();
+
+  selectedKeywords = Array.isArray(entry.keywords) ? entry.keywords.slice() : [];
+  renderKeywordChips();
+
+  setupPicker('pk-grind', { min:1, max:40, step:1, value:entry.grind, onChange: updateRatio });
+  setupPicker('pk-tamp', { min:0, max:10, step:1, value:entry.tamp });
+  setupPicker('pk-time', { min:0, max:90, step:1, value:entry.time });
+  setupPicker('pk-water', { min:0, max:400, step:5, value: entry.water != null ? entry.water : (entry.liquid || 0) });
+  setupPicker('pk-milk', { min:0, max:400, step:5, value: entry.milk != null ? entry.milk : 0 });
+  buildDosePicker(entry.dose);
+  buildYieldPicker(entry.yieldMl);
+
+  const inten = entryIntensity(entry);
+  intensity = inten
+    ? { acidity: Math.round(inten.acidity||0), bitterness: Math.round(inten.bitterness||0), aroma: Math.round(inten.aroma||0) }
+    : { acidity:0, bitterness:0, aroma:0 };
+  renderAllIntensity();
+  starRating = entryRating(entry);
+  renderStar();
+
   updateBeanInfo();
   updateRatio();
   document.getElementById('saveBtn').textContent = '수정 저장';
@@ -1219,8 +1535,6 @@ function enterEditMode(entry){
   const d = new Date(entry.ts);
   document.getElementById('editBannerText').textContent =
     (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+' 기록 수정 중';
-  // 입력 탭으로 전환
-  document.querySelector('.tab-btn[data-tab="input"]').click();
   window.scrollTo({top:0, behavior:'smooth'});
 }
 function exitEditMode(){
@@ -1229,9 +1543,16 @@ function exitEditMode(){
   document.getElementById('editBanner').style.display = 'none';
   document.getElementById('inp-datetime').value = '';
   document.getElementById('inp-memo').value = '';
-  dosingCupUsed = false;
-  updateDosingCupBtn();
-  resetStarRatings();
+  document.getElementById('inp-nickname').value = '';
+  selectedTools = [];
+  selectedKeywords = [];
+  intensity = { acidity:0, bitterness:0, aroma:0 };
+  starRating = 0;
+  renderToolChips();
+  renderKeywordChips();
+  renderAllIntensity();
+  renderStar();
+  syncWeightToggles();
   updateBeanInfo();
 }
 document.getElementById('cancelEditBtn').addEventListener('click', exitEditMode);
@@ -1243,11 +1564,15 @@ document.getElementById('loadRecipeBtn').addEventListener('click', ()=>{
   document.getElementById('sel-coffeeType').value = last.coffeeType;
   document.getElementById('sel-bean').value = last.bean;
   updateBeanInfo();
-  dosingCupUsed = !!last.dosingCup;
-  updateDosingCupBtn();
-  pickers['pk-grind'].setValue(last.grind);
-  pickers['pk-dose'].setValue(last.dose);
-  pickers['pk-tamp'].setValue(last.tamp);
+  selectedTools = entryTools(last).slice();
+  renderToolChips();
+  doseIncludesCup = !!last.doseIncludesCup;
+  document.getElementById('doseWeightToggle').style.display = selectedTools.includes(DOSE_TOOL) ? '' : 'none';
+  document.getElementById('yieldWeightToggle').style.display = selectedTools.includes(YIELD_TOOL) ? '' : 'none';
+  updateWeightToggleBtns();
+  setupPicker('pk-grind', { min:1, max:40, step:1, value:last.grind, onChange: updateRatio });
+  setupPicker('pk-tamp', { min:0, max:10, step:1, value:last.tamp });
+  buildDosePicker(last.dose);
   updateRatio();
   showToast('이전 레시피를 불러왔어요');
 });
@@ -1258,6 +1583,7 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
   document.getElementById('sel-bean').selectedIndex = 0;
   document.getElementById('sel-taste').selectedIndex = 0;
   updateBeanInfo();
+  updateRatio();
 });
 
 // ---------- entry list (card / list view) ----------
@@ -1272,19 +1598,21 @@ function getFilteredSortedEntries(){
   const beanFilter = document.getElementById('filter-bean').value;
   const tasteFilter = document.getElementById('filter-taste').value;
   const ratingFilter = parseFloat(document.getElementById('filter-rating').value) || 0;
+  const favOnly = document.getElementById('filter-favorite').value === '1';
 
   let rows = entries.filter(e=>
     (!typeFilter || e.coffeeType === typeFilter) &&
     (!beanFilter || e.bean === beanFilter) &&
     (!tasteFilter || e.taste === tasteFilter) &&
-    ((e.overallRating || 0) >= ratingFilter)
+    (entryRating(e) >= ratingFilter) &&
+    (!favOnly || e.favorite)
   );
 
   const ratioOf = e => (e.dose > 0 && e.yieldMl > 0) ? e.yieldMl / e.dose : 0;
   rows.sort((a,b)=>{
     let av, bv;
     if(sortState.col === 'ratio'){ av = ratioOf(a); bv = ratioOf(b); }
-    else if(sortState.col === 'overallRating'){ av = a.overallRating || 0; bv = b.overallRating || 0; }
+    else if(sortState.col === 'rating'){ av = entryRating(a); bv = entryRating(b); }
     else { av = a[sortState.col]; bv = b[sortState.col]; }
     if(sortState.col === 'ts'){ av = new Date(av).getTime(); bv = new Date(bv).getTime(); }
     if(typeof av === 'string') return sortState.dir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
@@ -1292,7 +1620,19 @@ function getFilteredSortedEntries(){
   });
   return rows;
 }
+function actionButtonsHtml(e){
+  return '<button class="fav-btn'+(e.favorite?' on':'')+'" data-id="'+e.id+'">'+(e.favorite?'♥':'♡')+'</button>'
+    + '<button class="edit-btn" data-id="'+e.id+'">✎</button>'
+    + '<button class="del-btn" data-id="'+e.id+'">×</button>';
+}
 function wireEntryButtons(container){
+  container.querySelectorAll('.fav-btn').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      const entry = entries.find(e=> e.id === btn.dataset.id);
+      if(entry){ entry.favorite = !entry.favorite; saveEntries(); renderTable(); }
+    });
+  });
   container.querySelectorAll('.edit-btn').forEach(btn=>{
     btn.addEventListener('click', (ev)=>{
       ev.stopPropagation();
@@ -1324,20 +1664,32 @@ function renderCardView(container, rows){
     const ratio = e.dose>0 && e.yieldMl>0 ? '1:'+(e.yieldMl/e.dose).toFixed(1) : '—';
     const water = e.water != null ? e.water : (e.liquid || 0);
     const milk = e.milk != null ? e.milk : 0;
-    const cupBadge = e.dosingCup ? ' · <span class="ec-cup">🥄 도징컵</span>' : '';
-    const extras = [];
-    if(water > 0) extras.push('물 '+water+'ml');
-    if(milk > 0) extras.push('우유 '+milk+'ml');
-    const ratingStr = e.overallRating ? '<span class="ec-rating">⭐ '+e.overallRating.toFixed(2)+'</span> · ' : '';
-    const memoStr = e.memo ? ' · '+escHtml(truncate(e.memo, 20)) : '';
+    const tools = entryTools(e);
+    const parts = [
+      '분쇄도 '+e.grind,
+      '도징 '+Number(e.dose).toFixed(1)+'g',
+      '탬핑 '+e.tamp+'회',
+      '추출 '+e.time+'초',
+      '추출량 '+Number(e.yieldMl).toFixed(1)+'ml',
+      '비율 '+ratio
+    ];
+    if(water > 0) parts.push('물 '+water+'ml');
+    if(milk > 0) parts.push('우유 '+milk+'ml');
+    if(e.daysSinceRoast != null) parts.push('로스팅 '+(e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일');
+    if(tools.length) parts.push(escHtml(tools.join('·')));
+    const rating = entryRating(e);
+    const ratingStr = rating ? '<span class="ec-rating">★ '+rating.toFixed(1)+'</span> · ' : '';
+    const nick = e.nickname ? '<span class="ec-nickname">'+escHtml(e.nickname)+'</span> · ' : '';
+    const kw = (e.keywords && e.keywords.length) ? ' · '+escHtml(e.keywords.join(' · ')) : '';
+    const memoStr = e.memo ? ' · <span class="ec-memo">'+escHtml(truncate(e.memo, 20))+'</span>' : '';
     html += '<div class="entry-card" data-open-id="'+e.id+'">'
       + '<div class="ec-top">'
       +   '<span class="ec-date">'+dateStr+'</span>'
-      +   '<div class="ec-actions"><button class="edit-btn" data-id="'+e.id+'">✎</button><button class="del-btn" data-id="'+e.id+'">×</button></div>'
+      +   '<div class="ec-actions">'+actionButtonsHtml(e)+'</div>'
       + '</div>'
-      + '<div class="ec-line1">'+escHtml(e.coffeeType)+' · '+escHtml(e.bean)+'</div>'
-      + '<div class="ec-line2">분쇄도 '+e.grind+' · 도징 '+Number(e.dose).toFixed(1)+'g'+cupBadge+' · 탬핑 '+e.tamp+'회 · 추출 '+e.time+'초 · 추출량 '+Number(e.yieldMl).toFixed(1)+'ml · 비율 '+ratio+(extras.length ? ' · '+extras.join(' · ') : '')+'</div>'
-      + '<div class="ec-line3">'+ratingStr+escHtml(e.taste)+memoStr+'</div>'
+      + '<div class="ec-line1">'+nick+escHtml(e.coffeeType)+' · '+escHtml(e.bean)+'</div>'
+      + '<div class="ec-line2">'+parts.join(' · ')+'</div>'
+      + '<div class="ec-line3">'+ratingStr+escHtml(e.taste)+kw+memoStr+'</div>'
       + '</div>';
   });
   html += '</div>';
@@ -1345,33 +1697,34 @@ function renderCardView(container, rows){
   wireEntryButtons(container);
 }
 function renderListView(container, rows){
-  const cols = [
-    {label:'날짜'}, {label:'종류'}, {label:'원두'}, {label:'분쇄도'}, {label:'도징(g)'},
-    {label:'탬핑'}, {label:'추출(초)'}, {label:'추출량(ml)'}, {label:'비율'}, {label:'별점'},
-    {label:'맛평가'}, {label:'메모'}
-  ];
+  const cols = ['날짜','별칭','종류','원두','로스팅후','도구','분쇄도','도징(g)','탬핑','추출(초)','추출량(ml)','비율','별점','맛평가','메모'];
   let html = '<div class="table-scroll"><table><thead><tr>';
-  cols.forEach(c=> html += '<th>'+c.label+'</th>');
+  cols.forEach(c=> html += '<th>'+c+'</th>');
   html += '<th></th></tr></thead><tbody>';
   rows.forEach(e=>{
     const d = new Date(e.ts);
     const dateStr = (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
     const ratio = e.dose>0 && e.yieldMl>0 ? '1:'+(e.yieldMl/e.dose).toFixed(1) : '—';
-    const rating = e.overallRating ? e.overallRating.toFixed(2) : '—';
+    const rating = entryRating(e);
+    const tools = entryTools(e);
+    const roastAge = e.daysSinceRoast != null ? (e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일' : '—';
     html += '<tr data-open-id="'+e.id+'">'
       + '<td>'+dateStr+'</td>'
+      + '<td class="taste-cell">'+escHtml(e.nickname || '—')+'</td>'
       + '<td>'+escHtml(e.coffeeType)+'</td>'
       + '<td>'+escHtml(e.bean)+'</td>'
+      + '<td>'+roastAge+'</td>'
+      + '<td class="taste-cell">'+escHtml(tools.length ? tools.join(', ') : '—')+'</td>'
       + '<td>'+e.grind+'</td>'
       + '<td>'+Number(e.dose).toFixed(1)+'</td>'
       + '<td>'+e.tamp+'</td>'
       + '<td>'+e.time+'</td>'
       + '<td>'+Number(e.yieldMl).toFixed(1)+'</td>'
       + '<td>'+ratio+'</td>'
-      + '<td>'+rating+'</td>'
+      + '<td>'+(rating ? rating.toFixed(1) : '—')+'</td>'
       + '<td class="taste-cell">'+escHtml(e.taste)+'</td>'
-      + '<td class="taste-cell" title="'+escHtml(e.memo||'')+'">'+escHtml(truncate(e.memo||'', 8))+'</td>'
-      + '<td style="white-space:nowrap;"><button class="edit-btn" data-id="'+e.id+'">✎</button><button class="del-btn" data-id="'+e.id+'">×</button></td>'
+      + '<td class="taste-cell" title="'+escHtml(e.memo||'')+'">'+escHtml(truncate(e.memo||'', 8) || '—')+'</td>'
+      + '<td><div class="row-actions">'+actionButtonsHtml(e)+'</div></td>'
       + '</tr>';
   });
   html += '</tbody></table></div>';
@@ -1382,16 +1735,15 @@ function renderTable(){
   const container = document.getElementById('tableContainer');
   const rows = getFilteredSortedEntries();
   if(rows.length === 0){
-    container.innerHTML = '<div class="empty-state">아직 기록이 없어요.<br>입력 탭에서 첫 추출을 기록해보세요.</div>';
+    container.innerHTML = '<div class="empty-state">조건에 맞는 기록이 없어요.<br>입력 탭에서 새 추출을 기록해보세요.</div>';
     return;
   }
   if(viewMode === 'list') renderListView(container, rows);
   else renderCardView(container, rows);
 }
-document.getElementById('filter-coffeeType').addEventListener('change', renderTable);
-document.getElementById('filter-bean').addEventListener('change', renderTable);
-document.getElementById('filter-taste').addEventListener('change', renderTable);
-document.getElementById('filter-rating').addEventListener('change', renderTable);
+['filter-coffeeType','filter-bean','filter-taste','filter-rating','filter-favorite'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', renderTable);
+});
 document.getElementById('sortSelect').addEventListener('change', (ev)=>{
   const [col, dir] = ev.target.value.split('-');
   sortState = { col, dir };
@@ -1406,42 +1758,100 @@ document.querySelectorAll('.viewmode-btn').forEach(btn=>{
   });
 });
 
+// ---------- 설정: 꾹 눌러 순서 바꾸기 ----------
+function enableReorder(box, key){
+  let dragEl = null, timer = null, dragging = false, startX = 0, startY = 0;
+  function cleanup(){
+    clearTimeout(timer);
+    if(dragEl) dragEl.classList.remove('dragging');
+    dragEl = null;
+    dragging = false;
+  }
+  Array.from(box.children).forEach(chip=>{
+    chip.addEventListener('pointerdown', (ev)=>{
+      if(ev.target.closest('button')) return;
+      startX = ev.clientX; startY = ev.clientY;
+      const pid = ev.pointerId;
+      timer = setTimeout(()=>{
+        dragging = true;
+        dragEl = chip;
+        chip.classList.add('dragging');
+        try{ chip.setPointerCapture(pid); }catch(err){}
+        if(navigator.vibrate) navigator.vibrate(25);
+      }, 350);
+    });
+    chip.addEventListener('pointermove', (ev)=>{
+      if(!dragging){
+        // 길게 누르기 전에 손가락이 움직이면 스크롤로 보고 취소
+        if(Math.abs(ev.clientX-startX) > 10 || Math.abs(ev.clientY-startY) > 10) clearTimeout(timer);
+        return;
+      }
+      ev.preventDefault();
+      const under = document.elementFromPoint(ev.clientX, ev.clientY);
+      const overChip = under && under.closest ? under.closest('.chip') : null;
+      if(overChip && overChip !== dragEl && overChip.parentElement === box){
+        const kids = Array.from(box.children);
+        if(kids.indexOf(dragEl) < kids.indexOf(overChip)) box.insertBefore(dragEl, overChip.nextSibling);
+        else box.insertBefore(dragEl, overChip);
+      }
+    });
+    chip.addEventListener('pointerup', ()=>{
+      if(dragging){
+        const order = Array.from(box.children).map(c=> parseInt(c.dataset.idx, 10));
+        const list = options[key];
+        options[key] = order.map(i=> list[i]);
+        cleanup();
+        saveOptions();
+        renderChips();
+        renderDropdowns();
+        renderToolChips();
+        renderKeywordChips();
+        showToast('순서를 바꿨어요');
+        return;
+      }
+      cleanup();
+    });
+    chip.addEventListener('pointercancel', cleanup);
+  });
+}
+
 // ---------- settings ----------
 function renderChips(){
   renderChipGroup('coffeeType');
-  renderBeanChips();
   renderChipGroup('taste');
+  renderChipGroup('memoKeywords');
+  renderBeanChips();
+  renderToolSettingChips();
 }
 function renderChipGroup(key){
   const box = document.getElementById('chips-'+key);
   box.innerHTML = '';
-  options[key].forEach(v=>{
+  options[key].forEach((v, idx)=>{
     const chip = document.createElement('div');
     chip.className = 'chip';
+    chip.dataset.idx = idx;
     const span = document.createElement('span');
     span.textContent = v;
     const btn = document.createElement('button');
     btn.textContent = '×';
-    btn.dataset.key = key;
-    btn.dataset.val = v;
+    btn.addEventListener('click', ()=>{
+      options[key] = options[key].filter(x=> x!==v);
+      saveOptions();
+      renderChips(); renderDropdowns(); renderKeywordChips();
+    });
     chip.appendChild(span);
     chip.appendChild(btn);
     box.appendChild(chip);
   });
-  box.querySelectorAll('button').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      options[btn.dataset.key] = options[btn.dataset.key].filter(x=> x!==btn.dataset.val);
-      saveOptions();
-      renderChips(); renderDropdowns();
-    });
-  });
+  enableReorder(box, key);
 }
 function renderBeanChips(){
   const box = document.getElementById('chips-bean');
   box.innerHTML = '';
-  options.bean.forEach(b=>{
+  options.bean.forEach((b, idx)=>{
     const chip = document.createElement('div');
     chip.className = 'chip' + (editingBeanName === b.name ? ' editing' : '');
+    chip.dataset.idx = idx;
     const span = document.createElement('span');
     span.textContent = b.name;
     span.style.cursor = 'pointer';
@@ -1464,6 +1874,39 @@ function renderBeanChips(){
     chip.appendChild(btn);
     box.appendChild(chip);
   });
+  enableReorder(box, 'bean');
+}
+function renderToolSettingChips(){
+  const box = document.getElementById('chips-tools');
+  box.innerHTML = '';
+  options.tools.forEach((t, idx)=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (editingToolName === t.name ? ' editing' : '');
+    chip.dataset.idx = idx;
+    const span = document.createElement('span');
+    span.textContent = t.name;
+    span.style.cursor = 'pointer';
+    span.addEventListener('click', ()=> startEditTool(t));
+    chip.appendChild(span);
+    if(t.weight){
+      const meta = document.createElement('span');
+      meta.className = 'chip-meta';
+      meta.textContent = t.weight+'g';
+      chip.appendChild(meta);
+    }
+    const btn = document.createElement('button');
+    btn.textContent = '×';
+    btn.addEventListener('click', ()=>{
+      options.tools = options.tools.filter(x=> x.name !== t.name);
+      selectedTools = selectedTools.filter(n=> n !== t.name);
+      if(editingToolName === t.name) cancelEditTool();
+      saveOptions();
+      renderChips(); renderToolChips(); syncWeightToggles();
+    });
+    chip.appendChild(btn);
+    box.appendChild(chip);
+  });
+  enableReorder(box, 'tools');
 }
 function startEditBean(b){
   editingBeanName = b.name;
@@ -1500,6 +1943,46 @@ document.getElementById('addBeanBtn').addEventListener('click', ()=>{
   saveOptions();
   renderChips(); renderDropdowns();
 });
+function startEditTool(t){
+  editingToolName = t.name;
+  document.getElementById('add-tool-name').value = t.name;
+  document.getElementById('add-tool-weight').value = t.weight || '';
+  document.getElementById('addToolBtn').textContent = '수정 완료';
+  renderToolSettingChips();
+}
+function cancelEditTool(){
+  editingToolName = null;
+  document.getElementById('add-tool-name').value = '';
+  document.getElementById('add-tool-weight').value = '';
+  document.getElementById('addToolBtn').textContent = '추가';
+}
+document.getElementById('addToolBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('add-tool-name').value.trim();
+  const weight = parseFloat(document.getElementById('add-tool-weight').value) || 0;
+  if(!name) return;
+  if(editingToolName){
+    const t = options.tools.find(x=> x.name === editingToolName);
+    if(t){
+      const oldName = t.name;
+      t.name = name; t.weight = weight;
+      selectedTools = selectedTools.map(n=> n === oldName ? name : n);
+    }
+    cancelEditTool();
+  } else {
+    if(!options.tools.some(t=> t.name === name)){
+      options.tools.push({ name, weight });
+    }
+    document.getElementById('add-tool-name').value = '';
+    document.getElementById('add-tool-weight').value = '';
+  }
+  saveOptions();
+  renderChips();
+  renderToolChips();
+  // 무게가 바뀌었으면 픽커 범위를 다시 잡는다
+  if(doseIncludesCup) buildDosePicker(getNetDose());
+  if(yieldIncludesGlass) buildYieldPicker(getNetYield());
+  syncWeightToggles();
+});
 document.querySelectorAll('.add-row button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const key = btn.dataset.target;
@@ -1509,7 +1992,7 @@ document.querySelectorAll('.add-row button').forEach(btn=>{
     if(!options[key].includes(val)) options[key].push(val);
     input.value = '';
     saveOptions();
-    renderChips(); renderDropdowns();
+    renderChips(); renderDropdowns(); renderKeywordChips();
   });
 });
 
@@ -1545,6 +2028,8 @@ document.getElementById('importFile').addEventListener('change', (ev)=>{
       saveEntries();
       renderDropdowns();
       renderChips();
+      renderToolChips();
+      renderKeywordChips();
       renderTable();
       showToast('가져왔어요');
     }catch(e){
@@ -1560,14 +2045,15 @@ document.getElementById('importFile').addEventListener('change', (ev)=>{
   loadAll();
   renderDropdowns();
   renderChips();
+  renderToolChips();
+  renderKeywordChips();
+  ['acidity','bitterness','aroma'].forEach(buildIntensityWidget);
+  renderAllIntensity();
+  renderStar();
   initPickers();
-  updateDosingCupBtn();
-  resetStarRatings();
-  enableManualEntry('pk-dose', 10, 30, 0.1);
-  enableManualEntry('pk-yield', 0, 120, 0.1);
-  wireStarRating('star-acidity', 'acidity');
-  wireStarRating('star-bitterness', 'bitterness');
-  wireStarRating('star-aroma', 'aroma');
+  updateWeightToggleBtns();
+  updateRatio();
+  ['pk-dose','pk-yield','pk-water','pk-milk'].forEach(enableManualEntry);
 })();
 
 if('serviceWorker' in navigator){
