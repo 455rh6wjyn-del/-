@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>피부 일지</title>
+<meta name="description" content="바른 것과 피부의 대화를 기록하는 스킨케어 일지">
+<meta name="theme-color" content="#3F6154">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="피부 일지">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F3F2EE;
+    --card: #FFFFFF;
+    --ink: #23272A;
+    --sub: #8A8F94;
+    --line: #E5E3DD;
+    --green: #3F6154;
+    --green-soft: #E3EBE6;
+    --rose: #C4685A;
+    --rose-soft: #F6E3DF;
+    --amber: #B08A4F;
+    --amber-soft: #F0EBDD;
+    --radius: 16px;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{ margin:0; padding:0; background: var(--bg) !important; }
+  body{
+    color: var(--ink);
+    font-family: 'IBM Plex Sans KR', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+  }
+  /* 뷰어가 body 배경을 무시해도 항상 같은 배경이 깔리도록 하는 고정 레이어 */
+  .bg-fix{ position: fixed; inset: 0; background: var(--bg); z-index: -1; pointer-events: none; }
+
+  button{ cursor:pointer; font-family: inherit; }
+  input, select, textarea{ font-family: inherit; }
+  input:focus, select:focus, textarea:focus, button:focus-visible{ outline: 2px solid var(--green); outline-offset: 1px; }
+
+  header.top{ padding: 22px 18px 10px; max-width: 560px; margin: 0 auto; }
+  header.top h1{
+    font-family: 'Gowun Batang', serif;
+    font-size: 26px; font-weight: 700; margin: 0;
+  }
+  header.top p{ margin: 2px 0 0; font-size: 13px; color: var(--sub); }
+
+  main{ max-width: 560px; margin: 0 auto; padding: 12px 18px 100px; }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .stack{ display:flex; flex-direction:column; gap: 14px; }
+  .stack-sm{ display:flex; flex-direction:column; gap: 10px; }
+
+  .label{
+    font-size: 12px; letter-spacing: 0.08em;
+    color: var(--sub); font-weight: 700; margin-bottom: 8px;
+  }
+  .hint{ font-size: 13px; color: var(--sub); line-height: 1.6; }
+
+  .inp{
+    display:block;
+    width: 100%; max-width:100%; min-width:0;
+    box-sizing:border-box;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    font-size: 15px;
+    background: #fff;
+    color: var(--ink);
+    color-scheme: light;
+  }
+  input.inp[type="date"], input.inp[type="time"]{
+    -webkit-appearance: none; appearance: none; min-height: 42px;
+  }
+  /* iOS Safari가 날짜·시간 입력을 칸보다 넓게 그리는 것을 막는다 */
+  input.inp::-webkit-date-and-time-value{ text-align:left; margin:0; max-width:100%; }
+  select.inp{
+    -webkit-appearance:none; appearance:none;
+    padding-right: 32px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238A8F94' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+  textarea.inp{ resize: vertical; min-height: 54px; }
+
+  .row{ display:flex; gap: 8px; }
+  .row-wrap{ display:flex; flex-wrap:wrap; gap: 6px; }
+  .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .spacer{ flex: 1; }
+
+  .btn-primary{
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--green);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .btn-primary:disabled{ opacity: .55; }
+  .btn-ghost{
+    padding: 9px 13px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    font-size: 13px;
+  }
+
+  .chip{
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    line-height: 1;
+    border: 1.5px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+  }
+  .chip.on{ border-color: var(--green); background: var(--green-soft); color: var(--green); font-weight: 700; }
+  .chip.rose.on{ border-color: var(--rose); background: var(--rose-soft); color: var(--rose); }
+
+  .kind-tag{
+    font-size: 12.5px; font-weight: 800;
+    border-radius: 999px; padding: 6px 12px;
+    flex-shrink: 0;
+  }
+  .kind-routine{ background: var(--green-soft); color: var(--green); }
+  .kind-skin{ background: var(--rose-soft); color: var(--rose); }
+  .kind-life{ background: var(--amber-soft); color: var(--amber); }
+
+  .chooser-btn{
+    text-align: left;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+  }
+  .chooser-btn .t{ display:block; font-size: 16.5px; font-weight: 700; }
+  .chooser-btn .d{ display:block; font-size: 13px; color: var(--sub); margin-top: 3px; }
+
+  .score-row{ display:flex; gap: 6px; }
+  .score-row button{
+    flex: 1; padding: 10px 0; border-radius: 10px;
+    font-size: 15px; font-weight: 700;
+    border: 1.5px solid var(--line); background: #fff; color: var(--sub);
+  }
+  .score-row button.on{ border-color: var(--green); background: var(--green); color: #fff; }
+  .score-cap{ font-size: 12px; color: var(--sub); margin-top: 6px; display:flex; justify-content: space-between; }
+
+  .stress-row{ display:flex; gap: 4px; }
+  .stress-row button{
+    flex:1; padding: 8px 0; border-radius: 8px;
+    border: 1.5px solid var(--line); background:#fff; color: var(--sub);
+    font-weight: 700; font-size: 13px;
+  }
+  .stress-row button.on{ border-color: var(--amber); background: var(--amber-soft); color: var(--amber); }
+
+  .photo-thumb{ position: relative; }
+  .photo-thumb img{
+    width: 54px; height: 54px; object-fit: cover;
+    border-radius: 8px; border: 1px solid var(--line); display:block;
+  }
+  .photo-thumb button{
+    position: absolute; top: -6px; right: -6px;
+    width: 20px; height: 20px; border-radius: 999px;
+    border: none; background: var(--ink); color: #fff;
+    font-size: 11px; line-height: 20px; padding: 0;
+  }
+
+  .date-head{
+    font-family: 'Gowun Batang', serif;
+    font-size: 15px; font-weight: 700; margin: 10px 2px 8px;
+  }
+  .rec-card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .rec-head{
+    width: 100%; background: none; border: none;
+    text-align: left; padding: 14px;
+  }
+  .rec-top{ display:flex; align-items:center; gap: 8px; }
+  .rec-tags{ display:flex; flex-wrap:wrap; gap: 5px; margin-top: 8px; }
+  .tag-sm{ font-size: 12px; background: var(--bg); border-radius: 6px; padding: 3px 7px; }
+  .tag-sm.rose{ background: var(--rose-soft); color: var(--rose); }
+  .rec-body{ border-top: 1px solid var(--line); padding: 14px; font-size: 13.5px; line-height: 1.7; }
+  .rec-memo{ margin-top: 6px; background: var(--bg); border-radius: 8px; padding: 8px 10px; white-space: pre-wrap; }
+  .rec-photos{ display:flex; gap: 8px; margin-top: 8px; }
+  .rec-photos img{
+    width: 90px; height: 90px; object-fit: cover;
+    border-radius: 10px; border: 1px solid var(--line);
+  }
+
+  .stat-row{
+    display:flex; align-items:center;
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .stat-row:last-child{ border-bottom: none; }
+  .stat-delta{ font-weight: 800; }
+  .delta-bad{ color: var(--rose); }
+  .delta-good{ color: var(--green); }
+  .delta-flat{ color: var(--sub); }
+
+  .prod-card{ background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); }
+  .prod-btn{ width:100%; background:none; border:none; text-align:left; padding: 14px; }
+  .rating-row{ display:flex; gap: 6px; }
+  .rating-row button{
+    flex: 1; padding: 10px 0; border-radius: 10px;
+    font-size: 13px; font-weight: 700;
+    border: 1.5px solid var(--line); background: #fff; color: var(--sub);
+  }
+
+  .toast{
+    position: fixed; bottom: 84px; left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--ink); color: #fff;
+    padding: 10px 18px; border-radius: 999px;
+    font-size: 14px; z-index: 50;
+    opacity: 0; transition: all .25s ease; pointer-events: none;
+    max-width: 90vw; text-align: center;
+  }
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  nav.bottom{
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #fff; border-top: 1px solid var(--line); z-index: 40;
+  }
+  nav.bottom .inner{ max-width: 560px; margin: 0 auto; display: flex; }
+  nav.bottom button{
+    flex: 1; padding: 14px 0 18px;
+    background: none; border: none;
+    font-size: 13.5px; color: var(--sub);
+    border-top: 2.5px solid transparent;
+  }
+  nav.bottom button.active{ font-weight: 800; color: var(--green); border-top-color: var(--green); }
+
+  .panel{ display: none; }
+  .panel.active{ display: block; }
+  .empty{ text-align:center; color: var(--sub); padding: 24px; font-size: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="bg-fix"></div>
+
+<header class="top">
+  <h1>피부 일지</h1>
+  <p>바른 것과 피부의 대화를 기록합니다</p>
+</header>
+
+<main>
+  <!-- ================= 기록하기 ================= -->
+  <section id="panel-input" class="panel active">
+
+    <!-- 기록 종류 고르기 -->
+    <div id="entryChooser" class="stack">
+      <div class="hint" style="margin: 4px 2px;">무엇을 기록할까요? 각각 따로, 필요한 것만 기록하면 돼요.</div>
+      <button class="chooser-btn" data-kind="routine">
+        <span class="kind-tag kind-routine">루틴</span>
+        <span>
+          <span class="t">루틴 기록</span>
+          <span class="d">오늘 바른 화장품과 사용한 디바이스</span>
+        </span>
+      </button>
+      <button class="chooser-btn" data-kind="skin">
+        <span class="kind-tag kind-skin">피부</span>
+        <span>
+          <span class="t">피부 상태 기록</span>
+          <span class="d">점수, 트러블 종류와 부위, 사진</span>
+        </span>
+      </button>
+      <button class="chooser-btn" data-kind="life">
+        <span class="kind-tag kind-life">생활</span>
+        <span>
+          <span class="t">생활 요인 기록</span>
+          <span class="d">수면 · 식사 · 스트레스 · 생리주기 · 기온</span>
+        </span>
+      </button>
+    </div>
+
+    <!-- 루틴 기록 -->
+    <div id="form-routine" class="stack" style="display:none;">
+      <div class="row" style="align-items:center;">
+        <button class="btn-ghost form-back" style="padding:6px 12px;">← 뒤로</button>
+        <span class="kind-tag kind-routine">루틴</span>
+        <span class="hint edit-note" style="display:none;">기존 기록 수정 중</span>
+      </div>
+      <div class="card">
+        <div class="label">언제</div>
+        <div class="row">
+          <input type="date" class="inp" id="rt-date" style="flex:1.3;">
+          <input type="time" class="inp" id="rt-time" style="flex:1;">
+        </div>
+        <div class="row" style="margin-top:10px; align-items:center;">
+          <button class="chip" data-slot="morning" id="rt-slot-morning">아침</button>
+          <button class="chip" data-slot="evening" id="rt-slot-evening">저녁</button>
+          <div class="spacer"></div>
+          <button class="btn-ghost" id="rt-loadRecent">최근 루틴 불러오기</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">사용한 화장품 · 디바이스</div>
+        <div id="rt-steps"></div>
+      </div>
+      <div class="card">
+        <div class="label">메모</div>
+        <textarea class="inp" id="rt-memo" rows="2" placeholder="새 제품 첫 사용, 따가움 등"></textarea>
+      </div>
+      <button class="btn-primary" id="rt-save">루틴 저장</button>
+    </div>
+
+    <!-- 피부 상태 기록 -->
+    <div id="form-skin" class="stack" style="display:none;">
+      <div class="row" style="align-items:center;">
+        <button class="btn-ghost form-back" style="padding:6px 12px;">← 뒤로</button>
+        <span class="kind-tag kind-skin">피부</span>
+        <span class="hint edit-note" style="display:none;">기존 기록 수정 중</span>
+      </div>
+      <div class="card">
+        <div class="label">언제</div>
+        <div class="row">
+          <input type="date" class="inp" id="sk-date" style="flex:1.3;">
+          <input type="time" class="inp" id="sk-time" style="flex:1;">
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">피부 종합 점수</div>
+        <div class="score-row" id="sk-score"></div>
+        <div class="score-cap"><span>1 · 많이 안 좋음</span><span>5 · 아주 좋음</span></div>
+      </div>
+      <div class="card">
+        <div class="label">트러블</div>
+        <div class="hint" style="margin-bottom:6px;">종류를 고르고, 얼굴에서 부위를 탭하세요</div>
+        <div class="row-wrap" id="sk-condTypes" style="margin-bottom:10px;"></div>
+        <div id="sk-zonePicker" style="display:none;">
+          <div class="row-wrap" id="sk-condTabs" style="margin-bottom:6px;"></div>
+          <div id="sk-faceMap"></div>
+        </div>
+        <div class="row-wrap" style="margin-top:12px; align-items:center;">
+          <button class="btn-ghost" id="sk-addPhoto">사진 추가 (0/2)</button>
+          <input type="file" id="sk-photoFile" accept="image/*" style="display:none;">
+          <div class="row-wrap" id="sk-photos" style="gap:10px;"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">메모</div>
+        <textarea class="inp" id="sk-memo" rows="2" placeholder="느낌, 특이사항"></textarea>
+      </div>
+      <button class="btn-primary" id="sk-save">피부 상태 저장</button>
+    </div>
+
+    <!-- 생활 요인 기록 -->
+    <div id="form-life" class="stack" style="display:none;">
+      <div class="row" style="align-items:center;">
+        <button class="btn-ghost form-back" style="padding:6px 12px;">← 뒤로</button>
+        <span class="kind-tag kind-life">생활</span>
+        <span class="hint edit-note" style="display:none;">기존 기록 수정 중</span>
+      </div>
+      <div class="card">
+        <div class="label">언제</div>
+        <div class="row">
+          <input type="date" class="inp" id="lf-date" style="flex:1.3;">
+          <input type="time" class="inp" id="lf-time" style="flex:1;">
+        </div>
+        <div class="hint" style="margin-top:8px; font-size:12px;">입력한 것만 저장돼요. 하루에 여러 번 나눠 기록해도 됩니다 (예: 점심에 식사만).</div>
+      </div>
+      <div class="card">
+        <div class="label">생활 요인</div>
+        <div class="grid2">
+          <div>
+            <div class="hint" style="margin-bottom:4px;">수면 시간</div>
+            <input type="number" inputmode="decimal" step="0.5" class="inp" id="lf-sleep" placeholder="예: 6.5">
+          </div>
+          <div>
+            <div class="hint" style="margin-bottom:4px;">식사</div>
+            <select class="inp" id="lf-meal"></select>
+          </div>
+          <div>
+            <div class="hint" style="margin-bottom:4px;">스트레스 (1~5)</div>
+            <div class="stress-row" id="lf-stress"></div>
+          </div>
+          <div>
+            <div class="hint" style="margin-bottom:4px;">생리주기</div>
+            <select class="inp" id="lf-cycle"></select>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">날씨</div>
+        <div class="row">
+          <input type="number" class="inp" id="lf-high" placeholder="최고 ℃" style="flex:1;">
+          <input type="number" class="inp" id="lf-low" placeholder="최저 ℃" style="flex:1;">
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">메모</div>
+        <textarea class="inp" id="lf-memo" rows="2" placeholder="야식, 운동, 외출 등 자유롭게"></textarea>
+      </div>
+      <button class="btn-primary" id="lf-save">생활 요인 저장</button>
+    </div>
+  </section>
+
+  <!-- ================= 타임라인 ================= -->
+  <section id="panel-list" class="panel">
+    <div id="listContainer" class="stack-sm"></div>
+  </section>
+
+  <!-- ================= 분석 ================= -->
+  <section id="panel-analysis" class="panel">
+    <div id="analysisContainer" class="stack"></div>
+  </section>
+
+  <!-- ================= 화장품 ================= -->
+  <section id="panel-products" class="panel">
+    <div id="productList" class="stack-sm"></div>
+    <div id="productForm" class="stack" style="display:none;">
+      <div class="card">
+        <div class="label" id="pf-title">새 제품 등록</div>
+        <div class="row" style="margin-bottom:10px;">
+          <button class="chip" data-ptype="cosmetic">화장품</button>
+          <button class="chip" data-ptype="device">디바이스</button>
+        </div>
+        <div class="stack-sm" style="gap:8px;">
+          <input class="inp" id="pf-brand" placeholder="제조사 (예: ○○코스메틱)">
+          <input class="inp" id="pf-name" placeholder="제품명 *">
+          <div>
+            <div class="hint" style="margin:4px 0 6px;">사용 시작일 (새 제품 의심 분석에 쓰여요)</div>
+            <input type="date" class="inp" id="pf-startDate">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">어느 단계에 표시할까요? *</div>
+        <div class="row-wrap" id="pf-steps"></div>
+      </div>
+      <div class="card">
+        <div class="label">전성분</div>
+        <textarea class="inp" id="pf-ingredients" rows="4" placeholder="정제수, 글리세린, …"></textarea>
+      </div>
+      <div class="card">
+        <div class="label">나의 평가</div>
+        <div class="rating-row" id="pf-rating" style="margin-bottom:10px;"></div>
+        <textarea class="inp" id="pf-memo" rows="3" placeholder="자세한 사용감·트러블 경험 (통계에는 위 평가가, 여기엔 디테일이 남아요)"></textarea>
+      </div>
+      <button class="btn-primary" id="pf-save">등록</button>
+      <div class="row">
+        <button class="btn-ghost" id="pf-cancel" style="flex:1;">취소</button>
+        <button class="btn-ghost" id="pf-delete" style="flex:1; border-color:var(--rose); color:var(--rose); font-weight:700; display:none;">삭제</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<nav class="bottom">
+  <div class="inner">
+    <button class="tab-btn active" data-tab="input">기록하기</button>
+    <button class="tab-btn" data-tab="list">타임라인</button>
+    <button class="tab-btn" data-tab="analysis">분석</button>
+    <button class="tab-btn" data-tab="products">화장품</button>
+  </div>
+</nav>
+
+<script>
+/* ─────────────────────────── 상수 ─────────────────────────── */
+const STEPS = ['세안','토너·패드','세럼','로션·크림','팩','디바이스','기타'];
+const COND_TYPES = ['여드름','좁쌀·뾰루지','붉음기','건조·각질','유분','가려움'];
+const ZONES = [
+  { id:'forehead', label:'이마',   cx:100, cy:58,  rx:46, ry:20 },
+  { id:'glabella', label:'미간',   cx:100, cy:90,  rx:12, ry:9  },
+  { id:'nose',     label:'코',     cx:100, cy:124, rx:12, ry:20 },
+  { id:'cheekL',   label:'왼볼',   cx:62,  cy:134, rx:21, ry:23 },
+  { id:'cheekR',   label:'오른볼', cx:138, cy:134, rx:21, ry:23 },
+  { id:'mouth',    label:'입가',   cx:100, cy:170, rx:23, ry:11 },
+  { id:'chin',     label:'턱',     cx:100, cy:198, rx:25, ry:12 }
+];
+const RATINGS = [
+  { id:'undecided', label:'판단 중', bg:'#EFEEE9', fg:'#8A8F94' },
+  { id:'good',      label:'잘 맞음', bg:'#E3EBE6', fg:'#3F6154' },
+  { id:'neutral',   label:'보통',    bg:'#F0EBDD', fg:'#B08A4F' },
+  { id:'bad',       label:'안 맞음', bg:'#F6E3DF', fg:'#C4685A' }
+];
+const MEALS = ['평소대로','가볍게','자극적·기름진','과식','음주'];
+const CYCLES = ['생리 중','생리 전','배란기','그 외'];
+const KIND_META = {
+  routine: { label:'루틴', cls:'kind-routine' },
+  skin:    { label:'피부', cls:'kind-skin' },
+  life:    { label:'생활', cls:'kind-life' }
+};
+
+/* ─────────────────────────── 상태 ─────────────────────────── */
+let products = [];
+let records = [];
+let tab = 'input';
+let inputMode = null;      // null | routine | skin | life
+let editRecord = null;     // 수정 중인 기록
+let openRecordId = null;   // 타임라인에서 펼친 기록
+const photoCache = {};
+
+let rtForm = null;         // 루틴 폼 상태
+let skForm = null;         // 피부 폼 상태
+let lfForm = null;         // 생활 폼 상태
+let pfForm = null;         // 제품 폼 상태
+
+/* ─────────────────────────── 유틸 ─────────────────────────── */
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const pad2 = n => String(n).padStart(2,'0');
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+}
+function nowTime(){
+  const d = new Date();
+  return pad2(d.getHours())+':'+pad2(d.getMinutes());
+}
+function addDays(dateStr, n){
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+}
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function el(id){ return document.getElementById(id); }
+
+/* ─────────────────────────── 저장소 (localStorage + Firestore) ─────────────────────────── */
+function storageGet(key){
+  try{ return localStorage.getItem(key); }catch(e){ return null; }
+}
+function storageSet(key, value){
+  try{ localStorage.setItem(key, value); return true; }catch(e){ return false; }
+}
+function storageDel(key){
+  try{ localStorage.removeItem(key); }catch(e){}
+}
+
+let useCloud = false;
+let fbRefs = null;
+
+function sortRecords(){
+  records.sort((a,b)=> (b.date+b.time).localeCompare(a.date+a.time));
+}
+
+function loadAll(){
+  const p = storageGet('skin-products');
+  if(p){ try{ products = JSON.parse(p) || []; }catch(e){ products = []; } }
+  const r = storageGet('skin-records');
+  if(r){ try{ records = JSON.parse(r) || []; }catch(e){ records = []; } }
+  records = migrateRecords(records).records;
+  sortRecords();
+}
+function saveProducts(){
+  const json = JSON.stringify(products);
+  const ok = storageSet('skin-products', json);
+  if(!ok) showToast('이 기기에 저장하지 못했어요. 저장 공간을 확인해 주세요');
+  if(useCloud && fbRefs){
+    fbRefs.fb.setDoc(fbRefs.productsRef, { value: json })
+      .catch(()=> showToast('클라우드 동기화 실패 — 이 기기에는 저장됐어요'));
+  }
+}
+function saveRecords(){
+  sortRecords();
+  const json = JSON.stringify(records);
+  const ok = storageSet('skin-records', json);
+  if(!ok) showToast('이 기기에 저장하지 못했어요. 저장 공간을 확인해 주세요');
+  if(useCloud && fbRefs){
+    fbRefs.fb.setDoc(fbRefs.recordsRef, { value: json })
+      .catch(()=> showToast('클라우드 동기화 실패 — 이 기기에는 저장됐어요'));
+  }
+}
+
+/* 사진은 기록마다 문서를 따로 둔다 (한 문서에 몰면 용량 제한에 걸린다) */
+async function loadPhotos(id){
+  const local = storageGet('skin-photos:'+id);
+  if(local){ try{ return JSON.parse(local); }catch(e){} }
+  if(useCloud && fbRefs){
+    try{
+      const snap = await fbRefs.fb.getDoc(fbRefs.photoRef(id));
+      if(snap.exists() && snap.data().value){
+        storageSet('skin-photos:'+id, snap.data().value);
+        return JSON.parse(snap.data().value);
+      }
+    }catch(e){}
+  }
+  return [];
+}
+async function savePhotos(id, arr){
+  if(arr.length){
+    const json = JSON.stringify(arr);
+    if(!storageSet('skin-photos:'+id, json)) showToast('사진을 이 기기에 저장하지 못했어요');
+    if(useCloud && fbRefs){
+      try{ await fbRefs.fb.setDoc(fbRefs.photoRef(id), { value: json }); }
+      catch(e){ showToast('사진 동기화에 실패했어요'); }
+    }
+  } else {
+    await deletePhotos(id);
+  }
+  photoCache[id] = arr;
+}
+async function deletePhotos(id){
+  storageDel('skin-photos:'+id);
+  delete photoCache[id];
+  if(useCloud && fbRefs){
+    try{ await fbRefs.fb.deleteDoc(fbRefs.photoRef(id)); }catch(e){}
+  }
+}
+
+window.startCloudSync = function(fb){
+  const productsRef = fb.doc(fb.db, 'skinLog', 'products');
+  const recordsRef = fb.doc(fb.db, 'skinLog', 'records');
+  fbRefs = {
+    fb, productsRef, recordsRef,
+    photoRef: (id)=> fb.doc(fb.db, 'skinLogPhotos', id)
+  };
+
+  fb.onSnapshot(productsRef, (snap)=>{
+    useCloud = true;
+    if(snap.exists() && snap.data().value){
+      try{ products = JSON.parse(snap.data().value) || []; }catch(e){ return; }
+      storageSet('skin-products', snap.data().value);
+      if(tab === 'products') renderProducts();
+      if(inputMode === 'routine') renderRoutineSteps();
+      if(tab === 'list') renderList();
+    } else {
+      fb.setDoc(productsRef, { value: JSON.stringify(products) }).catch(()=>{});
+    }
+  }, ()=>{ useCloud = false; showToast('클라우드 연결 실패 — 이 기기에만 저장돼요'); });
+
+  fb.onSnapshot(recordsRef, (snap)=>{
+    useCloud = true;
+    if(snap.exists() && snap.data().value){
+      let incoming;
+      try{ incoming = JSON.parse(snap.data().value) || []; }catch(e){ return; }
+      const migrated = migrateRecords(incoming);
+      records = migrated.records;
+      sortRecords();
+      storageSet('skin-records', JSON.stringify(records));
+      if(tab === 'list') renderList();
+      if(tab === 'analysis') renderAnalysis();
+    } else {
+      fb.setDoc(recordsRef, { value: JSON.stringify(records) }).catch(()=>{});
+    }
+  }, ()=>{ useCloud = false; showToast('클라우드 연결 실패 — 이 기기에만 저장돼요'); });
+};
+
+/* 종류 구분이 없던 옛 기록을 루틴/피부/생활로 쪼갠다 */
+function migrateRecords(raw){
+  if(!Array.isArray(raw)) return { records: [], changed: false };
+  let changed = false;
+  const out = [];
+  raw.forEach(r=>{
+    if(!r) return;
+    if(r.kind){ out.push(r); return; }
+    changed = true;
+    const base = { date: r.date, time: r.time };
+    if(r.steps && Object.keys(r.steps).length){
+      out.push(Object.assign({ id: r.id+'_r', kind:'routine' }, base,
+        { slot: r.slot || 'evening', steps: r.steps, memo: r.memo || '' }));
+    }
+    out.push(Object.assign({ id: r.id, kind:'skin' }, base,
+      { score: r.score == null ? 3 : r.score, conds: r.conds || {}, photoCount: r.photoCount || 0, memo: r.memo || '' }));
+    const lifeHas = r.life && (r.life.sleep || r.life.meal || r.life.stress || r.life.cycle);
+    const weatherHas = r.weather && (r.weather.high || r.weather.low);
+    if(lifeHas || weatherHas){
+      out.push(Object.assign({ id: r.id+'_l', kind:'life' }, base,
+        { life: r.life || {}, weather: r.weather || {}, memo: '' }));
+    }
+  });
+  return { records: out, changed };
+}
+
+/* ─────────────────────────── 토스트 ─────────────────────────── */
+let toastTimer;
+function showToast(msg){
+  const t = el('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+/* ─────────────────────────── 탭 ─────────────────────────── */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b=> b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.panel').forEach(p=> p.classList.remove('active'));
+    el('panel-'+tab).classList.add('active');
+    if(tab !== 'input'){ editRecord = null; setInputMode(null); }
+    if(tab === 'list') renderList();
+    if(tab === 'analysis') renderAnalysis();
+    if(tab === 'products') renderProducts();
+    window.scrollTo({ top: 0 });
+  });
+});
+function goTab(name){
+  const btn = document.querySelector('.tab-btn[data-tab="'+name+'"]');
+  if(btn) btn.click();
+}
+
+/* ─────────────────────────── 기록 종류 고르기 ─────────────────────────── */
+document.querySelectorAll('.chooser-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> setInputMode(btn.dataset.kind));
+});
+document.querySelectorAll('.form-back').forEach(btn=>{
+  btn.addEventListener('click', ()=>{ editRecord = null; setInputMode(null); });
+});
+
+function setInputMode(mode){
+  inputMode = mode;
+  el('entryChooser').style.display = mode ? 'none' : 'flex';
+  ['routine','skin','life'].forEach(k=>{
+    el('form-'+k).style.display = (mode === k) ? 'flex' : 'none';
+  });
+  if(mode === 'routine') initRoutineForm();
+  if(mode === 'skin') initSkinForm();
+  if(mode === 'life') initLifeForm();
+}
+
+function startEdit(rec){
+  editRecord = rec;
+  goTab('input');
+  setInputMode(rec.kind);
+}
+
+function upsertRecord(rec, isEdit){
+  if(isEdit) records = records.map(r=> r.id === rec.id ? rec : r);
+  else records = [rec].concat(records);
+  saveRecords();
+  editRecord = null;
+  setInputMode(null);
+  showToast(isEdit ? '기록을 수정했어요' : '기록을 저장했어요');
+  goTab('list');
+}
+
+/* ─────────────────────────── 루틴 기록 ─────────────────────────── */
+function initRoutineForm(){
+  const e = editRecord && editRecord.kind === 'routine' ? editRecord : null;
+  rtForm = {
+    date: e ? e.date : todayStr(),
+    time: e ? e.time : nowTime(),
+    slot: e ? e.slot : (new Date().getHours() < 15 ? 'morning' : 'evening'),
+    steps: e ? JSON.parse(JSON.stringify(e.steps || {})) : {},
+    memo: e ? (e.memo || '') : ''
+  };
+  el('rt-date').value = rtForm.date;
+  el('rt-time').value = rtForm.time;
+  el('rt-memo').value = rtForm.memo;
+  el('rt-save').textContent = e ? '수정 저장' : '루틴 저장';
+  el('form-routine').querySelector('.edit-note').style.display = e ? '' : 'none';
+  renderRoutineSlot();
+  renderRoutineSteps();
+}
+el('rt-date').addEventListener('change', ()=>{ rtForm.date = el('rt-date').value; });
+el('rt-time').addEventListener('change', ()=>{ rtForm.time = el('rt-time').value; });
+el('rt-memo').addEventListener('input', ()=>{ rtForm.memo = el('rt-memo').value; });
+
+function renderRoutineSlot(){
+  el('rt-slot-morning').classList.toggle('on', rtForm.slot === 'morning');
+  el('rt-slot-evening').classList.toggle('on', rtForm.slot === 'evening');
+}
+document.querySelectorAll('[data-slot]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{ rtForm.slot = btn.dataset.slot; renderRoutineSlot(); });
+});
+
+function renderRoutineSteps(){
+  const box = el('rt-steps');
+  box.innerHTML = '';
+  if(products.length === 0){
+    box.innerHTML = '<div class="hint">화장품 탭에서 제품을 먼저 등록하면 여기에 단계별로 나타나요.</div>';
+    return;
+  }
+  let any = false;
+  STEPS.forEach(step=>{
+    const inStep = products.filter(p=> (p.steps || []).includes(step));
+    if(!inStep.length) return;
+    any = true;
+    const wrap = document.createElement('div');
+    wrap.style.marginBottom = '12px';
+    const title = document.createElement('div');
+    title.style.cssText = 'font-size:13px; font-weight:700; color:var(--green); margin-bottom:6px;';
+    title.textContent = step;
+    wrap.appendChild(title);
+    const row = document.createElement('div');
+    row.className = 'row-wrap';
+    inStep.forEach(p=>{
+      const chip = document.createElement('button');
+      chip.className = 'chip' + ((rtForm.steps[step] || []).includes(p.id) ? ' on' : '');
+      chip.textContent = p.name;
+      chip.addEventListener('click', ()=>{
+        const cur = rtForm.steps[step] || [];
+        rtForm.steps[step] = cur.includes(p.id) ? cur.filter(x=> x !== p.id) : cur.concat([p.id]);
+        renderRoutineSteps();
+      });
+      row.appendChild(chip);
+    });
+    wrap.appendChild(row);
+    box.appendChild(wrap);
+  });
+  if(!any) box.innerHTML = '<div class="hint">등록된 제품에 단계가 지정되지 않았어요. 화장품 탭에서 단계를 골라 주세요.</div>';
+}
+
+el('rt-loadRecent').addEventListener('click', ()=>{
+  const last = records.find(r=> r.kind === 'routine' && r.slot === rtForm.slot)
+            || records.find(r=> r.kind === 'routine');
+  if(!last){ showToast('불러올 이전 루틴이 없어요'); return; }
+  rtForm.steps = JSON.parse(JSON.stringify(last.steps || {}));
+  renderRoutineSteps();
+  showToast('최근 루틴을 불러왔어요');
+});
+
+el('rt-save').addEventListener('click', ()=>{
+  const picked = Object.keys(rtForm.steps).reduce((n,k)=> n + rtForm.steps[k].length, 0);
+  if(!picked){ showToast('사용한 제품을 하나 이상 선택해 주세요'); return; }
+  const steps = {};
+  Object.keys(rtForm.steps).forEach(k=>{ if(rtForm.steps[k].length) steps[k] = rtForm.steps[k]; });
+  const isEdit = !!(editRecord && editRecord.kind === 'routine');
+  upsertRecord({
+    id: isEdit ? editRecord.id : uid(),
+    kind: 'routine',
+    date: rtForm.date, time: rtForm.time, slot: rtForm.slot,
+    steps: steps, memo: rtForm.memo
+  }, isEdit);
+});
+
+/* ─────────────────────────── 피부 상태 기록 ─────────────────────────── */
+function initSkinForm(){
+  const e = editRecord && editRecord.kind === 'skin' ? editRecord : null;
+  skForm = {
+    date: e ? e.date : todayStr(),
+    time: e ? e.time : nowTime(),
+    score: e ? e.score : 3,
+    conds: e ? JSON.parse(JSON.stringify(e.conds || {})) : {},
+    activeCond: null,
+    photos: [],
+    memo: e ? (e.memo || '') : ''
+  };
+  el('sk-date').value = skForm.date;
+  el('sk-time').value = skForm.time;
+  el('sk-memo').value = skForm.memo;
+  el('sk-save').textContent = e ? '수정 저장' : '피부 상태 저장';
+  el('form-skin').querySelector('.edit-note').style.display = e ? '' : 'none';
+  renderScore();
+  renderCondTypes();
+  renderZonePicker();
+  renderPhotos();
+  if(e && e.photoCount){
+    loadPhotos(e.id).then(ph=>{
+      if(skForm && editRecord && editRecord.id === e.id){ skForm.photos = ph; renderPhotos(); }
+    });
+  }
+}
+el('sk-date').addEventListener('change', ()=>{ skForm.date = el('sk-date').value; });
+el('sk-time').addEventListener('change', ()=>{ skForm.time = el('sk-time').value; });
+el('sk-memo').addEventListener('input', ()=>{ skForm.memo = el('sk-memo').value; });
+
+function renderScore(){
+  const box = el('sk-score');
+  box.innerHTML = '';
+  [1,2,3,4,5].forEach(n=>{
+    const b = document.createElement('button');
+    b.textContent = n;
+    if(skForm.score === n) b.classList.add('on');
+    b.addEventListener('click', ()=>{ skForm.score = n; renderScore(); });
+    box.appendChild(b);
+  });
+}
+
+function renderCondTypes(){
+  const box = el('sk-condTypes');
+  box.innerHTML = '';
+  COND_TYPES.forEach(t=>{
+    const on = !!skForm.conds[t];
+    const chip = document.createElement('button');
+    chip.className = 'chip rose' + (on ? ' on' : '');
+    chip.textContent = t + (on && skForm.conds[t].length ? ' ' + skForm.conds[t].length : '');
+    chip.addEventListener('click', ()=>{
+      if(skForm.conds[t]){
+        delete skForm.conds[t];
+        if(skForm.activeCond === t) skForm.activeCond = null;
+      } else {
+        skForm.conds[t] = [];
+        skForm.activeCond = t;
+      }
+      renderCondTypes();
+      renderZonePicker();
+    });
+    box.appendChild(chip);
+  });
+}
+
+function renderZonePicker(){
+  const types = Object.keys(skForm.conds);
+  const wrap = el('sk-zonePicker');
+  if(!types.length){ wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  if(!skForm.activeCond || !skForm.conds[skForm.activeCond]) skForm.activeCond = types[0];
+
+  const tabs = el('sk-condTabs');
+  tabs.innerHTML = '';
+  types.forEach(t=>{
+    const b = document.createElement('button');
+    b.className = 'btn-ghost';
+    b.style.padding = '5px 10px';
+    b.textContent = t + ' 부위 선택';
+    if(skForm.activeCond === t){
+      b.style.fontWeight = '800';
+      b.style.borderColor = 'var(--rose)';
+      b.style.color = 'var(--rose)';
+    }
+    b.addEventListener('click', ()=>{ skForm.activeCond = t; renderZonePicker(); });
+    tabs.appendChild(b);
+  });
+  renderFaceMap();
+}
+
+function renderFaceMap(){
+  const selected = skForm.activeCond ? (skForm.conds[skForm.activeCond] || []) : [];
+  const others = [];
+  Object.keys(skForm.conds).forEach(t=>{
+    if(t !== skForm.activeCond) skForm.conds[t].forEach(z=> others.push(z));
+  });
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 200 235');
+  svg.setAttribute('style', 'width:170px; display:block; margin:0 auto;');
+
+  const face = document.createElementNS(NS, 'ellipse');
+  face.setAttribute('cx','100'); face.setAttribute('cy','120');
+  face.setAttribute('rx','72'); face.setAttribute('ry','98');
+  face.setAttribute('fill','#FBFAF7');
+  face.setAttribute('stroke','#E5E3DD');
+  face.setAttribute('stroke-width','2');
+  svg.appendChild(face);
+
+  ['M60 100 q10 -7 20 0','M120 100 q10 -7 20 0'].forEach(d=>{
+    const brow = document.createElementNS(NS, 'path');
+    brow.setAttribute('d', d);
+    brow.setAttribute('stroke','#8A8F94');
+    brow.setAttribute('stroke-width','2');
+    brow.setAttribute('fill','none');
+    brow.setAttribute('stroke-linecap','round');
+    svg.appendChild(brow);
+  });
+
+  ZONES.forEach(z=>{
+    const on = selected.includes(z.id);
+    const other = !on && others.includes(z.id);
+    const g = document.createElementNS(NS, 'g');
+    g.style.cursor = 'pointer';
+    g.addEventListener('click', ()=>{
+      if(!skForm.activeCond) return;
+      const cur = skForm.conds[skForm.activeCond] || [];
+      skForm.conds[skForm.activeCond] = cur.includes(z.id) ? cur.filter(x=> x !== z.id) : cur.concat([z.id]);
+      renderCondTypes();
+      renderFaceMap();
+    });
+    const e2 = document.createElementNS(NS, 'ellipse');
+    e2.setAttribute('cx', z.cx); e2.setAttribute('cy', z.cy);
+    e2.setAttribute('rx', z.rx); e2.setAttribute('ry', z.ry);
+    e2.setAttribute('fill', on ? '#F6E3DF' : 'transparent');
+    e2.setAttribute('stroke', on ? '#C4685A' : (other ? '#B08A4F' : '#E5E3DD'));
+    e2.setAttribute('stroke-width', on ? '2' : '1.2');
+    e2.setAttribute('stroke-dasharray', (on || other) ? 'none' : '3 3');
+    g.appendChild(e2);
+    const tx = document.createElementNS(NS, 'text');
+    tx.setAttribute('x', z.cx); tx.setAttribute('y', z.cy + 4);
+    tx.setAttribute('text-anchor','middle');
+    tx.setAttribute('font-size','10.5');
+    tx.setAttribute('fill', on ? '#C4685A' : '#8A8F94');
+    tx.setAttribute('style','pointer-events:none; font-weight:' + (on ? 700 : 400) + ';');
+    tx.textContent = z.label;
+    g.appendChild(tx);
+    svg.appendChild(g);
+  });
+
+  const box = el('sk-faceMap');
+  box.innerHTML = '';
+  box.appendChild(svg);
+}
+
+/* 사진 압축 — 긴 변 500px, JPEG 0.7 */
+function compressImage(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const max = 500;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(img.width * scale);
+        cv.height = Math.round(img.height * scale);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        resolve(cv.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+el('sk-addPhoto').addEventListener('click', ()=> el('sk-photoFile').click());
+el('sk-photoFile').addEventListener('change', async (ev)=>{
+  const file = ev.target.files[0];
+  ev.target.value = '';
+  if(!file) return;
+  if(skForm.photos.length >= 2){ showToast('사진은 기록당 2장까지 저장할 수 있어요'); return; }
+  try{
+    skForm.photos = skForm.photos.concat([await compressImage(file)]);
+    renderPhotos();
+  }catch(e){
+    showToast('사진을 처리하지 못했어요');
+  }
+});
+
+function renderPhotos(){
+  el('sk-addPhoto').textContent = '사진 추가 (' + skForm.photos.length + '/2)';
+  const box = el('sk-photos');
+  box.innerHTML = '';
+  skForm.photos.forEach((src, i)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'photo-thumb';
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = '피부 사진 ' + (i+1);
+    const del = document.createElement('button');
+    del.textContent = '✕';
+    del.addEventListener('click', ()=>{
+      skForm.photos = skForm.photos.filter((_, j)=> j !== i);
+      renderPhotos();
+    });
+    wrap.appendChild(img);
+    wrap.appendChild(del);
+    box.appendChild(wrap);
+  });
+}
+
+el('sk-save').addEventListener('click', async ()=>{
+  const isEdit = !!(editRecord && editRecord.kind === 'skin');
+  const id = isEdit ? editRecord.id : uid();
+  const btn = el('sk-save');
+  btn.disabled = true;
+  await savePhotos(id, skForm.photos);
+  btn.disabled = false;
+  upsertRecord({
+    id: id, kind: 'skin',
+    date: skForm.date, time: skForm.time,
+    score: skForm.score, conds: skForm.conds,
+    memo: skForm.memo, photoCount: skForm.photos.length
+  }, isEdit);
+});
+
+/* ─────────────────────────── 생활 요인 기록 ─────────────────────────── */
+function initLifeForm(){
+  const e = editRecord && editRecord.kind === 'life' ? editRecord : null;
+  const life = e && e.life ? e.life : {};
+  const weather = e && e.weather ? e.weather : {};
+  lfForm = {
+    date: e ? e.date : todayStr(),
+    time: e ? e.time : nowTime(),
+    sleep: life.sleep || '',
+    meal: life.meal || '',
+    stress: life.stress || 0,
+    cycle: life.cycle || '',
+    high: weather.high || '',
+    low: weather.low || '',
+    memo: e ? (e.memo || '') : ''
+  };
+  el('lf-date').value = lfForm.date;
+  el('lf-time').value = lfForm.time;
+  el('lf-sleep').value = lfForm.sleep;
+  el('lf-high').value = lfForm.high;
+  el('lf-low').value = lfForm.low;
+  el('lf-memo').value = lfForm.memo;
+  fillSelect('lf-meal', MEALS, lfForm.meal);
+  fillSelect('lf-cycle', CYCLES, lfForm.cycle);
+  el('lf-save').textContent = e ? '수정 저장' : '생활 요인 저장';
+  el('form-life').querySelector('.edit-note').style.display = e ? '' : 'none';
+  renderStress();
+}
+function fillSelect(id, list, value){
+  const sel = el(id);
+  sel.innerHTML = '';
+  const none = document.createElement('option');
+  none.value = ''; none.textContent = '선택 안 함';
+  sel.appendChild(none);
+  list.forEach(v=>{
+    const o = document.createElement('option');
+    o.value = v; o.textContent = v;
+    sel.appendChild(o);
+  });
+  sel.value = value || '';
+}
+function renderStress(){
+  const box = el('lf-stress');
+  box.innerHTML = '';
+  [1,2,3,4,5].forEach(n=>{
+    const b = document.createElement('button');
+    b.textContent = n;
+    if(lfForm.stress && lfForm.stress >= n) b.classList.add('on');
+    b.addEventListener('click', ()=>{
+      lfForm.stress = lfForm.stress === n ? 0 : n;
+      renderStress();
+    });
+    box.appendChild(b);
+  });
+}
+[['lf-date','date'],['lf-time','time'],['lf-sleep','sleep'],['lf-high','high'],['lf-low','low'],['lf-memo','memo'],['lf-meal','meal'],['lf-cycle','cycle']]
+  .forEach(([id, key])=>{
+    el(id).addEventListener('change', ()=>{ lfForm[key] = el(id).value; });
+    el(id).addEventListener('input', ()=>{ lfForm[key] = el(id).value; });
+  });
+
+el('lf-save').addEventListener('click', ()=>{
+  const has = lfForm.sleep || lfForm.meal || lfForm.stress || lfForm.cycle || lfForm.high || lfForm.low || lfForm.memo;
+  if(!has){ showToast('항목을 하나 이상 입력해 주세요'); return; }
+  const isEdit = !!(editRecord && editRecord.kind === 'life');
+  upsertRecord({
+    id: isEdit ? editRecord.id : uid(),
+    kind: 'life',
+    date: lfForm.date, time: lfForm.time,
+    life: { sleep: lfForm.sleep, meal: lfForm.meal, stress: lfForm.stress, cycle: lfForm.cycle },
+    weather: { high: lfForm.high, low: lfForm.low },
+    memo: lfForm.memo
+  }, isEdit);
+});
+
+/* ─────────────────────────── 타임라인 ─────────────────────────── */
+function productName(id){
+  const p = products.find(x=> x.id === id);
+  return p ? p.name : '(삭제된 제품)';
+}
+function routineProductIds(r){
+  const out = [];
+  Object.keys(r.steps || {}).forEach(k=> (r.steps[k] || []).forEach(id=> out.push(id)));
+  return out;
+}
+function lifeSummary(r){
+  const parts = [];
+  if(r.life && r.life.sleep) parts.push('수면 ' + r.life.sleep + 'h');
+  if(r.life && r.life.meal) parts.push(r.life.meal);
+  if(r.life && r.life.stress) parts.push('스트레스 ' + r.life.stress);
+  if(r.life && r.life.cycle) parts.push(r.life.cycle);
+  if(r.weather && r.weather.high) parts.push(r.weather.low + '~' + r.weather.high + '℃');
+  return parts.join(' · ');
+}
+
+function renderList(){
+  const box = el('listContainer');
+  box.innerHTML = '';
+  if(!records.length){
+    box.innerHTML = '<div class="card"><div class="empty">아직 기록이 없어요. 기록하기 탭에서 첫 기록을 남겨보세요.</div></div>';
+    return;
+  }
+  let lastDate = null;
+  records.forEach(r=>{
+    if(r.date !== lastDate){
+      const h = document.createElement('div');
+      h.className = 'date-head';
+      h.textContent = r.date;
+      box.appendChild(h);
+      lastDate = r.date;
+    }
+    box.appendChild(recordCard(r));
+  });
+}
+
+function recordCard(r){
+  const meta = KIND_META[r.kind] || KIND_META.routine;
+  const card = document.createElement('div');
+  card.className = 'rec-card';
+
+  const head = document.createElement('button');
+  head.className = 'rec-head';
+
+  const top = document.createElement('div');
+  top.className = 'rec-top';
+  top.innerHTML = '<span class="kind-tag ' + meta.cls + '" style="font-size:12px; padding:4px 10px;">' + meta.label + '</span>'
+    + (r.kind === 'routine' ? '<span style="font-size:13px; font-weight:700; color:var(--green);">' + (r.slot === 'morning' ? '아침' : '저녁') + '</span>' : '')
+    + '<span style="font-size:13px; color:var(--sub);">' + escHtml(r.time) + '</span>'
+    + '<div class="spacer"></div>'
+    + (r.kind === 'skin'
+        ? '<span style="font-size:13px; font-weight:700; color:' + (r.score >= 4 ? 'var(--green)' : (r.score <= 2 ? 'var(--rose)' : 'var(--amber)')) + ';">피부 ' + r.score + '점</span>'
+        : '');
+  head.appendChild(top);
+
+  const tags = document.createElement('div');
+  tags.className = 'rec-tags';
+  if(r.kind === 'routine'){
+    const ids = routineProductIds(r);
+    ids.slice(0,6).forEach(id=>{
+      const s = document.createElement('span');
+      s.className = 'tag-sm';
+      s.textContent = productName(id);
+      tags.appendChild(s);
+    });
+    if(ids.length > 6){
+      const s = document.createElement('span');
+      s.style.cssText = 'font-size:12px; color:var(--sub);';
+      s.textContent = '+' + (ids.length - 6);
+      tags.appendChild(s);
+    }
+  } else if(r.kind === 'skin'){
+    const types = Object.keys(r.conds || {});
+    if(types.length){
+      types.forEach(t=>{
+        const s = document.createElement('span');
+        s.className = 'tag-sm rose';
+        s.textContent = t + (r.conds[t].length ? ' ' + r.conds[t].length : '');
+        tags.appendChild(s);
+      });
+    } else {
+      const s = document.createElement('span');
+      s.style.cssText = 'font-size:12px; color:var(--sub);';
+      s.textContent = '트러블 없음';
+      tags.appendChild(s);
+    }
+  } else {
+    const s = document.createElement('span');
+    s.style.cssText = 'font-size:12px; color:var(--sub);';
+    s.textContent = lifeSummary(r) || '메모';
+    tags.appendChild(s);
+  }
+  head.appendChild(tags);
+  card.appendChild(head);
+
+  head.addEventListener('click', ()=>{
+    openRecordId = openRecordId === r.id ? null : r.id;
+    renderList();
+    if(openRecordId === r.id && r.kind === 'skin' && r.photoCount && !photoCache[r.id]){
+      loadPhotos(r.id).then(ph=>{ photoCache[r.id] = ph; if(openRecordId === r.id) renderList(); });
+    }
+  });
+
+  if(openRecordId === r.id) card.appendChild(recordBody(r));
+  return card;
+}
+
+function recordBody(r){
+  const body = document.createElement('div');
+  body.className = 'rec-body';
+  let html = '';
+  if(r.kind === 'routine'){
+    STEPS.filter(s=> r.steps && r.steps[s] && r.steps[s].length).forEach(s=>{
+      html += '<div><b style="color:var(--green);">' + escHtml(s) + '</b> · '
+        + escHtml(r.steps[s].map(productName).join(', ')) + '</div>';
+    });
+  } else if(r.kind === 'skin'){
+    Object.keys(r.conds || {}).forEach(t=>{
+      const zs = r.conds[t];
+      const names = zs.map(z=>{
+        const zone = ZONES.find(x=> x.id === z);
+        return zone ? zone.label : z;
+      });
+      html += '<div><b style="color:var(--rose);">' + escHtml(t) + '</b>'
+        + (names.length ? ' · ' + escHtml(names.join(', ')) : '') + '</div>';
+    });
+    if(!Object.keys(r.conds || {}).length) html += '<div style="color:var(--sub);">트러블 없음</div>';
+  } else {
+    const parts = [];
+    if(r.life && r.life.sleep) parts.push('수면 ' + r.life.sleep + '시간');
+    if(r.life && r.life.meal) parts.push('식사 ' + r.life.meal);
+    if(r.life && r.life.stress) parts.push('스트레스 ' + r.life.stress);
+    if(r.life && r.life.cycle) parts.push(r.life.cycle);
+    if(r.weather && r.weather.high) parts.push('기온 ' + r.weather.low + '℃ ~ ' + r.weather.high + '℃');
+    html += '<div>' + escHtml(parts.join(' · ')) + '</div>';
+  }
+  if(r.memo) html += '<div class="rec-memo">' + escHtml(r.memo) + '</div>';
+  body.innerHTML = html;
+
+  if(r.kind === 'skin' && r.photoCount){
+    const ph = document.createElement('div');
+    ph.className = 'rec-photos';
+    if(photoCache[r.id]){
+      photoCache[r.id].forEach(src=>{
+        const img = document.createElement('img');
+        img.src = src; img.alt = '피부 사진';
+        ph.appendChild(img);
+      });
+    } else {
+      const s = document.createElement('span');
+      s.style.cssText = 'color:var(--sub); font-size:12px;';
+      s.textContent = '사진 불러오는 중…';
+      ph.appendChild(s);
+    }
+    body.appendChild(ph);
+  }
+
+  const actions = document.createElement('div');
+  actions.className = 'row';
+  actions.style.marginTop = '12px';
+  const edit = document.createElement('button');
+  edit.className = 'btn-ghost';
+  edit.style.cssText = 'flex:1; border-color:var(--green); color:var(--green); font-weight:700;';
+  edit.textContent = '수정';
+  edit.addEventListener('click', ()=> startEdit(r));
+  const del = document.createElement('button');
+  del.className = 'btn-ghost';
+  del.style.cssText = 'flex:1; border-color:var(--rose); color:var(--rose); font-weight:700;';
+  del.textContent = '삭제';
+  del.addEventListener('click', async ()=>{
+    if(!window.confirm('이 기록을 삭제할까요?')) return;
+    records = records.filter(x=> x.id !== r.id);
+    saveRecords();
+    if(r.kind === 'skin') await deletePhotos(r.id);
+    renderList();
+    showToast('삭제했어요');
+  });
+  actions.appendChild(edit);
+  actions.appendChild(del);
+  body.appendChild(actions);
+  return body;
+}
+
+/* ─────────────────────────── 분석 ─────────────────────────── */
+/* 하루 단위로 피부 점수 평균과 트러블 유무를 모은다 */
+function dayOutcomes(){
+  const by = {};
+  records.filter(r=> r.kind === 'skin').forEach(r=>{
+    if(!by[r.date]) by[r.date] = { scores: [], trouble: false };
+    by[r.date].scores.push(r.score);
+    if(Object.keys(r.conds || {}).length) by[r.date].trouble = true;
+  });
+  const out = {};
+  Object.keys(by).forEach(d=>{
+    const v = by[d];
+    out[d] = { score: v.scores.reduce((a,b)=> a+b, 0) / v.scores.length, trouble: v.trouble };
+  });
+  return out;
+}
+
+/* 제품을 쓴 다음 1~3일의 트러블 비율을 쓰지 않은 날과 비교한다 */
+function productStats(){
+  const outcomes = dayOutcomes();
+  const allDates = Object.keys(outcomes);
+  const res = [];
+  products.forEach(p=>{
+    const usedDates = {};
+    records.filter(r=> r.kind === 'routine').forEach(r=>{
+      if(routineProductIds(r).includes(p.id)) usedDates[r.date] = true;
+    });
+    const used = Object.keys(usedDates);
+    if(used.length < 3) return;
+    const after = {};
+    used.forEach(d=> [1,2,3].forEach(n=> after[addDays(d, n)] = true));
+    const A = allDates.filter(d=> after[d]);
+    const B = allDates.filter(d=> !after[d] && !usedDates[d]);
+    if(A.length < 3 || B.length < 3) return;
+    const rate = ds => ds.filter(d=> outcomes[d].trouble).length / ds.length;
+    const avg = ds => ds.reduce((s,d)=> s + outcomes[d].score, 0) / ds.length;
+    res.push({
+      name: p.name, nUse: used.length, nA: A.length, nB: B.length,
+      troubleDelta: rate(A) - rate(B), scoreDelta: avg(A) - avg(B)
+    });
+  });
+  return res.sort((a,b)=> b.troubleDelta - a.troubleDelta);
+}
+
+/* 생활 요인이 있던 날과 그 다음날의 트러블 비율을 비교한다 */
+function lifeStats(){
+  const outcomes = dayOutcomes();
+  const lifeRecs = records.filter(r=> r.kind === 'life');
+  const factors = [
+    {
+      label: '수면 6시간 미만',
+      has: r=> r.life && r.life.sleep !== '' && r.life.sleep != null,
+      test: r=> parseFloat(r.life.sleep) < 6
+    },
+    {
+      label: '자극적 식사·과식·음주',
+      has: r=> !!(r.life && r.life.meal),
+      test: r=> ['자극적·기름진','과식','음주'].includes(r.life.meal)
+    },
+    {
+      label: '스트레스 4 이상',
+      has: r=> !!(r.life && r.life.stress),
+      test: r=> r.life.stress >= 4
+    },
+    {
+      label: '생리 전·생리 중',
+      has: r=> !!(r.life && r.life.cycle),
+      test: r=> ['생리 전','생리 중'].includes(r.life.cycle)
+    }
+  ];
+  return factors.map(fac=>{
+    const yes = {}, all = {};
+    lifeRecs.forEach(r=>{
+      if(!fac.has(r)) return;
+      all[r.date] = true;
+      if(fac.test(r)) yes[r.date] = true;
+    });
+    const affected = {};
+    Object.keys(yes).forEach(d=>{ affected[d] = true; affected[addDays(d,1)] = true; });
+    const dates = Object.keys(outcomes).filter(d=> all[d] || affected[d]);
+    const A = dates.filter(d=> affected[d]);
+    const B = dates.filter(d=> !affected[d]);
+    if(A.length < 3 || B.length < 3) return null;
+    const rate = ds => ds.filter(d=> outcomes[d].trouble).length / ds.length;
+    return { label: fac.label, nA: A.length, nB: B.length, troubleDelta: rate(A) - rate(B) };
+  }).filter(Boolean).sort((a,b)=> b.troubleDelta - a.troubleDelta);
+}
+
+function pct(v){ return (v >= 0 ? '+' : '') + Math.round(v * 100) + '%p'; }
+function deltaClass(v){ return v > 0.1 ? 'delta-bad' : (v < -0.1 ? 'delta-good' : 'delta-flat'); }
+
+function renderAnalysis(){
+  const box = el('analysisContainer');
+  const skinCount = records.filter(r=> r.kind === 'skin').length;
+  const routineCount = records.filter(r=> r.kind === 'routine').length;
+  const lifeCount = records.filter(r=> r.kind === 'life').length;
+  const enough = skinCount >= 10;
+
+  let html = '<div class="card">'
+    + '<div class="label">데이터 현황</div>'
+    + '<div style="font-size:14px;">루틴 ' + routineCount + '건 · 피부 상태 ' + skinCount + '건 · 생활 ' + lifeCount + '건 · 등록 제품 ' + products.length + '개</div>';
+  if(!enough){
+    html += '<div class="hint" style="margin-top:8px;">통계는 <b>피부 상태 기록이 10건</b> 이상 쌓이면 표시돼요. '
+      + '루틴만 기록하면 원인 데이터만 쌓이는 셈이라, 피부 상태도 함께 기록하는 게 중요해요.</div>';
+  }
+  html += '</div>';
+
+  if(enough){
+    const ps = productStats();
+    html += '<div class="card"><div class="label">제품별 영향 (사용 후 1~3일 트러블 비율 비교)</div>';
+    if(!ps.length){
+      html += '<div class="hint">아직 비교 가능한 제품이 없어요. 같은 제품을 3일 이상 사용하면 계산돼요.</div>';
+    } else {
+      ps.forEach(s=>{
+        html += '<div class="stat-row">'
+          + '<div style="flex:1;">'
+          +   '<div style="font-weight:600;">' + escHtml(s.name) + '</div>'
+          +   '<div style="font-size:12px; color:var(--sub);">사용 ' + s.nUse + '일 · 비교일수 ' + s.nA + '/' + s.nB + '</div>'
+          + '</div>'
+          + '<div class="stat-delta ' + deltaClass(s.troubleDelta) + '">' + pct(s.troubleDelta) + '</div>'
+          + '</div>';
+      });
+    }
+    html += '<div class="hint" style="margin-top:8px;">+는 사용 후 트러블이 더 잦았다는 뜻이에요. '
+      + '여러 요인이 겹칠 수 있으니 "의심 순위"로만 참고하세요.</div></div>';
+
+    const ls = lifeStats();
+    if(ls.length){
+      html += '<div class="card"><div class="label">생활 요인 영향 (당일~다음날 트러블 비율)</div>';
+      ls.forEach(s=>{
+        html += '<div class="stat-row">'
+          + '<div style="flex:1;">' + escHtml(s.label) + '</div>'
+          + '<div class="stat-delta ' + deltaClass(s.troubleDelta) + '">' + pct(s.troubleDelta) + '</div>'
+          + '</div>';
+      });
+      html += '</div>';
+    }
+  }
+
+  html += '<div class="card"><div class="label">저장 방식</div>'
+    + '<div class="hint">기록은 이 기기에 저장되고, 인터넷이 연결되면 클라우드로도 동기화돼 같은 앱을 설치한 다른 기기에서도 보여요. '
+    + '이 통계는 기록을 단순 비교한 결과일 뿐이고 의학적 진단이 아니에요.</div></div>';
+
+  box.innerHTML = html;
+}
+
+/* ─────────────────────────── 화장품 ─────────────────────────── */
+function useCount(id){
+  return records.filter(r=> r.kind === 'routine' && routineProductIds(r).includes(id)).length;
+}
+
+function renderProducts(){
+  el('productForm').style.display = pfForm ? 'flex' : 'none';
+  const list = el('productList');
+  list.style.display = pfForm ? 'none' : 'flex';
+  if(pfForm){ renderProductForm(); return; }
+
+  list.innerHTML = '';
+  const add = document.createElement('button');
+  add.className = 'btn-primary';
+  add.textContent = '+ 새 제품 등록';
+  add.addEventListener('click', ()=>{
+    pfForm = { name:'', brand:'', type:'cosmetic', steps:[], ingredients:'', rating:'undecided', memo:'', startDate:'' };
+    renderProducts();
+  });
+  list.appendChild(add);
+
+  if(!products.length){
+    const empty = document.createElement('div');
+    empty.className = 'card';
+    empty.innerHTML = '<div class="empty">등록된 제품이 없어요. 자주 쓰는 것부터 등록해 보세요.</div>';
+    list.appendChild(empty);
+    return;
+  }
+
+  products.forEach(p=>{
+    const rt = RATINGS.find(r=> r.id === p.rating) || RATINGS[0];
+    const card = document.createElement('div');
+    card.className = 'prod-card';
+    const btn = document.createElement('button');
+    btn.className = 'prod-btn';
+    btn.innerHTML = '<div class="rec-top">'
+      + '<div style="flex:1;">'
+      +   '<div style="font-size:12px; color:var(--sub);">' + escHtml(p.brand || (p.type === 'device' ? '디바이스' : '화장품')) + '</div>'
+      +   '<div style="font-size:15.5px; font-weight:700;">' + escHtml(p.name) + '</div>'
+      +   '<div style="font-size:12px; color:var(--sub); margin-top:3px;">' + escHtml((p.steps || []).join(' · ')) + ' · 사용 기록 ' + useCount(p.id) + '회</div>'
+      + '</div>'
+      + '<span style="font-size:12.5px; font-weight:800; background:' + rt.bg + '; color:' + rt.fg + '; border-radius:999px; padding:5px 11px;">' + rt.label + '</span>'
+      + '</div>';
+    btn.addEventListener('click', ()=>{
+      pfForm = Object.assign({ name:'', brand:'', type:'cosmetic', steps:[], ingredients:'', rating:'undecided', memo:'', startDate:'' }, p);
+      pfForm.steps = (p.steps || []).slice();
+      renderProducts();
+    });
+    card.appendChild(btn);
+    list.appendChild(card);
+  });
+}
+
+function renderProductForm(){
+  el('pf-title').textContent = pfForm.id ? '제품 수정' : '새 제품 등록';
+  el('pf-brand').value = pfForm.brand || '';
+  el('pf-name').value = pfForm.name || '';
+  el('pf-startDate').value = pfForm.startDate || '';
+  el('pf-ingredients').value = pfForm.ingredients || '';
+  el('pf-memo').value = pfForm.memo || '';
+  el('pf-save').textContent = pfForm.id ? '수정 저장' : '등록';
+  el('pf-delete').style.display = pfForm.id ? '' : 'none';
+
+  document.querySelectorAll('[data-ptype]').forEach(b=>{
+    b.classList.toggle('on', b.dataset.ptype === pfForm.type);
+  });
+
+  const stepBox = el('pf-steps');
+  stepBox.innerHTML = '';
+  STEPS.forEach(s=>{
+    const chip = document.createElement('button');
+    chip.className = 'chip' + (pfForm.steps.includes(s) ? ' on' : '');
+    chip.textContent = s;
+    chip.addEventListener('click', ()=>{
+      pfForm.steps = pfForm.steps.includes(s) ? pfForm.steps.filter(x=> x !== s) : pfForm.steps.concat([s]);
+      renderProductForm();
+    });
+    stepBox.appendChild(chip);
+  });
+
+  const rateBox = el('pf-rating');
+  rateBox.innerHTML = '';
+  RATINGS.forEach(r=>{
+    const b = document.createElement('button');
+    b.textContent = r.label;
+    if(pfForm.rating === r.id){
+      b.style.borderColor = r.fg;
+      b.style.background = r.bg;
+      b.style.color = r.fg;
+    }
+    b.addEventListener('click', ()=>{ pfForm.rating = r.id; renderProductForm(); });
+    rateBox.appendChild(b);
+  });
+}
+
+document.querySelectorAll('[data-ptype]').forEach(b=>{
+  b.addEventListener('click', ()=>{ pfForm.type = b.dataset.ptype; renderProductForm(); });
+});
+[['pf-brand','brand'],['pf-name','name'],['pf-startDate','startDate'],['pf-ingredients','ingredients'],['pf-memo','memo']]
+  .forEach(([id, key])=>{
+    el(id).addEventListener('input', ()=>{ if(pfForm) pfForm[key] = el(id).value; });
+    el(id).addEventListener('change', ()=>{ if(pfForm) pfForm[key] = el(id).value; });
+  });
+
+el('pf-save').addEventListener('click', ()=>{
+  if(!pfForm.name.trim()){ showToast('제품명을 입력해 주세요'); return; }
+  if(!pfForm.steps.length){ showToast('이 제품이 속한 단계를 하나 이상 선택해 주세요'); return; }
+  if(pfForm.id){
+    products = products.map(p=> p.id === pfForm.id ? Object.assign({}, pfForm) : p);
+  } else {
+    products = products.concat([Object.assign({}, pfForm, { id: uid(), createdAt: todayStr() })]);
+  }
+  saveProducts();
+  showToast(pfForm.id ? '제품을 수정했어요' : '제품을 등록했어요');
+  pfForm = null;
+  renderProducts();
+});
+el('pf-cancel').addEventListener('click', ()=>{ pfForm = null; renderProducts(); });
+el('pf-delete').addEventListener('click', ()=>{
+  const n = useCount(pfForm.id);
+  const msg = "'" + pfForm.name + "'을(를) 삭제할까요?"
+    + (n ? '\n이 제품이 쓰인 기록 ' + n + '건에는 "(삭제된 제품)"으로 남아요.' : '');
+  if(!window.confirm(msg)) return;
+  products = products.filter(p=> p.id !== pfForm.id);
+  saveProducts();
+  showToast('삭제했어요');
+  pfForm = null;
+  renderProducts();
+});
+
+/* ─────────────────────────── 시작 ─────────────────────────── */
+(function init(){
+  loadAll();
+  setInputMode(null);
+  renderProducts();
+})();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCpqPBtxjBDT_Zp9CQu9cIu2oY0sOShX6I",
+    authDomain: "lovehouse-b7440.firebaseapp.com",
+    projectId: "lovehouse-b7440",
+    storageBucket: "lovehouse-b7440.firebasestorage.app",
+    messagingSenderId: "910165492271",
+    appId: "1:910165492271:web:258d97081d966a5f27fcda"
+  };
+
+  try{
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    if(typeof window.startCloudSync === 'function'){
+      window.startCloudSync({ db, doc, setDoc, getDoc, deleteDoc, onSnapshot });
+    }
+  }catch(e){
+    console.error('Firebase init failed', e);
+  }
+</script>
+</body>
+</html>
