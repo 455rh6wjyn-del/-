@@ -1,11 +1,15 @@
 # 자금수요조사 사이트
 
-Firebase Hosting(`fund-survey-bfd82`) 한 곳에 정적 페이지 두 개를 올린다.
+정적 페이지 세 개를 한 저장소에서 관리한다.
 
-| 경로 | 내용 | 소스 |
-| --- | --- | --- |
-| `/` | 햄쮸하우스 커피노트 (PWA) | `index.html`, `sw.js`, `manifest.json`, `icons/` |
-| `/fund-survey/` | 자금수요조사 (React + Firestore) | `fund-survey/` |
+| 경로 | 내용 | 소스 | 배포처 |
+| --- | --- | --- | --- |
+| `/` | 햄쮸하우스 커피노트 (PWA) | `index.html`, `sw.js`, `manifest.json`, `icons/` | Firebase + 페이지스 |
+| `/fund-survey/` | 자금수요조사 (React + Firestore) | `fund-survey/` | Firebase |
+| `/body-signal/` | Body Signal (React PWA) | `body-signal/` | 페이지스 |
+
+`fund-survey` 는 vite `base` 가 `/fund-survey/` 로 고정이라 도메인 루트가 아니면 깨진다.
+그래서 깃허브 페이지스(`/-/` 하위)에는 올리지 않고 Firebase 쪽에만 둔다.
 
 Firestore 는 앱마다 다른 프로젝트를 쓴다.
 
@@ -54,21 +58,73 @@ fundSurveyPlans/{이메일}         { apply, totalCost, loanWanted, updatedAt }
 
 ---
 
-## 2. 로컬 개발
+## 2. Body Signal
+
+피부 · 바디 · 이너 케어를 매일 기록하고, 쌓인 기록에서 "무엇을 한 날에 트러블이 더 잦았나"
+같은 상관 후보를 찾아 보여주는 개인 기록장이다. **서버가 없다.** 기록은 전부 기기 안에 남는다.
+
+| 무엇 | 어디에 |
+| --- | --- |
+| 설정 · 하루 기록 · 제품 · 의심 목록 | `localStorage` (`bodysignal-v4` 키 하나에 JSON) |
+| 주간 얼굴 사진 | `IndexedDB` (`bodysignal` DB → `photos` 스토어, 날짜별 Blob) |
+
+사진을 IndexedDB 로 뺀 이유는 용량이다. localStorage 는 문자열로 5MB 남짓이라
+사진 몇 장이면 꽉 찬다. 저장 전에 긴 변 520px · JPEG 품질 0.7 로 줄여서 Blob 으로 넣고,
+화면에는 `objectURL` 로 붙인다.
+
+기록이 기기에만 있으니 **기기를 바꾸기 전에 설정 → 데이터 관리에서 백업**해야 한다.
+JSON 백업에 사진은 담기지 않는다(날짜 목록만 들어간다).
+
+### PWA
+
+`body-signal/public/manifest.webmanifest` 와 서비스워커가 붙어 있어 홈 화면에 추가하면
+주소창 없이 앱처럼 뜬다. 서비스워커는 페이지 이동을 네트워크 우선으로 처리하고
+실패하면 캐시된 `index.html` 을 내주므로 오프라인에서도 앱이 열린다.
+`assets/` 아래 해시 붙은 파일만 캐시 우선이라 재배포하면 바로 새 빌드를 받는다.
+
+아이콘은 `body-signal/scripts/make-icons.mjs` 가 만든다. 외부 의존성 없이 PNG 를 직접
+인코딩하므로, 색이나 모양을 바꾸고 싶으면 그 파일을 고치고 `npm --prefix body-signal run icons`
+를 돌리면 된다.
+
+### 음식 사진 → 태그 자동 분류
+
+이너 탭의 식사 기록은 원래 모델 API 를 직접 부르게 되어 있었는데, 정적 사이트에서는
+API 키가 그대로 노출되고 브라우저에서 CORS 로도 막힌다. 그래서 기본값은 **손으로 태그를 고르는
+흐름**이고, 키를 들고 있는 중계 서버를 따로 띄웠다면 그 주소를 넣어 자동 분류를 켤 수 있다.
 
 ```bash
-npm run install:app     # fund-survey/ 의존성 설치
-npm run dev             # http://localhost:5173/fund-survey/
-npm run build           # public/ 에 배포용 결과 생성
+# body-signal/.env.local
+VITE_AI_ENDPOINT=https://내-중계-서버/messages
 ```
 
-`npm run build` 는 `fund-survey/` 를 vite 로 빌드해 `public/fund-survey/` 에 넣고,
-루트의 커피노트 정적 파일을 `public/` 로 복사한다. `public/` 은 빌드 산출물이라
-git 에 올리지 않는다.
+중계 서버는 받은 JSON 을 그대로 Anthropic Messages API 로 넘기고 응답을 돌려주면 된다
+(`x-api-key` 는 서버에서 붙인다). 주소가 없으면 사진 첨부 버튼과 AI 호출은 화면에서 빠진다.
 
 ---
 
-## 3. Firebase 배포
+## 3. 로컬 개발
+
+```bash
+npm run install:app          # fund-survey/ 의존성 설치
+npm run dev                  # http://localhost:5173/fund-survey/
+npm run build                # public/ 에 Firebase 배포용 결과 생성
+
+npm run install:body-signal  # body-signal/ 의존성 설치
+npm run dev:body-signal      # http://localhost:5173/
+npm run build:pages          # _site/ 에 페이지스 배포용 결과 생성
+```
+
+`npm run build` 는 `fund-survey/` 를 vite 로 빌드해 `public/fund-survey/` 에 넣고,
+루트의 커피노트 정적 파일을 `public/` 로 복사한다.
+
+`npm run build:pages` 는 `body-signal/` 을 빌드해 `_site/body-signal/` 에 넣고,
+커피노트 정적 파일을 `_site/` 로 복사한다.
+
+`public/` 과 `_site/` 는 빌드 산출물이라 git 에 올리지 않는다.
+
+---
+
+## 4. Firebase 배포
 
 ### 다른 Firebase 프로젝트로 바꾸기
 
@@ -134,7 +190,28 @@ firebase init hosting:github
 
 ---
 
-## 4. 보안에 대해 알아둘 것
+## 5. 깃허브 페이지스 배포
+
+`main` 에 푸시하면 `.github/workflows/github-pages.yml` 이 `npm run build:pages` 로
+`_site/` 를 만들어 페이지스에 올린다. 주소는 이렇게 된다.
+
+| 경로 | 내용 |
+| --- | --- |
+| `https://455rh6wjyn-del.github.io/-/` | 커피노트 |
+| `https://455rh6wjyn-del.github.io/-/body-signal/` | Body Signal |
+
+### 최초 1회 준비
+
+저장소 **Settings → Pages → Build and deployment → Source** 를 **GitHub Actions** 로
+바꿔야 한다. 브랜치 방식으로 남아 있으면 워크플로가 배포 단계에서 실패한다.
+이것 말고 따로 넣을 시크릿은 없다.
+
+Body Signal 은 vite `base` 가 `"./"` 라 빌드 결과가 상대 경로만 쓴다. 저장소 이름이
+바뀌어 경로가 달라져도, 도메인 루트로 옮겨도 그대로 동작한다.
+
+---
+
+## 6. 보안에 대해 알아둘 것
 
 이 앱에는 **로그인이 없다.** 주소를 아는 사람은 누구나 접근할 수 있고, 명단에 있는
 사업자번호만 알면 그 업체의 입력값을 보고 고칠 수 있다. 관리자 비밀번호도 브라우저에서만
@@ -162,11 +239,12 @@ Firebase Authentication + App Check 를 얹는 것을 권한다.
 
 ---
 
-## 5. 그 밖에
+## 7. 그 밖에
 
 - 엑셀 처리는 npm 의 `xlsx@0.18.5` 를 쓴다. SheetJS 최신판은 npm 이 아니라
   `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz` 로 설치해야 한다
   (이 저장소를 만든 환경에서는 해당 CDN 이 막혀 있어 npm 판을 썼다).
-- 커피노트의 서비스워커는 사이트 전체가 범위라, `/fund-survey` 경로는
+- 커피노트의 서비스워커는 사이트 전체가 범위라, `/fund-survey` 와 `/body-signal` 경로는
   캐시하지 않고 항상 네트워크에서 받도록 예외를 뒀다. 그러지 않으면 재배포 후에도
-  옛 빌드가 남아 빈 화면이 뜰 수 있다.
+  옛 빌드가 남아 빈 화면이 뜰 수 있다. 페이지스처럼 하위 경로에 올라가는 경우까지
+  잡으려고 경로 조각으로 본다.

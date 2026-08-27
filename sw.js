@@ -1,4 +1,4 @@
-const CACHE_NAME = 'coffee-note-v7';
+const CACHE_NAME = 'coffee-note-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -26,11 +26,12 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  // 자금수요조사 앱(/fund-survey/)은 캐시하지 않는다.
+  // 다른 앱(/fund-survey/, /body-signal/)은 캐시하지 않는다.
   // 이 서비스워커의 범위가 사이트 전체라, 캐시 우선으로 응답하면
   // 새로 배포한 뒤에도 옛 빌드가 남아 빈 화면이 뜰 수 있다.
+  // 깃허브 페이지스처럼 하위 경로에 올라가는 경우까지 잡으려고 경로 조각으로 본다.
   const url = new URL(event.request.url);
-  if (url.origin === self.location.origin && url.pathname.startsWith('/fund-survey')) return;
+  if (url.origin === self.location.origin && /(^|\/)(fund-survey|body-signal)(\/|$)/.test(url.pathname)) return;
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const network = fetch(event.request)

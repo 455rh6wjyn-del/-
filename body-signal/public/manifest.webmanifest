@@ -1,0 +1,20 @@
+{
+  "name": "Body Signal",
+  "short_name": "Body Signal",
+  "description": "피부 · 바디 · 이너 케어를 기록하고 패턴을 찾아보는 개인 기록장",
+  "start_url": ".",
+  "scope": ".",
+  "id": "body-signal",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F4F9",
+  "theme_color": "#6D5EF0",
+  "lang": "ko",
+  "dir": "ltr",
+  "categories": ["health", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

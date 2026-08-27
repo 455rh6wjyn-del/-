@@ -5,8 +5,12 @@
   "type": "module",
   "scripts": {
     "install:app": "npm --prefix fund-survey ci",
+    "install:body-signal": "npm --prefix body-signal ci",
     "dev": "npm --prefix fund-survey run dev",
+    "dev:body-signal": "npm --prefix body-signal run dev",
     "build": "npm --prefix fund-survey run build && node scripts/build-site.mjs",
+    "build:body-signal": "npm --prefix body-signal run build",
+    "build:pages": "npm run build:body-signal && node scripts/build-pages.mjs",
     "deploy": "npm run build && firebase deploy --only hosting",
     "deploy:rules": "firebase deploy --only firestore:rules"
   }

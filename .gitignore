@@ -1,6 +1,7 @@
 node_modules/
-public/
+/public/
 dist/
 .firebase/
 *.log
 .DS_Store
+_site/
