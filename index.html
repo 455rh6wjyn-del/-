@@ -37,7 +37,7 @@
     color: var(--cream);
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
-    padding-bottom: 40px;
+    padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px));
   }
   /* 뷰어가 body 배경을 무시해도 항상 배경이 깔리도록 하는 고정 레이어 */
   .bg-fix{
@@ -68,21 +68,26 @@
   }
 
   nav.tabs{
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 30;
     display:flex;
-    max-width: 480px;
-    margin: 0 auto 18px;
-    padding: 0 16px;
     gap: 6px;
+    margin: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -2px 12px rgba(43,31,22,0.07);
+    padding: 9px max(16px, calc((100% - 480px) / 2)) calc(9px + env(safe-area-inset-bottom, 0px));
   }
   nav.tabs button{
     flex:1;
-    background: var(--surface);
+    background: var(--surface-2);
     border: 1px solid var(--line);
     color: var(--muted);
     font-family: 'Inter', sans-serif;
     font-weight: 600;
     font-size: 13px;
-    padding: 11px 0;
+    padding: 12px 0;
     border-radius: 10px;
     cursor: pointer;
     transition: all .15s ease;
@@ -348,7 +353,7 @@
 
   .toast{
     position: fixed;
-    bottom: 20px;
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
     left: 50%;
     transform: translateX(-50%) translateY(20px);
     background: var(--brass);
@@ -577,12 +582,6 @@
   <p>BES876 · Impress</p>
 </header>
 
-<nav class="tabs">
-  <button class="tab-btn active" data-tab="input">입력</button>
-  <button class="tab-btn" data-tab="table">기록</button>
-  <button class="tab-btn" data-tab="settings">설정</button>
-</nav>
-
 <div class="wrap">
 
   <!-- INPUT PANEL -->
@@ -623,6 +622,7 @@
           <span>로스팅 <b id="beanInfoRoast">-</b></span>
           <span>개봉 <b id="beanInfoOpen">-</b></span>
           <span id="beanInfoDaysWrap" style="display:none;">로스팅 후 <b id="beanInfoDays">-</b></span>
+          <span id="beanInfoOpenDaysWrap" style="display:none;">개봉 후 <b id="beanInfoOpenDays">-</b></span>
         </div>
       </div>
       <div class="field">
@@ -839,6 +839,12 @@
     <div id="detailBody"></div>
   </div>
 </div>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="input">입력</button>
+  <button class="tab-btn" data-tab="table">기록</button>
+  <button class="tab-btn" data-tab="settings">설정</button>
+</nav>
 
 <div class="toast" id="toast"></div>
 
@@ -1432,13 +1438,22 @@ function updateBeanInfo(){
   if(b && (b.roastDate || b.openDate)){
     document.getElementById('beanInfoRoast').textContent = b.roastDate ? formatDateShort(b.roastDate) : '-';
     document.getElementById('beanInfoOpen').textContent = b.openDate ? formatDateShort(b.openDate) : '-';
+    const brewDate = getPreviewBrewDate();
     const daysWrap = document.getElementById('beanInfoDaysWrap');
     if(b.roastDate){
-      const days = daysBetween(b.roastDate, getPreviewBrewDate());
+      const days = daysBetween(b.roastDate, brewDate);
       document.getElementById('beanInfoDays').textContent = (days>=0?'+':'') + days + '일';
       daysWrap.style.display = '';
     } else {
       daysWrap.style.display = 'none';
+    }
+    const openWrap = document.getElementById('beanInfoOpenDaysWrap');
+    if(b.openDate){
+      const days = daysBetween(b.openDate, brewDate);
+      document.getElementById('beanInfoOpenDays').textContent = (days>=0?'+':'') + days + '일';
+      openWrap.style.display = '';
+    } else {
+      openWrap.style.display = 'none';
     }
     row.style.display = 'flex';
   } else {
@@ -1465,6 +1480,7 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
     beanRoastDate: beanObj ? beanObj.roastDate : '',
     beanOpenDate: beanObj ? beanObj.openDate : '',
     daysSinceRoast: (beanObj && beanObj.roastDate) ? daysBetween(beanObj.roastDate, brewDate) : null,
+    daysSinceOpen: (beanObj && beanObj.openDate) ? daysBetween(beanObj.openDate, brewDate) : null,
     tools: selectedTools.slice(),
     measureState: measureState,
     measureWeight: measureWeight(),
@@ -1553,6 +1569,7 @@ function openDetail(e){
   if(e.beanRoastDate) rows.push(['로스팅일자', formatDateShort(e.beanRoastDate)]);
   if(openDate) rows.push(['개봉일자', formatDateShort(openDate)]);
   if(e.daysSinceRoast != null) rows.push(['로스팅 후', (e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일']);
+  if(e.daysSinceOpen != null) rows.push(['개봉 후', (e.daysSinceOpen>=0?'+':'')+e.daysSinceOpen+'일']);
   if(tools.length) rows.push(['도구', tools.join(', ')]);
   rows.push(['분쇄도', e.grind]);
   rows.push(['도징량', Number(e.dose).toFixed(1)+' g']);
@@ -1793,9 +1810,10 @@ function renderCardView(container, rows){
     const rating = entryRating(e);
     const ratingStr = rating ? '<span class="ec-rating">★ '+rating.toFixed(1)+'</span> · ' : '';
     const nick = e.nickname ? '<span class="ec-nickname">'+escHtml(e.nickname)+'</span> · ' : '';
-    const roastAge = e.daysSinceRoast != null
-      ? ' <span class="ec-roast">로스팅 '+(e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일</span>'
-      : '';
+    const ages = [];
+    if(e.daysSinceRoast != null) ages.push('로스팅 '+(e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일');
+    if(e.daysSinceOpen != null) ages.push('개봉 '+(e.daysSinceOpen>=0?'+':'')+e.daysSinceOpen+'일');
+    const roastAge = ages.length ? ' <span class="ec-roast">'+ages.join(' · ')+'</span>' : '';
     const kw = (e.keywords && e.keywords.length) ? ' · '+escHtml(e.keywords.join(' · ')) : '';
     const memoStr = e.memo ? ' · <span class="ec-memo">'+escHtml(truncate(e.memo, 20))+'</span>' : '';
     html += '<div class="entry-card" data-open-id="'+e.id+'">'
@@ -1813,7 +1831,7 @@ function renderCardView(container, rows){
   wireEntryButtons(container);
 }
 function renderListView(container, rows){
-  const cols = ['날짜','별칭','종류','원두','로스팅후','분쇄도','도징(g)','탬핑','추출(초)','추출량(ml)','비율','별점','맛평가','메모'];
+  const cols = ['날짜','별칭','종류','원두','로스팅후','개봉후','분쇄도','도징(g)','탬핑','추출(초)','추출량(ml)','비율','별점','맛평가','메모'];
   let html = '<div class="table-scroll"><table><thead><tr>';
   cols.forEach(c=> html += '<th>'+c+'</th>');
   html += '<th></th></tr></thead><tbody>';
@@ -1823,12 +1841,14 @@ function renderListView(container, rows){
     const ratio = e.dose>0 && e.yieldMl>0 ? '1:'+(e.yieldMl/e.dose).toFixed(1) : '—';
     const rating = entryRating(e);
     const roastAge = e.daysSinceRoast != null ? (e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일' : '—';
+    const openAge = e.daysSinceOpen != null ? (e.daysSinceOpen>=0?'+':'')+e.daysSinceOpen+'일' : '—';
     html += '<tr data-open-id="'+e.id+'">'
       + '<td>'+dateStr+'</td>'
       + '<td class="taste-cell">'+escHtml(e.nickname || '—')+'</td>'
       + '<td>'+escHtml(e.coffeeType)+'</td>'
       + '<td>'+escHtml(e.bean)+'</td>'
       + '<td>'+roastAge+'</td>'
+      + '<td>'+openAge+'</td>'
       + '<td>'+e.grind+'</td>'
       + '<td>'+Number(e.dose).toFixed(1)+'</td>'
       + '<td>'+e.tamp+'</td>'
