@@ -1,4 +1,4 @@
-const CACHE_NAME = 'coffee-note-v9';
+const CACHE_NAME = 'coffee-note-v10';
 const ASSETS = [
   './',
   './index.html',
@@ -10,7 +10,11 @@ const ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    // cache: 'reload' 로 받아야 브라우저 HTTP 캐시에 남은 옛 파일을
+    // 그대로 담지 않는다.
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.addAll(ASSETS.map((u) => new Request(u, { cache: 'reload' })))
+    )
   );
   self.skipWaiting();
 });
@@ -35,6 +39,28 @@ self.addEventListener('fetch', (event) => {
     (url.pathname.startsWith('/fund-survey') || url.pathname.startsWith('/nail-diary'))
   )
     return;
+  // 페이지 자체(HTML)는 네트워크를 먼저 본다. 캐시를 먼저 돌려주면
+  // 새로 배포한 뒤에도 한 번 더 새로고침해야 갱신돼서 헷갈린다.
+  // 오프라인일 때만 캐시로 떨어진다.
+  const isPage =
+    event.request.mode === 'navigate' ||
+    (url.origin === self.location.origin && url.pathname.endsWith('/index.html'));
+  if (isPage) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() =>
+          caches.match(event.request).then((cached) => cached || caches.match('./index.html'))
+        )
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const network = fetch(event.request)
