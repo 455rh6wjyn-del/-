@@ -33,5 +33,24 @@ service cloud.firestore {
     match /fundSurveyPlans/{email} {
       allow read, write: if true;
     }
+
+    // 네일다이어리. 같은 프로젝트를 쓰지만 nailDiary 로 시작하는
+    // 컬렉션에만 데이터를 두어 자금수요조사와 섞이지 않는다.
+    match /nailDiaryProducts/{productId} {
+      allow read, write: if true;
+
+      match /comments/{commentId} {
+        allow read, write: if true;
+      }
+    }
+    match /nailDiaryCategories/{categoryId} {
+      allow read, write: if true;
+    }
+    match /nailDiaryTips/{tipId} {
+      allow read, write: if true;
+    }
+    match /nailDiaryConfig/{docId} {
+      allow read, write: if true;
+    }
   }
 }

@@ -1,0 +1,20 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // 네일다이어리 꿀팁·아이템 사진. fund-survey-bfd82 프로젝트를 같이 쓰므로
+    // 다른 앱과 섞이지 않게 nailDiary/ 아래로만 열어준다.
+    // 로그인이 없는 앱이라 firestore.rules 와 같은 수준의 개방된 규칙이다:
+    // 누구나 읽고 쓸 수 있고, 이미지 파일 · 8MB 이하만 업로드를 허용한다.
+    match /nailDiary/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.resource.size < 8 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

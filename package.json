@@ -4,10 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "install:app": "npm --prefix fund-survey ci",
+    "install:app": "npm --prefix fund-survey ci && npm --prefix nail-diary ci",
     "dev": "npm --prefix fund-survey run dev",
-    "build": "npm --prefix fund-survey run build && node scripts/build-site.mjs",
+    "dev:nail-diary": "npm --prefix nail-diary run dev",
+    "build": "npm --prefix fund-survey run build && npm --prefix nail-diary run build && node scripts/build-site.mjs",
     "deploy": "npm run build && firebase deploy --only hosting",
-    "deploy:rules": "firebase deploy --only firestore:rules"
+    "deploy:rules": "firebase deploy --only firestore:rules,storage"
   }
 }

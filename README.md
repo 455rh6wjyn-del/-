@@ -1,15 +1,18 @@
 # 자금수요조사 사이트
 
-Firebase Hosting(`fund-survey-bfd82`) 한 곳에 정적 페이지 두 개를 올린다.
+Firebase Hosting(`fund-survey-bfd82`) 한 곳에 정적 페이지 세 개를 올린다.
 
 | 경로 | 내용 | 소스 |
 | --- | --- | --- |
 | `/` | 햄쮸하우스 커피노트 (PWA) | `index.html`, `sw.js`, `manifest.json`, `icons/` |
 | `/fund-survey/` | 자금수요조사 (React + Firestore) | `fund-survey/` |
+| `/nail-diary/` | 다정한 자매의 네일다이어리 (React + Firestore + Storage) | `nail-diary/` |
 
 Firestore 는 앱마다 다른 프로젝트를 쓴다.
 
 - 자금수요조사 → `fund-survey-bfd82` (이 저장소의 `firestore.rules` 가 적용되는 곳)
+- 네일다이어리 → 같은 `fund-survey-bfd82` 를 자금수요조사와 같이 쓴다. `nailDiary` 로
+  시작하는 컬렉션에만 데이터를 두어 섞이지 않는다 (아래 2번 섹션 참고).
 - 커피노트 → `lovehouse-b7440` (`index.html` 안에 자기 설정을 따로 들고 있다)
 
 호스팅만 `fund-survey-bfd82` 로 합쳐져 있고, 커피노트가 읽고 쓰는 데이터는 예전 그대로다.
@@ -54,21 +57,78 @@ fundSurveyPlans/{이메일}         { apply, totalCost, loanWanted, updatedAt }
 
 ---
 
-## 2. 로컬 개발
+## 2. 다정한 자매의 네일다이어리
 
-```bash
-npm run install:app     # fund-survey/ 의존성 설치
-npm run dev             # http://localhost:5173/fund-survey/
-npm run build           # public/ 에 배포용 결과 생성
+젤네일 재료(폴리시·파츠·도구 등) 재고를 자매 둘이서 같이 기록하는 다이어리.
+로그인은 없고, 처음 들어가면 "언니 / 동생 / 직접 입력" 중 하나를 골라 브라우저에
+저장해둔다. 그 이름이 댓글·꿀팁 작성자로 남는다.
+
+- **아이템**: 브랜드 · 모델번호 · 제품명을 입력하고, 이미지 주소를 붙여넣으면
+  미리보기와 함께 대표 색상을 자동으로 뽑아본다(캔버스로 픽셀을 읽는 방식이라
+  이미지 서버가 CORS 를 막아두면 실패할 수 있고, 그럴 땐 색상을 직접 골라달라고
+  안내한다). 검색 API 키가 없어서 "제품 이미지 검색하기" 버튼은 구글 이미지 검색을
+  새 탭으로 열어줄 뿐이니, 마음에 드는 이미지를 찾아 주소를 복사해오면 된다.
+- **카테고리**: 자유롭게 만드는 태그다. "빨간색", "글리터", "파츠"처럼 색상·재질·
+  종류를 섞어 써도 되고, 아이템 하나에 여러 개를 동시에 붙일 수 있다(빨간 글리터는
+  두 카테고리에서 다 보인다).
+- **수량**: 아이템마다 "잔여량(%)" 또는 "개수" 중 관리 방식을 고른다. 폴리시는
+  잔여량 슬라이더, 파츠·도구는 개수 스테퍼로 관리하고 상세 화면에서 바로
+  ±10%·±1개씩 조정할 수 있다. 홈 화면은 잔여량 20% 이하 / 개수 2개 이하인
+  아이템을 "얼마 안 남았어요"로 모아 보여준다.
+- **댓글**: 아이템마다 댓글을 남길 수 있고, 작성자 이름과 시간이 함께 남는다.
+- **꿀팁 탭**: 작성자 · 작성일시 · 사진(선택)이 있는 메모장. 사진은 Firebase
+  Storage 에 올라간다.
+- **다음 네일 일정**: 홈 화면에서 날짜를 등록해두면 D-day 로 보여준다.
+
+### 데이터 구조 (Firestore + Storage)
+
+```
+nailDiaryProducts/{id}                  { brand, modelNo, name, categories[],
+                                           colorHex, imageUrl, trackingType,
+                                           amountPercent | count, tip, createdBy }
+nailDiaryProducts/{id}/comments/{id}    { author, text, createdAt }
+nailDiaryCategories/{id}                { name }
+nailDiaryTips/{id}                      { author, text, photoUrl, createdAt }
+nailDiaryConfig/schedule                { date, note, updatedBy }
+
+Storage: nailDiary/tips/...                업로드한 꿀팁 사진
 ```
 
-`npm run build` 는 `fund-survey/` 를 vite 로 빌드해 `public/fund-survey/` 에 넣고,
-루트의 커피노트 정적 파일을 `public/` 로 복사한다. `public/` 은 빌드 산출물이라
-git 에 올리지 않는다.
+로그인이 없는 건 자금수요조사와 같은 이유다. 링크를 아는 사람이면 누구나 읽고
+쓸 수 있고, `firestore.rules` · `storage.rules` 도 `nailDiary` 로 시작하는 경로만
+열어준 뒤로는 딱히 더 막아두지 않았다(사진 업로드는 이미지 타입 · 8MB 이하로만
+제한). 자매 둘만 쓰는 앱이라 이 정도면 충분하다고 보고 만들었다.
+
+### 완전히 다른 Firebase 프로젝트로 분리하고 싶다면
+
+지금은 새 프로젝트를 콘솔에서 만들 수 없는 환경에서 작업해서, 자금수요조사가
+쓰는 `fund-survey-bfd82` 를 그대로 같이 쓰도록 했다. 나중에 분리하고 싶으면:
+
+1. Firebase 콘솔에서 새 프로젝트 → 웹 앱(`</>`)을 추가해 `firebaseConfig` 를 받는다.
+2. `nail-diary/src/firebase-config.js` 를 그 값으로 바꾼다.
+3. 새 프로젝트에서 **Firestore**와 **Storage**를 켜고, `firestore.rules` /
+   `storage.rules` 의 `nailDiary*` 규칙만 옮겨서 올린다.
+4. 호스팅은 그대로 `fund-survey-bfd82` 에 둘지, 새 프로젝트로 옮길지는 자유다
+   (Hosting 프로젝트와 Firestore 프로젝트가 달라도 상관없다).
 
 ---
 
-## 3. Firebase 배포
+## 3. 로컬 개발
+
+```bash
+npm run install:app     # fund-survey/, nail-diary/ 의존성 설치
+npm run dev              # http://localhost:5173/fund-survey/
+npm run dev:nail-diary   # http://localhost:5173/nail-diary/
+npm run build            # public/ 에 배포용 결과 생성
+```
+
+`npm run build` 는 `fund-survey/` 와 `nail-diary/` 를 각각 vite 로 빌드해
+`public/fund-survey/`, `public/nail-diary/` 에 넣고, 루트의 커피노트 정적 파일을
+`public/` 로 복사한다. `public/` 은 빌드 산출물이라 git 에 올리지 않는다.
+
+---
+
+## 4. Firebase 배포
 
 ### 다른 Firebase 프로젝트로 바꾸기
 
@@ -99,11 +159,13 @@ Firebase 콘솔에서 프로젝트 `fund-survey-bfd82` 에 **Firestore 데이터
 그다음 보안 규칙을 올린다.
 
 ```bash
-npm run deploy:rules    # firestore.rules 반영
+npm run deploy:rules    # firestore.rules, storage.rules 반영
 ```
 
-> 이 명령은 `fund-survey-bfd82` 의 규칙을 `firestore.rules` 내용으로 **덮어쓴다.**
-> 커피노트가 쓰는 `lovehouse-b7440` 쪽 규칙은 건드리지 않는다.
+> 이 명령은 `fund-survey-bfd82` 의 규칙을 `firestore.rules` · `storage.rules` 내용으로
+> **덮어쓴다.** 커피노트가 쓰는 `lovehouse-b7440` 쪽 규칙은 건드리지 않는다.
+> 네일다이어리의 꿀팁 사진 업로드가 되려면 콘솔에서 **Storage** 도 한 번 켜야 한다
+> (Firestore 와 마찬가지로 콘솔에서 수동으로 켜야 하는 항목이다).
 
 ### 손으로 배포
 
@@ -134,7 +196,7 @@ firebase init hosting:github
 
 ---
 
-## 4. 보안에 대해 알아둘 것
+## 5. 보안에 대해 알아둘 것
 
 이 앱에는 **로그인이 없다.** 주소를 아는 사람은 누구나 접근할 수 있고, 명단에 있는
 사업자번호만 알면 그 업체의 입력값을 보고 고칠 수 있다. 관리자 비밀번호도 브라우저에서만
@@ -162,11 +224,11 @@ Firebase Authentication + App Check 를 얹는 것을 권한다.
 
 ---
 
-## 5. 그 밖에
+## 6. 그 밖에
 
 - 엑셀 처리는 npm 의 `xlsx@0.18.5` 를 쓴다. SheetJS 최신판은 npm 이 아니라
   `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz` 로 설치해야 한다
   (이 저장소를 만든 환경에서는 해당 CDN 이 막혀 있어 npm 판을 썼다).
-- 커피노트의 서비스워커는 사이트 전체가 범위라, `/fund-survey` 경로는
+- 커피노트의 서비스워커는 사이트 전체가 범위라, `/fund-survey`, `/nail-diary` 경로는
   캐시하지 않고 항상 네트워크에서 받도록 예외를 뒀다. 그러지 않으면 재배포 후에도
   옛 빌드가 남아 빈 화면이 뜰 수 있다.

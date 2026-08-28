@@ -18,11 +18,17 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: fund-survey/package-lock.json
+          cache-dependency-path: |
+            fund-survey/package-lock.json
+            nail-diary/package-lock.json
 
       - name: Install app dependencies
         run: npm ci
         working-directory: fund-survey
+
+      - name: Install nail-diary dependencies
+        run: npm ci
+        working-directory: nail-diary
 
       - name: Build site
         run: npm run build
