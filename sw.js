@@ -1,4 +1,4 @@
-const CACHE_NAME = 'coffee-note-v10';
+const CACHE_NAME = 'coffee-note-v11';
 const ASSETS = [
   './',
   './index.html',
