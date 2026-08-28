@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 이 파일은 naildiary 프로젝트 전용이다. 자금수요조사·커피노트와는
+    // 별도 프로젝트라 컬렉션 이름에 nailDiary 접두어가 꼭 필요하진 않지만,
+    // 앱 코드(store.js)와 그대로 맞추려고 이름은 유지했다.
+    //
+    // 로그인이 없는 앱이라(자매 둘이서만 쓰는 링크 공유 방식) 자금수요조사와
+    // 같은 수준으로 개방된 규칙이다: 정해둔 경로 안에서는 누구나 읽고 쓸 수 있고,
+    // 경로 밖의 컬렉션은 전부 접근 불가.
+
+    match /nailDiaryProducts/{productId} {
+      allow read, write: if true;
+
+      match /comments/{commentId} {
+        allow read, write: if true;
+      }
+    }
+    match /nailDiaryCategories/{categoryId} {
+      allow read, write: if true;
+    }
+    match /nailDiaryTips/{tipId} {
+      allow read, write: if true;
+    }
+    match /nailDiaryConfig/{docId} {
+      allow read, write: if true;
+    }
+  }
+}

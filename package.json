@@ -9,6 +9,7 @@
     "dev:nail-diary": "npm --prefix nail-diary run dev",
     "build": "npm --prefix fund-survey run build && npm --prefix nail-diary run build && node scripts/build-site.mjs",
     "deploy": "npm run build && firebase deploy --only hosting",
-    "deploy:rules": "firebase deploy --only firestore:rules,storage"
+    "deploy:rules": "firebase deploy --only firestore:rules",
+    "deploy:rules:nail-diary": "cd nail-diary && firebase deploy --only firestore:rules,storage"
   }
 }

@@ -1,20 +1,19 @@
 /**
  * ★ Firebase 프로젝트를 바꿀 때 고치는 곳 ★
  *
- * 네일다이어리는 지금 fund-survey-bfd82 프로젝트를 자금수요조사 앱과
- * 같이 쓴다 (Hosting 이 이미 이 프로젝트로 합쳐져 있어서, 새 프로젝트를
- * 만들지 않고 바로 쓸 수 있게 한 선택이다). 데이터는 nailDiary 로 시작하는
- * 컬렉션에만 저장되니 자금수요조사 데이터와 섞이지 않는다 (firestore.rules 참고).
+ * 네일다이어리는 자금수요조사(fund-survey-bfd82)와는 별도인 naildiary
+ * 프로젝트의 Firestore·Storage 를 쓴다. Hosting 만 fund-survey-bfd82 에
+ * 얹혀서 /nail-diary/ 경로로 나간다 (README 2번 섹션 참고).
+ * 여기 값들은 비밀이 아니다. 브라우저에 그대로 노출되는 식별자이고,
+ * 실제 접근 제어는 nail-diary/firestore.rules · nail-diary/storage.rules 가 담당한다.
  *
- * 완전히 분리하고 싶으면 콘솔에서 새 프로젝트 → 웹 앱(</>) 을 만들고
- * 나온 firebaseConfig 를 아래에 붙여 넣으면 된다. 그러면 이 프로젝트에서도
- * Firestore 와 Storage 를 새로 켜고 규칙을 올려야 한다.
+ * 프로젝트를 바꾸면 nail-diary/.firebaserc 의 projects.default 도 같이 고친다.
  */
 export const firebaseConfig = {
-  apiKey: "AIzaSyBdhE2d0rnyAaBE2eKGCZLWIZiHImPJF3U",
-  authDomain: "fund-survey-bfd82.firebaseapp.com",
-  projectId: "fund-survey-bfd82",
-  storageBucket: "fund-survey-bfd82.firebasestorage.app",
-  messagingSenderId: "895689323285",
-  appId: "1:895689323285:web:9645134264ab9157d82f1c",
+  apiKey: "AIzaSyC30DBXKiS8PDW406HFDmtGvLSRmQ3HM-o",
+  authDomain: "naildiary.firebaseapp.com",
+  projectId: "naildiary",
+  storageBucket: "naildiary.firebasestorage.app",
+  messagingSenderId: "783801254704",
+  appId: "1:783801254704:web:2300015388dff8483dfef5",
 };

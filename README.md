@@ -10,12 +10,13 @@ Firebase Hosting(`fund-survey-bfd82`) 한 곳에 정적 페이지 세 개를 올
 
 Firestore 는 앱마다 다른 프로젝트를 쓴다.
 
-- 자금수요조사 → `fund-survey-bfd82` (이 저장소의 `firestore.rules` 가 적용되는 곳)
-- 네일다이어리 → 같은 `fund-survey-bfd82` 를 자금수요조사와 같이 쓴다. `nailDiary` 로
-  시작하는 컬렉션에만 데이터를 두어 섞이지 않는다 (아래 2번 섹션 참고).
+- 자금수요조사 → `fund-survey-bfd82` (이 저장소 루트의 `firestore.rules` 가 적용되는 곳)
+- 네일다이어리 → `naildiary` (자금수요조사와 별도 프로젝트. 규칙은 `nail-diary/firestore.rules` ·
+  `nail-diary/storage.rules` 이고, 배포도 `nail-diary/` 안에서 따로 한다. 아래 2번 섹션 참고)
 - 커피노트 → `lovehouse-b7440` (`index.html` 안에 자기 설정을 따로 들고 있다)
 
-호스팅만 `fund-survey-bfd82` 로 합쳐져 있고, 커피노트가 읽고 쓰는 데이터는 예전 그대로다.
+호스팅만 `fund-survey-bfd82` 로 합쳐져 있고(세 앱 다 같은 곳에서 서빙), 각 앱이
+읽고 쓰는 Firestore·Storage 데이터는 프로젝트별로 완전히 분리돼 있다.
 
 ---
 
@@ -80,7 +81,7 @@ fundSurveyPlans/{이메일}         { apply, totalCost, loanWanted, updatedAt }
   Storage 에 올라간다.
 - **다음 네일 일정**: 홈 화면에서 날짜를 등록해두면 D-day 로 보여준다.
 
-### 데이터 구조 (Firestore + Storage)
+### 데이터 구조 (Firestore + Storage, `naildiary` 프로젝트)
 
 ```
 nailDiaryProducts/{id}                  { brand, modelNo, name, categories[],
@@ -95,21 +96,36 @@ Storage: nailDiary/tips/...                업로드한 꿀팁 사진
 ```
 
 로그인이 없는 건 자금수요조사와 같은 이유다. 링크를 아는 사람이면 누구나 읽고
-쓸 수 있고, `firestore.rules` · `storage.rules` 도 `nailDiary` 로 시작하는 경로만
-열어준 뒤로는 딱히 더 막아두지 않았다(사진 업로드는 이미지 타입 · 8MB 이하로만
-제한). 자매 둘만 쓰는 앱이라 이 정도면 충분하다고 보고 만들었다.
+쓸 수 있고, `nail-diary/firestore.rules` · `nail-diary/storage.rules` 가 정해둔
+경로 밖은 전부 접근 불가다(사진 업로드는 이미지 타입 · 8MB 이하로만 제한). 자매
+둘만 쓰는 앱이라 이 정도면 충분하다고 보고 만들었다.
 
-### 완전히 다른 Firebase 프로젝트로 분리하고 싶다면
+### 배포 준비 (naildiary 프로젝트)
 
-지금은 새 프로젝트를 콘솔에서 만들 수 없는 환경에서 작업해서, 자금수요조사가
-쓰는 `fund-survey-bfd82` 를 그대로 같이 쓰도록 했다. 나중에 분리하고 싶으면:
+호스팅은 `fund-survey-bfd82` 를 그대로 쓰지만(위 1번 섹션의 `npm run deploy` /
+GitHub Actions), Firestore·Storage 규칙은 `naildiary` 프로젝트 것이라 따로 올려야
+한다. `nail-diary/` 가 자기 `.firebaserc` · `firebase.json` 을 따로 갖고 있어서
+그 안에서 실행하면 된다.
 
-1. Firebase 콘솔에서 새 프로젝트 → 웹 앱(`</>`)을 추가해 `firebaseConfig` 를 받는다.
-2. `nail-diary/src/firebase-config.js` 를 그 값으로 바꾼다.
-3. 새 프로젝트에서 **Firestore**와 **Storage**를 켜고, `firestore.rules` /
-   `storage.rules` 의 `nailDiary*` 규칙만 옮겨서 올린다.
-4. 호스팅은 그대로 `fund-survey-bfd82` 에 둘지, 새 프로젝트로 옮길지는 자유다
-   (Hosting 프로젝트와 Firestore 프로젝트가 달라도 상관없다).
+```bash
+npm install -g firebase-tools   # 처음 한 번
+firebase login                  # 처음 한 번, naildiary 프로젝트에 접근 권한이 있는 계정으로
+
+npm run deploy:rules:nail-diary  # nail-diary/firestore.rules, storage.rules 배포
+```
+
+Firebase 콘솔의 `naildiary` 프로젝트에서 **Firestore Database**와 **Storage**가
+미리 켜져 있어야 한다(콘솔에서 만들 때 이미 켰다면 이 명령은 규칙만 올린다).
+
+### 완전히 다른 Firebase 프로젝트로 다시 바꾸고 싶다면
+
+| 파일 | 고칠 것 |
+| --- | --- |
+| `nail-diary/src/firebase-config.js` | `firebaseConfig` 전체 |
+| `nail-diary/.firebaserc` | `projects.default` = 새 프로젝트 ID |
+
+새 프로젝트에서도 **Firestore**와 **Storage**를 켜고 `npm run deploy:rules:nail-diary`
+로 규칙을 올려야 한다.
 
 ---
 
@@ -159,13 +175,13 @@ Firebase 콘솔에서 프로젝트 `fund-survey-bfd82` 에 **Firestore 데이터
 그다음 보안 규칙을 올린다.
 
 ```bash
-npm run deploy:rules    # firestore.rules, storage.rules 반영
+npm run deploy:rules    # firestore.rules 반영
 ```
 
-> 이 명령은 `fund-survey-bfd82` 의 규칙을 `firestore.rules` · `storage.rules` 내용으로
-> **덮어쓴다.** 커피노트가 쓰는 `lovehouse-b7440` 쪽 규칙은 건드리지 않는다.
-> 네일다이어리의 꿀팁 사진 업로드가 되려면 콘솔에서 **Storage** 도 한 번 켜야 한다
-> (Firestore 와 마찬가지로 콘솔에서 수동으로 켜야 하는 항목이다).
+> 이 명령은 `fund-survey-bfd82` 의 규칙을 `firestore.rules` 내용으로 **덮어쓴다.**
+> 커피노트가 쓰는 `lovehouse-b7440`, 네일다이어리가 쓰는 `naildiary` 쪽 규칙은
+> 건드리지 않는다. 네일다이어리 규칙은 `npm run deploy:rules:nail-diary` 로 따로
+> 올린다(2번 섹션 참고).
 
 ### 손으로 배포
 
