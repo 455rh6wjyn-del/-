@@ -6,6 +6,10 @@
       {
         "source": "/fund-survey/**",
         "destination": "/fund-survey/index.html"
+      },
+      {
+        "source": "/nail-diary/**",
+        "destination": "/nail-diary/index.html"
       }
     ],
     "headers": [
@@ -17,6 +21,16 @@
       },
       {
         "source": "/fund-survey/index.html",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/nail-diary/assets/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "source": "/nail-diary/index.html",
         "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
       },
       {
