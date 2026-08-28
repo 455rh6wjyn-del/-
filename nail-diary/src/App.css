@@ -616,7 +616,8 @@ textarea {
   flex-direction: column;
   gap: 10px;
 }
-.tip-form textarea {
+.tip-form textarea,
+.tip-form input {
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 10px 12px;
@@ -629,10 +630,11 @@ textarea {
   gap: 10px;
 }
 .tip-file-preview {
-  width: 44px;
-  height: 44px;
+  width: 72px;
+  height: 72px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
 }
 .tip-list {
   display: flex;

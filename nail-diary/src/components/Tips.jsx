@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { addTip, deleteTip, uploadTipPhoto } from "../store";
+import { addTip, deleteTip } from "../store";
 
 function formatDate(ts) {
   if (!ts?.toDate) return "";
@@ -8,15 +8,8 @@ function formatDate(ts) {
 
 export default function Tips({ identity, tips }) {
   const [text, setText] = useState("");
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [photoUrl, setPhotoUrl] = useState("");
   const [saving, setSaving] = useState(false);
-
-  const onFile = (e) => {
-    const f = e.target.files?.[0];
-    setFile(f || null);
-    setPreview(f ? URL.createObjectURL(f) : null);
-  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -24,12 +17,9 @@ export default function Tips({ identity, tips }) {
     if (!trimmed) return;
     setSaving(true);
     try {
-      let photoUrl = null;
-      if (file) photoUrl = await uploadTipPhoto(file);
-      await addTip({ author: identity.name, text: trimmed, photoUrl });
+      await addTip({ author: identity.name, text: trimmed, photoUrl: photoUrl.trim() || null });
       setText("");
-      setFile(null);
-      setPreview(null);
+      setPhotoUrl("");
     } finally {
       setSaving(false);
     }
@@ -45,10 +35,16 @@ export default function Tips({ identity, tips }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
-        <div className="tip-form-row">
-          <input type="file" accept="image/*" onChange={onFile} />
-          {preview && <img className="tip-file-preview" src={preview} alt="미리보기" />}
-        </div>
+        <input
+          placeholder="사진 주소 (선택, https://...)"
+          value={photoUrl}
+          onChange={(e) => setPhotoUrl(e.target.value)}
+        />
+        {photoUrl && (
+          <div className="tip-form-row">
+            <img className="tip-file-preview" src={photoUrl} alt="미리보기" />
+          </div>
+        )}
         <button type="submit" className="btn-primary" disabled={saving}>
           {saving ? "등록 중..." : "등록"}
         </button>

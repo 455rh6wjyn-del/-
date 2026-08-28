@@ -10,16 +10,18 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { db, storage } from "./firebase";
+import { db } from "./firebase";
 
 /**
- * Firestore 구조 (fund-survey-bfd82 프로젝트, nailDiary 로 시작하는 컬렉션만 사용)
+ * Firestore 구조 (naildiary 프로젝트)
  *   nailDiaryProducts/{id}                 제품 (브랜드·모델번호·카테고리·색상·잔여량 등)
  *   nailDiaryProducts/{id}/comments/{id}   제품별 댓글 (author, text, createdAt)
  *   nailDiaryCategories/{id}               카테고리 이름 목록 (자동완성용)
  *   nailDiaryTips/{id}                     꿀팁 메모 (author, text, photoUrl, createdAt)
  *   nailDiaryConfig/schedule                다음 네일 일정 { date, note }
+ *
+ * Storage 는 안 쓴다. 꿀팁 사진도 아이템 이미지처럼 인터넷 주소를 붙여넣는
+ * 방식이다 (Firebase Storage 는 Blaze 요금제가 있어야 켤 수 있어서 뺐다).
  */
 const productsCol = collection(db, "nailDiaryProducts");
 const categoriesCol = collection(db, "nailDiaryCategories");
@@ -106,13 +108,6 @@ export function addTip({ author, text, photoUrl }) {
 
 export function deleteTip(id) {
   return deleteDoc(doc(tipsCol, id));
-}
-
-export async function uploadTipPhoto(file) {
-  const path = `nailDiary/tips/${Date.now()}_${file.name}`;
-  const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, file, { contentType: file.type });
-  return getDownloadURL(storageRef);
 }
 
 /* ── 다음 네일 일정 ─────────────────────────────────────── */
