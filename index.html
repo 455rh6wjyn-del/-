@@ -232,6 +232,15 @@
     margin-bottom: 6px;
   }
   .pk-label-row .pk-label{ margin-bottom:0; }
+  .pk-action-slot{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-height: 14px;
+    margin-bottom: 6px;
+  }
   .manual-btn, .zero-btn, .glass-btn{
     background:none;
     border:none;
@@ -683,22 +692,23 @@
       </div>
       <div class="picker-grid cols-4">
         <div class="pk-cell">
+          <div class="pk-action-slot"></div>
           <span class="pk-label">내부버</span>
           <div class="picker" id="pk-innerburr"><div class="picker-window"></div></div>
         </div>
         <div class="pk-cell">
+          <div class="pk-action-slot"></div>
           <span class="pk-label">분쇄도</span>
           <div class="picker" id="pk-grind"><div class="picker-window"></div></div>
         </div>
         <div class="pk-cell">
-          <div class="pk-label-row">
-            <span class="pk-label">도징량 (g)</span>
-            <button type="button" class="manual-btn" data-picker="pk-dose">직접입력</button>
-          </div>
+          <div class="pk-action-slot"><button type="button" class="manual-btn" data-picker="pk-dose">직접입력</button></div>
+          <span class="pk-label">도징량 (g)</span>
           <div class="picker" id="pk-dose"><div class="picker-window"></div></div>
           <div class="net-hint" id="doseNetHint"></div>
         </div>
         <div class="pk-cell">
+          <div class="pk-action-slot"></div>
           <span class="pk-label">탬핑 (회)</span>
           <div class="picker" id="pk-tamp"><div class="picker-window"></div></div>
         </div>
@@ -709,15 +719,16 @@
       <p class="card-title">추출 결과</p>
       <div class="picker-grid cols-2">
         <div class="pk-cell">
+          <div class="pk-action-slot"></div>
           <span class="pk-label">추출시간 (초)</span>
           <div class="picker" id="pk-time"><div class="picker-window"></div></div>
         </div>
         <div class="pk-cell">
-          <div class="pk-label-row">
-            <span class="pk-label">추출량 (ml)</span>
+          <div class="pk-action-slot">
             <button type="button" class="manual-btn" data-picker="pk-yield">직접입력</button>
             <button type="button" class="glass-btn" id="yieldGlassBtn" style="display:none;">잔포함</button>
           </div>
+          <span class="pk-label">추출량 (ml)</span>
           <div class="picker" id="pk-yield"><div class="picker-window"></div></div>
           <div class="net-hint" id="yieldNetHint"></div>
         </div>
