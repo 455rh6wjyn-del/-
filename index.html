@@ -218,6 +218,7 @@
     gap: 8px;
     margin-bottom: 14px;
   }
+  .picker-grid.cols-4{ grid-template-columns: repeat(4, 1fr); }
   .picker-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
   .picker-grid.cols-2{ grid-template-columns: repeat(2, 1fr); }
   .pk-cell{ text-align:center; }
@@ -680,7 +681,11 @@
         <label>측정 상태 <span style="color:var(--muted); font-weight:400;">(도징량을 어떤 상태로 쟀는지)</span></label>
         <div class="pick-chips" id="measureChips"></div>
       </div>
-      <div class="picker-grid cols-3">
+      <div class="picker-grid cols-4">
+        <div class="pk-cell">
+          <span class="pk-label">내부버</span>
+          <div class="picker" id="pk-innerburr"><div class="picker-window"></div></div>
+        </div>
         <div class="pk-cell">
           <span class="pk-label">분쇄도</span>
           <div class="picker" id="pk-grind"><div class="picker-window"></div></div>
@@ -1204,6 +1209,7 @@ function setupPicker(id, cfg){
 }
 
 function initPickers(){
+  setupPicker('pk-innerburr', { min:1, max:10, step:1, value:5 });
   setupPicker('pk-grind', { min:1, max:40, step:1, value:11 });
   setupPicker('pk-tamp', { min:0, max:10, step:1, value:2 });
   setupPicker('pk-time', { min:0, max:90, step:1, value:30 });
@@ -1531,6 +1537,7 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
     tools: selectedTools.slice(),
     measureState: measureState,
     measureWeight: measureWeight(),
+    innerBurr: pickers['pk-innerburr'].getValue(),
     grind: pickers['pk-grind'].getValue(),
     dose: getNetDose(),
     doseGross: pickers['pk-dose'].getValue(),
@@ -1618,6 +1625,7 @@ function openDetail(e){
   if(e.daysSinceRoast != null) rows.push(['로스팅 후', (e.daysSinceRoast>=0?'+':'')+e.daysSinceRoast+'일']);
   if(e.daysSinceOpen != null) rows.push(['개봉 후', (e.daysSinceOpen>=0?'+':'')+e.daysSinceOpen+'일']);
   if(tools.length) rows.push(['도구', tools.join(', ')]);
+  if(e.innerBurr != null) rows.push(['내부버', e.innerBurr]);
   rows.push(['분쇄도', e.grind]);
   rows.push(['도징량', Number(e.dose).toFixed(1)+' g']);
   rows.push(['탬핑', e.tamp+' 회']);
@@ -1688,6 +1696,7 @@ function enterEditMode(entry){
   selectedKeywords = Array.isArray(entry.keywords) ? entry.keywords.slice() : [];
   renderKeywordChips();
 
+  setupPicker('pk-innerburr', { min:1, max:10, step:1, value: entry.innerBurr != null ? entry.innerBurr : 5 });
   setupPicker('pk-grind', { min:1, max:40, step:1, value:entry.grind });
   setupPicker('pk-tamp', { min:0, max:10, step:1, value:entry.tamp });
   setupPicker('pk-time', { min:0, max:90, step:1, value:entry.time });
@@ -1745,6 +1754,7 @@ document.getElementById('loadRecipeBtn').addEventListener('click', ()=>{
   renderToolChips();
   measureState = last.measureState || TARE;
   renderMeasureChips();
+  setupPicker('pk-innerburr', { min:1, max:10, step:1, value: last.innerBurr != null ? last.innerBurr : 5 });
   setupPicker('pk-grind', { min:1, max:40, step:1, value:last.grind });
   setupPicker('pk-tamp', { min:0, max:10, step:1, value:last.tamp });
   buildDosePicker(last.dose);
@@ -1844,14 +1854,16 @@ function renderCardView(container, rows){
     const ratio = e.dose>0 && e.yieldMl>0 ? '1:'+(e.yieldMl/e.dose).toFixed(1) : '—';
     const water = e.water != null ? e.water : (e.liquid || 0);
     const milk = e.milk != null ? e.milk : 0;
-    const parts = [
+    const parts = [];
+    if(e.innerBurr != null) parts.push('내부버 '+e.innerBurr);
+    parts.push(
       '분쇄도 '+e.grind,
       '도징 '+Number(e.dose).toFixed(1)+'g',
       '탬핑 '+e.tamp+'회',
       '추출 '+e.time+'초',
       '추출량 '+Number(e.yieldMl).toFixed(1)+'ml',
       '비율 '+ratio
-    ];
+    );
     if(water > 0) parts.push('물 '+water+'ml');
     if(milk > 0) parts.push('우유 '+milk+'ml');
     const rating = entryRating(e);
@@ -1878,7 +1890,7 @@ function renderCardView(container, rows){
   wireEntryButtons(container);
 }
 function renderListView(container, rows){
-  const cols = ['날짜','별칭','종류','원두','로스팅후','개봉후','분쇄도','도징(g)','탬핑','추출(초)','추출량(ml)','비율','별점','맛평가','메모'];
+  const cols = ['날짜','별칭','종류','원두','로스팅후','개봉후','내부버','분쇄도','도징(g)','탬핑','추출(초)','추출량(ml)','비율','별점','맛평가','메모'];
   let html = '<div class="table-scroll"><table><thead><tr>';
   cols.forEach(c=> html += '<th>'+c+'</th>');
   html += '<th></th></tr></thead><tbody>';
@@ -1896,6 +1908,7 @@ function renderListView(container, rows){
       + '<td>'+escHtml(e.bean)+'</td>'
       + '<td>'+roastAge+'</td>'
       + '<td>'+openAge+'</td>'
+      + '<td>'+(e.innerBurr != null ? e.innerBurr : '—')+'</td>'
       + '<td>'+e.grind+'</td>'
       + '<td>'+Number(e.dose).toFixed(1)+'</td>'
       + '<td>'+e.tamp+'</td>'
